@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">traveller</string>
+    <string name="title_activity_login">Sign in</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="email">Email</string>
+    <string name="toLogin">Already a member? Login</string>
+    <string name="register">Register</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="no_account">No account yet? Create one</string>
+    <string name="or">or</string>
+    <string name="re_password">Re-enter password</string>
+    <string name="password">Password</string>
+</resources>

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" xmlns:tools="http://schemas.android.com/tools"
+                tools:context=".ui.auth.SignupActivity">
+
+    <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#F6F6F6"
+    android:layout_centerVertical="true">
+
+
+
+        <FrameLayout
+                android:id="@+id/fm2"
+                android:layout_width="50dp"
+                android:layout_height="100dp"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/background_circle1">
+
+        </FrameLayout>
+
+        <FrameLayout
+                android:id="@+id/fm3"
+                android:layout_width="120dp"
+                android:layout_height="100dp"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/background_circle2">
+
+        </FrameLayout>
+
+        <RelativeLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
+            <com.client.traveller.ui.customfonts.EditText_Poppins_Regular
+                    android:id="@+id/firstName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/first_name"
+                    android:gravity="center"
+                    android:background="@drawable/background_gradient2"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="20dp"
+                    android:textCursorDrawable="@drawable/cursor_color"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="50dp"
+                    android:inputType="text"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:textSize="15sp"
+                    android:textColorHint="@color/colorPrimary"
+                    android:textColor="@color/colorPrimary"
+            />
+
+            <com.client.traveller.ui.customfonts.EditText_Poppins_Regular
+                    android:id="@+id/lastName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/last_name"
+                    android:gravity="center"
+                    android:background="@drawable/background_gradient2"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="20dp"
+                    android:textCursorDrawable="@drawable/cursor_color"
+                    android:layout_marginRight="20dp"
+                    android:inputType="text"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:textSize="15sp"
+                    android:layout_below="@id/firstName"
+                    android:textColorHint="@color/colorPrimary"
+                    android:textColor="@color/colorPrimary"
+            />
+
+
+
+            <com.client.traveller.ui.customfonts.EditText_Poppins_Regular
+                    android:id="@+id/email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/email"
+                    android:gravity="center"
+                    android:background="@drawable/background_gradient2"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="20dp"
+                    android:textCursorDrawable="@drawable/cursor_color"
+                    android:layout_marginRight="20dp"
+
+                    android:inputType="text"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:textSize="15sp"
+                    android:layout_below="@id/lastName"
+                    android:textColorHint="@color/colorPrimary"
+                    android:textColor="@color/colorPrimary"
+            />
+
+            <com.client.traveller.ui.customfonts.EditText_Poppins_Regular
+                    android:id="@+id/password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/password"
+                    android:layout_marginBottom="10dp"
+                    android:layout_below="@+id/email"
+                    android:textCursorDrawable="@drawable/sky_blue_cursor_color"
+                    android:inputType="textPassword"
+                    android:gravity="center"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:textSize="15sp"
+                    android:background="@drawable/background_gradient2"
+                    android:textColorHint="@color/colorPrimary"
+                    android:textColor="@color/colorPrimary"/>
+
+            <com.client.traveller.ui.customfonts.EditText_Poppins_Regular
+                    android:id="@+id/re_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/re_password"
+                    android:layout_marginBottom="10dp"
+                    android:layout_below="@+id/password"
+                    android:textCursorDrawable="@drawable/sky_blue_cursor_color"
+                    android:inputType="textPassword"
+                    android:gravity="center"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:textSize="15sp"
+                    android:background="@drawable/background_gradient2"
+                    android:textColorHint="@color/colorPrimary"
+                    android:textColor="@color/colorPrimary"
+            />
+
+
+
+            <com.client.traveller.ui.customfonts.Button_Poppins_Regular
+                    android:id="@+id/assistant_apply"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/register"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:layout_below="@id/re_password"
+                    android:textCursorDrawable="@drawable/sky_blue_cursor_color"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:background="@drawable/background_gradient"/>
+
+            <com.client.traveller.ui.customfonts.MyTextView_Poppins_Regular
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/toLogin"
+                    android:layout_below="@id/assistant_apply"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="30dp"/>
+        </RelativeLayout>
+
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:orientation="vertical">
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_marginBottom="13.7dp"
+                    android:orientation="horizontal">
+
+
+                <com.client.traveller.ui.customfonts.MyTextView_Poppins_Regular
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="13.3sp"
+                        android:textColor="#aeaeae"
+                        android:gravity="center_horizontal"
+                        android:text="or"
+                />
+            </LinearLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>
+
+        <!--</ScrollView>-->
