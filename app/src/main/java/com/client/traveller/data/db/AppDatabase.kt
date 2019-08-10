@@ -12,12 +12,12 @@ import com.client.traveller.data.db.entities.User
 )
 abstract class AppDatabase: RoomDatabase() {
 
-    abstract fun getUserDao(): UserDao
+    abstract fun UserDao(): UserDao
 
     companion object{
         @Volatile
         private var instance: AppDatabase? = null
-        private val LOCK = Any() //zapewnia że będzie tylko jedna instancja bazy danych
+        private val LOCK = Any() // zapewnia że będzie tylko jedna instancja bazy danych
 
         operator fun invoke(context: Context) = instance ?: synchronized(LOCK){
             instance?:buildDatabase(context).also {

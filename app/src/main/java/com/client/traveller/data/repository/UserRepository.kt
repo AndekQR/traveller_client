@@ -1,35 +1,14 @@
 package com.client.traveller.data.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.client.traveller.data.network.MyApi
-import okhttp3.ResponseBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.client.traveller.data.db.entities.User
+import com.client.traveller.data.network.response.LoginResponse
 
-class UserRepository {
+interface UserRepository {
 
-    fun userLogin(email: String, password: String): LiveData<String> {
-
-        val loginResponse = MutableLiveData<String>()
-
-        MyApi().userLogin(email, password).enqueue(object : Callback<ResponseBody> {
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                loginResponse.value = t.message
-            }
-
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                if (response.isSuccessful){
-                    loginResponse.value = response.body()?.string()
-                }
-                else{
-                    loginResponse.value = response.errorBody()?.string()
-                }
-            }
-
-        })
-
-        return loginResponse
-    }
+    suspend fun login(email: String, password: String): LoginResponse
+    suspend fun register(firstName:String, lastName: String, email: String, password: String):LoginResponse
+    suspend fun saveUser(user: User)
+    fun getUser(): LiveData<User>
+    suspend fun deleteUser() //jest tylko jeden aktualnie zalogowany!
 }
