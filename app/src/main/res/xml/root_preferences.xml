@@ -15,48 +15,35 @@
   -->
 
 <androidx.preference.PreferenceScreen
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
             app:title="@string/messages_header"
             app:iconSpaceReserved="false">
 
-        <EditTextPreference
-                app:key="signature"
-                app:title="@string/signature_title"
-                app:useSimpleSummaryProvider="true"
+        <SwitchPreference
+                android:key="SEND_LOCATION"
+                android:title="@string/send_location_title"
+                android:summary="@string/send_location_summary"
+                android:defaultValue="true"
+                android:checked="true"
+                android:disableDependentsState="false"
                 app:iconSpaceReserved="false"
         />
 
-        <ListPreference
-                app:key="reply"
-                app:title="@string/reply_title"
-                app:entries="@array/reply_entries"
-                app:entryValues="@array/reply_values"
-                app:defaultValue="reply"
-                app:useSimpleSummaryProvider="true"
-                app:iconSpaceReserved="false"/>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-            app:title="@string/sync_header"
-            app:iconSpaceReserved="false">
-
-        <SwitchPreferenceCompat
-                app:key="sync"
-                app:title="@string/sync_title"
-                app:iconSpaceReserved="false"/>
-
-        <SwitchPreferenceCompat
-                app:key="attachment"
-                app:title="@string/attachment_title"
-                app:summaryOn="@string/attachment_summary_on"
-                app:summaryOff="@string/attachment_summary_off"
-                app:dependency="sync"
+        <SwitchPreference
+                android:key="CAMERA_TRACKING"
+                android:title="@string/camera_tracking_title"
+                android:summary="@string/camera_tracking_description"
+                android:defaultValue="true"
+                android:checked="true"
+                android:disableDependentsState="true"
                 app:iconSpaceReserved="false"
+                android:dependency = "SEND_LOCATION"
         />
 
+
     </PreferenceCategory>
+
 
 </androidx.preference.PreferenceScreen>

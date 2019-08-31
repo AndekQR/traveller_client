@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
->
-    <data>
-        <variable name="viewModel" type="com.client.traveller.ui.auth.AuthViewModel"/>
-    </data>
-
-    <RelativeLayout
+<RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    tools:context=".ui.auth.SignupActivity">
+                    tools:context=".ui.auth.SignupActivity"
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:tools="http://schemas.android.com/tools">
 
         <RelativeLayout
                 android:layout_width="wrap_content"
@@ -43,10 +36,10 @@
                             android:layout_centerVertical="true"
                             android:layout_centerHorizontal="true">
                 <EditText
-                        android:id="@+id/firstName"
+                        android:id="@+id/displayName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/first_name"
+                        android:hint="@string/displayName"
                         android:gravity="center"
                         android:background="@drawable/background_gradient2"
                         android:layout_marginBottom="10dp"
@@ -60,31 +53,7 @@
                         android:textSize="15sp"
                         android:textColorHint="@color/colorDark"
                         android:textColor="@color/colorDark"
-                        android:text="@={viewModel.firstName}"
                 />
-
-                <EditText
-                        android:id="@+id/lastName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/last_name"
-                        android:gravity="center"
-                        android:background="@drawable/background_gradient2"
-                        android:layout_marginBottom="10dp"
-                        android:layout_marginLeft="20dp"
-                        android:textCursorDrawable="@drawable/cursor_color"
-                        android:layout_marginRight="20dp"
-                        android:inputType="text"
-                        android:paddingTop="15dp"
-                        android:paddingBottom="15dp"
-                        android:textSize="15sp"
-                        android:layout_below="@id/firstName"
-                        android:textColorHint="@color/colorDark"
-                        android:textColor="@color/colorDark"
-                        android:text="@={viewModel.lastName}"
-                />
-
-
 
                 <EditText
                         android:id="@+id/email"
@@ -97,12 +66,11 @@
                         android:layout_marginLeft="20dp"
                         android:textCursorDrawable="@drawable/cursor_color"
                         android:layout_marginRight="20dp"
-                        android:text="@={viewModel.email}"
                         android:inputType="textEmailAddress"
                         android:paddingTop="15dp"
                         android:paddingBottom="15dp"
                         android:textSize="15sp"
-                        android:layout_below="@id/lastName"
+                        android:layout_below="@id/displayName"
                         android:textColorHint="@color/colorDark"
                         android:textColor="@color/colorDark"
                 />
@@ -125,7 +93,7 @@
                         android:background="@drawable/background_gradient2"
                         android:textColorHint="@color/colorDark"
                         android:textColor="@color/colorDark"
-                        android:text="@={viewModel.password}"/>
+                />
 
                 <EditText
                         android:id="@+id/re_password"
@@ -145,7 +113,6 @@
                         android:background="@drawable/background_gradient2"
                         android:textColorHint="@color/colorDark"
                         android:textColor="@color/colorDark"
-                        android:text="@={viewModel.confirmPassword}"
                 />
 
 
@@ -164,8 +131,9 @@
                         android:textCursorDrawable="@drawable/sky_blue_cursor_color"
                         android:textColor="#FFFFFF"
                         android:textSize="15sp"
-                        android:background="@drawable/background_gradient"
-                        android:onClick="@{viewModel::onSignupButtonClick}"/>
+                        android:background="@color/colorPrimary"
+                        android:onClick="onSignUpButtonClick"
+                />
 
 
                 <TextView
@@ -176,7 +144,8 @@
                         android:layout_centerHorizontal="true"
                         android:layout_marginTop="30dp"
                         android:textColor="@color/colorDark"
-                        android:onClick="@{viewModel::toLogin}"
+                        android:onClick="toLogin"
+
                 />
             </RelativeLayout>
 
@@ -193,5 +162,4 @@
         />
 
     </RelativeLayout>
-</layout>
 

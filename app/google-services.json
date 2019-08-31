@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "98668081815",
+    "firebase_url": "https://traveller-249409.firebaseio.com",
+    "project_id": "traveller-249409",
+    "storage_bucket": "traveller-249409.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:98668081815:android:c3b7abba01c20d5f",
+        "android_client_info": {
+          "package_name": "com.client.traveller"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "98668081815-7jrd02cj5jn4eo5vj7vhg7lej63s5b0q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.client.traveller",
+            "certificate_hash": "6d325f30a5552202aad50e2ef0cb78d2ce32b3be"
+          }
+        },
+        {
+          "client_id": "98668081815-f8kdmk55hpjilmpmnbbd858849hnutk7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAd9mVHXtr7oJkIwt605x3Wu5A65srtq6Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "98668081815-f8kdmk55hpjilmpmnbbd858849hnutk7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

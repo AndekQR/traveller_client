@@ -8,25 +8,40 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:openDrawer="start"
-        android:background="@color/colorWhiteLightMaterial"
         tools:context=".ui.home.HomeActivity"
-
 >
+
+
+    <fragment
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:fitsSystemWindows="true"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
     <!--ten z ikona do otwierania drawera ( hamburger ) -->
     <include
             layout="@layout/action_bar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-
     />
 
-    <!--zawartość okna-->
-    <FrameLayout
-            android:id="@+id/frameContent"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-    />
+    <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="bottom"
+                android:layout_alignParentBottom="true"
+                android:orientation="horizontal">
+
+                <!--tu były przyciski od mapy-->
+
+        </LinearLayout>
+    </FrameLayout>
+
 
     <!--Drawer-->
     <com.google.android.material.navigation.NavigationView
@@ -43,9 +58,6 @@
 
 
     />
-
-
-
 
 </androidx.drawerlayout.widget.DrawerLayout>
 

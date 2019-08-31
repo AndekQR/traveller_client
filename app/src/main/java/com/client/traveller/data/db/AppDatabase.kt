@@ -6,6 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.client.traveller.data.db.entities.User
 
+/**
+ * przechoweuje dane o użytkowniku
+ *
+ * Jeśli dane użytkownika są w lokalnej baze danych to ów użytkownik jest zalogowany w aplikacji
+ * przy wylogowywaniu dane są usuwane
+ */
+
 @Database(
     entities = [User::class],
     version = 1

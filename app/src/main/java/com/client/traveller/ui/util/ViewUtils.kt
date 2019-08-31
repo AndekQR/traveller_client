@@ -5,9 +5,13 @@ import android.widget.ProgressBar
 
 
 fun ProgressBar.show(){
-    visibility = View.VISIBLE
+    Coroutines.main{
+        visibility = View.VISIBLE
+    }
 }
 
 fun ProgressBar.hide(){
-    visibility = View.GONE
+    Coroutines.main{
+        visibility = View.GONE
+    }
 }

@@ -12,8 +12,8 @@
     <string name="email">Email</string>
     <string name="toLogin">Already a member? Login</string>
     <string name="register">Register</string>
-    <string name="first_name">First name</string>
-    <string name="last_name">Last name</string>
+    <string name="displayName">Name</string>
+    <string name="phone_number">Phone number (optional)</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="no_account">No account yet? Create one</string>
@@ -46,5 +46,18 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails</string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
 
+    <string name="camera_tracking_title">Śledząca kamera</string>
+    <string name="camera_tracking_description">Gdy włączone, kamera śledzi twoją lokalizację</string>
+
+
+
+
+
+
+
+
+
     <string name="google_maps_key">AIzaSyAfGoF9YliSCVlIBi3pSshQpDpb10uD0WM</string>
+    <string name="send_location_title">Wysyłaj lokalizację urządzenia</string>
+    <string name="send_location_summary">Gdy włączone, osoby z tej samej wycieczki widzą twoją lokalizację</string>
 </resources>

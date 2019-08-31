@@ -1,36 +1,47 @@
 package com.client.traveller.ui.auth
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.R
-import com.client.traveller.data.db.entities.User
-import com.client.traveller.databinding.ActivityLoginBinding
 import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.util.hide
 import com.client.traveller.ui.util.show
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_login.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
 
-class LoginActivity : AppCompatActivity(), AuthListener, KodeinAware{
+class LoginActivity : AppCompatActivity(), KodeinAware {
 
     override val kodein by kodein()
     private val factory: AuthViewModelFactory by instance()
+    private lateinit var viewModel: AuthViewModel
+    private lateinit var auth: FirebaseAuth
+
+    private val REQUIRED_PERMISSIONS = listOf(
+        Manifest.permission.INTERNET,
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_NETWORK_STATE
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_login)
 
-
-        val viewModel = ViewModelProviders.of(this, factory).get(AuthViewModel::class.java)
+        viewModel = ViewModelProvider(this, factory).get(AuthViewModel::class.java)
         viewModel.getLoggedInUser().observe(this, Observer { user ->
-            if (user != null){
+            if (user != null) {
                 Intent(this, HomeActivity::class.java).also {
                     it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(it)
@@ -38,25 +49,82 @@ class LoginActivity : AppCompatActivity(), AuthListener, KodeinAware{
             }
         })
 
-        val binding = DataBindingUtil.setContentView<ActivityLoginBinding>(this, R.layout.activity_login)
-        binding.viewModel = viewModel
-        viewModel.authListener = this
+        auth = FirebaseAuth.getInstance()
 
+        this.requestPermissions()
+    }
+
+
+    private fun requestPermissions() {
+        var permissionsNotGranted = mutableListOf<String>()
+
+        REQUIRED_PERMISSIONS.forEach { permission ->
+            var result = ActivityCompat.checkSelfPermission(this, permission)
+            if (result == PackageManager.PERMISSION_DENIED)
+                permissionsNotGranted.add(permission)
+        }
+
+        if (permissionsNotGranted.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsNotGranted.toTypedArray(), 100)
+        }
 
     }
 
-    override fun onStarted() {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            100 -> {
+                for (i in permissions.indices) {
+                    if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                        Toast.makeText(
+                            this, "Required permission: " + permissions[i] +
+                                    " not granted.", Toast.LENGTH_LONG
+                        ).show()
+                        this.finish()
+                    }
+                }
+            }
+        }
+    }
+
+    fun toRegister(v: View) {
+        Intent(v.context, SignupActivity::class.java).also {
+            v.context.startActivity(it)
+        }
+    }
+
+    /**
+     * Akcja po naciśnięciu przycisku zaloguj
+     *
+     * walidacja polega tylko na sprawdzeniu czy pola nie są puste
+     * reszta walidacji jest przeprowadzana po stronie serwera google
+     *
+     * @param view: musi być aby metoda można była przypisać w xml
+     */
+
+    fun onLoginButtonClick(view: View) {
         progress_bar.show()
-    }
 
-    override fun onSuccess(user: User) {
-        progress_bar.hide()
-    }
+        val email = email.text.toString()
+        val password = password.text.toString()
 
-    override fun onFailure(message: String) {
-        progress_bar.hide()
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-    }
+        /**
+         * Jeżeli spełnia walidację to nie wchodzi w if
+         */
+        if (!viewModel.validate(email, password)) {
+            progress_bar.hide()
+            return
+        }
 
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    viewModel.logInUser(task.result?.user)
+                    progress_bar.hide()
+                } else {
+                    progress_bar.hide()
+                    Toast.makeText(this, task.exception?.message, Toast.LENGTH_LONG).show()
+                }
+            }
+    }
 
 }

@@ -8,6 +8,8 @@
 
     <!--google maps-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
 
 
     <application
@@ -20,6 +22,8 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
+
+        <uses-library android:name="org.apache.http.legacy" android:required="false" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -48,7 +52,6 @@
                 android:name=".ui.auth.LoginActivity"
                 android:theme="@style/AppTheme.StatusBar.Transparent"
         >
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryLight</item>
@@ -22,7 +22,7 @@
     </style>
 
 
-    <style name="DarkActionBar" parent="Theme.MaterialComponents.Light.DarkActionBar" />
+    <style name="DarkActionBar" parent="Theme.AppCompat.DayNight.DarkActionBar" />
 
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>
