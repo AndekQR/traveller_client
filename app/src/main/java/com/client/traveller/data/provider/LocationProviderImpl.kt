@@ -36,7 +36,10 @@ class LocationProviderImpl(
 ) : LocationProvider {
 
 
-
+    /**
+     * [TAG] używany do logowania
+     * [SEND_LOCATION] i [CAMERA_TRACKING] stałe które mają przypisane klucze pól w ustawieniach aplikacji
+     */
     val TAG = this::class.java.simpleName
     private val SEND_LOCATION = "SEND_LOCATION"
     private val CAMERA_TRACKING = "CAMERA_TRACKING"
@@ -282,6 +285,9 @@ class LocationProviderImpl(
 
 
     override fun onMapClick(position: LatLng) {
+        // TODO do zaimplementowania, po kliknięci wyskakuje menu z tym miejscem i z informacjami o nim, jeżeli nie ma w danym miejscu nic to obiekty w pobliżu
+        // znacznik czyszczony po po otwrciu menu
+        // mmenu się
         mMap?.addMarker(MarkerOptions().position(position).title("onClick"))
     }
 

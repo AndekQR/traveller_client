@@ -36,10 +36,10 @@ class TravellerAplication: Application(), KodeinAware {
         bind() from singleton { instance<AppDatabase>().UserDao() }
         bind<NetworkInterceptor>() with singleton { NetworkInterceptorImpl(instance()) }
         bind() from singleton { TravellerApiService(instance()) }
-        bind<Repository>() with singleton { RepositoryImpl(instance(), instance(), instance()) }
+        bind<Repository>() with singleton { RepositoryImpl(instance(), instance()) }
         bind() from provider { AuthViewModelFactory(instance()) }
         bind() from singleton { NetworkInterceptorImpl(instance()) }
-        bind() from provider { HomeViewModelFactory(instance()) }
+        bind() from provider { HomeViewModelFactory(instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }
 
 

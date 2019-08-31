@@ -10,9 +10,6 @@ import com.google.android.gms.maps.SupportMapFragment
 
 interface LocationProvider : OnMapReadyCallback, GoogleMap.OnMapClickListener, Preference.OnPreferenceChangeListener {
 
-
-    //    fun getLocation(): Location
-//    fun getLastTimeUpdateLocation(): Date
     fun init(mapFragment: SupportMapFragment, context: Context, savedInstanceState: Bundle?)
     fun startLocationUpdates()
     fun stopLocationUpdates()
