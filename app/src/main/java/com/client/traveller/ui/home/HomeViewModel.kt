@@ -26,6 +26,12 @@ class HomeViewModel(
         }
     }
 
+    fun setEmailVerified(){
+        Coroutines.io {
+            repository.setEmailVerified()
+        }
+    }
+
     fun initLocationProvider(map: SupportMapFragment, context: Context, savedInstanceState: Bundle?){
         return locationProvider.init(map, context, savedInstanceState)
     }

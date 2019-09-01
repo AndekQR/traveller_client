@@ -1,19 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.client.traveller">
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.client.traveller">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-
-    <!--google maps-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- google maps -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-
-
     <application
-            android:usesCleartextTraffic="true"
             android:name=".TravellerAplication"
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
@@ -21,41 +16,44 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
+            android:usesCleartextTraffic="true"
             tools:ignore="GoogleAppIndexingWarning">
 
-        <uses-library android:name="org.apache.http.legacy" android:required="false" />
+        <uses-library
+                android:name="org.apache.http.legacy"
+                android:required="false" />
 
         <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key"/>
+                android:name="com.google.android.geo.API_KEY"
+                android:value="@string/google_maps_key" />
 
         <activity
                 android:name=".ui.settings.SettingsActivity"
                 android:label="@string/title_activity_settings"
                 android:parentActivityName=".ui.home.HomeActivity"
-                android:theme="@style/AppTheme.StatusBar.Transparent"
-        >
-
-        </activity>
+                android:theme="@style/AppTheme.StatusBar.Transparent" />
         <activity
                 android:name=".ui.home.HomeActivity"
-                android:theme="@style/AppTheme.StatusBar.Transparent"
-        >
+                android:theme="@style/AppTheme.StatusBar.Transparent">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                        android:host="traveller.systems/verify"
+                        android:scheme="https"/>
+            </intent-filter>
         </activity>
         <activity
                 android:name=".ui.auth.SignupActivity"
-                android:theme="@style/AppTheme.StatusBar.Transparent"
-        >
-
-        </activity>
+                android:theme="@style/AppTheme.StatusBar.Transparent" />
         <activity
                 android:name=".ui.auth.LoginActivity"
-                android:theme="@style/AppTheme.StatusBar.Transparent"
-        >
+                android:theme="@style/AppTheme.StatusBar.Transparent">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>

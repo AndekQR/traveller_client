@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
+import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -16,9 +17,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.BuildConfig
 import com.client.traveller.R
 import com.client.traveller.ui.auth.LoginActivity
+import com.client.traveller.ui.dialogs.Dialog
 import com.client.traveller.ui.settings.SettingsActivity
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import kotlinx.android.synthetic.main.action_bar.*
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.nav_header.view.*
@@ -28,7 +31,6 @@ import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-
 
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, KodeinAware {
 
@@ -64,6 +66,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val map = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         viewModel.initLocationProvider(map, this, savedInstanceState)
 
+//        this.getDynamicLinks()
     }
 
 
@@ -163,4 +166,22 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
     }
+
+
+    //TODO zwalnianie domeny na firebase spróbuj za miesiąc traveller.systems name.com
+//    private fun getDynamicLinks(){
+//        FirebaseDynamicLinks.getInstance()
+//            .getDynamicLink(intent)
+//            .addOnSuccessListener(this){ pendingDynamicLinkData ->
+//                var deepLink: Uri? = null
+//                if (pendingDynamicLinkData != null || pendingDynamicLinkData?.link != null){
+//                    deepLink = pendingDynamicLinkData.link
+//                    viewModel.setEmailVerified()
+//                    Dialog.newInstance(getString(R.string.post_email_verification)).show(this.supportFragmentManager, "Weryfikacja e-mail")
+//                }
+//            }
+//            .addOnFailureListener {
+//                Log.e("HomeActivity", it.message)
+//            }
+//    }
 }
