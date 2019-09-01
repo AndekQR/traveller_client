@@ -8,4 +8,5 @@ interface Repository {
     suspend fun saveUser(firebaseUser: FirebaseUser)
     fun getUser(): LiveData<User>
     suspend fun deleteUser() //jest tylko jeden aktualnie zalogowany!
+    suspend fun setEmailVerified()
 }

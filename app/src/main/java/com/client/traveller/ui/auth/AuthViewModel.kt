@@ -25,18 +25,20 @@ class AuthViewModel(
         }
     }
 
-    fun validate(email: String, password: String, displayName: String? = null, phoneNumber: String? = null, rePassword: String? = null): Boolean{
+    fun validate(email: String, password: String, displayName: String? = null, rePassword: String? = null): Boolean{
         var valid = true
 
         if (email.isEmpty() || password.isEmpty())
             valid = false
 
-        if (displayName !=null && phoneNumber != null && rePassword != null){
+        if (displayName !=null  && rePassword != null){
             if (displayName.isEmpty() || rePassword.isEmpty())
                 valid = false
             else if (password != rePassword)
                 valid = false
         }
+        else
+            valid = false
 
         return valid
     }

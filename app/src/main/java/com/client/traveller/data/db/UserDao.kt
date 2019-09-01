@@ -20,4 +20,7 @@ interface UserDao {
     @Query("DELETE FROM user WHERE uid = $CURRENT_USER_ID")
     fun deleteUser()
 
+    @Query("UPDATE user SET verified = 1 WHERE uid = $CURRENT_USER_ID")
+    fun setEmailVerified()
+
 }

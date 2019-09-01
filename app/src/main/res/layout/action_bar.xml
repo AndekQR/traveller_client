@@ -13,7 +13,7 @@
             android:id="@+id/floating_search_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:floatingSearch_searchHint="Search..."
+            app:floatingSearch_searchHint="@string/search_hint"
             app:floatingSearch_suggestionsListAnimDuration="150"
             app:floatingSearch_showSearchKey="false"
             app:floatingSearch_leftActionMode="showHamburger"
