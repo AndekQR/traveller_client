@@ -35,13 +35,12 @@
         <activity
                 android:name=".ui.home.HomeActivity"
                 android:theme="@style/AppTheme.StatusBar.Transparent">
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data
-                        android:host="traveller.systems/verify"
-                        android:scheme="https"/>
+                <data android:scheme="https" android:host="travellersystems.page.link" />
+                <data android:scheme="http" android:host="travellersystems.page.link"/>
             </intent-filter>
         </activity>
         <activity
@@ -52,7 +51,6 @@
                 android:theme="@style/AppTheme.StatusBar.Transparent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

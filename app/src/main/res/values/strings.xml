@@ -58,5 +58,10 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="post_email_verification">Weryfikacja e-mail została ukończona!</string>
+    <string name="post_email_verification_success">Weryfikacja e-mail została ukończona!</string>
+    <string name="post_email_verification_fail">Weryfikacja e-mail zakończyła się niepowodzeniem. Skontaktuj się z twórcą.</string>
+    <string name="reset_password">Zapomniałeś hasła? Utwórz nowe!</string>
+    <string name="password_reset_button">Wyślij</string>
+    <string name="password_reset_cancel_button">Anuluj</string>
+    <string name="password_reset_wrong_email">Podaj poprawny email!</string>
 </resources>

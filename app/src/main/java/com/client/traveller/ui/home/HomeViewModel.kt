@@ -9,6 +9,7 @@ import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.repository.Repository
 import com.client.traveller.ui.util.Coroutines
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.firebase.auth.FirebaseAuth
 
 class HomeViewModel(
     private val repository: Repository,
@@ -24,6 +25,7 @@ class HomeViewModel(
         Coroutines.io {
             repository.deleteUser()
         }
+        FirebaseAuth.getInstance().signOut()
     }
 
     fun setEmailVerified(){

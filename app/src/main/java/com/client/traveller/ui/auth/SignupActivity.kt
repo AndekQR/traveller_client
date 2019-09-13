@@ -19,8 +19,6 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-//TODO Send a user a verification email
-//TODO Dodać przycisk do resetowania hasła Send a password reset email (jak na firebase documentation)
 class SignupActivity : AppCompatActivity(), KodeinAware {
 
     override val kodein by kodein()
@@ -84,7 +82,7 @@ class SignupActivity : AppCompatActivity(), KodeinAware {
                         .build()
                     this.updateProfile(task.result?.user, profileUpdates)
                     viewModel.logInUser(task.result?.user)
-//                    viewModel.sendEmailVerification(task.result?.user)
+                    viewModel.sendEmailVerification(task.result?.user)
                     progress_bar.hide()
                 } else{
                     progress_bar.hide()

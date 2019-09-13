@@ -1,12 +1,20 @@
 package com.client.traveller.ui.auth
 
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import com.client.traveller.BuildConfig
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.repository.Repository
 import com.client.traveller.ui.util.Coroutines
 import com.google.firebase.auth.ActionCodeSettings
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.dynamiclinks.DynamicLink
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
+import java.net.URL
+import java.net.URLDecoder
 
 class AuthViewModel(
     private val repository: Repository
@@ -50,22 +58,28 @@ class AuthViewModel(
      *
      * @param user użytkownik do którego zostanie wysłany email weryfikacyjny
      */
-    //TODO zwalnianie domeny traveler.systems name.com
-//    fun sendEmailVerification(user: FirebaseUser?){
-//
-//        val url = "https://traveller.systems/verify/"
-//        val actionCodeSettings = ActionCodeSettings.newBuilder()
-//            .setUrl(url)
-//            .setAndroidPackageName("com.client.traveller", false, null)
-//            .build()
-//
-//        user?.sendEmailVerification(actionCodeSettings)
-//            ?.addOnCompleteListener{task ->
-//                val result = task.result?.toString()
-//                val exception = task.exception?.message
-//                val asd = "asd"
-//            }
-//    }
+    fun sendEmailVerification(user: FirebaseUser?){
 
+        val baseUrl = "https://travellersystems.page.link/"
+        val fullUrl = Uri.parse(baseUrl).buildUpon()
+            .appendPath("verify")
+            .appendQueryParameter("email", FirebaseAuth.getInstance().currentUser?.email)
+            .build()
 
+        val actionCodeSettings = ActionCodeSettings.newBuilder()
+            .setUrl(Uri.decode(fullUrl.toString()))
+            .setAndroidPackageName("com.client.traveller", true, null)
+            .setHandleCodeInApp(true)
+            .build()
+
+        user?.sendEmailVerification(actionCodeSettings)
+            ?.addOnCompleteListener{task ->
+                if (task.isSuccessful){
+                    Log.e(javaClass.simpleName, "sendEmailVerification successful")
+                }
+                else{
+                    Log.e(javaClass.simpleName, task.exception?.localizedMessage)
+                }
+            }
+    }
 }
