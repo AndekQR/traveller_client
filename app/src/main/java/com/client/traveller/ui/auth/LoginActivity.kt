@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -11,17 +12,20 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.R
+import com.client.traveller.ui.dialogs.Dialog
 import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.util.hide
 import com.client.traveller.ui.util.show
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import kotlinx.android.synthetic.main.activity_login.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
 
-class LoginActivity : AppCompatActivity(), KodeinAware {
+class LoginActivity : AppCompatActivity(), KodeinAware,
+    PasswordResetFragment.OnFragmentInteractionListener {
 
     override val kodein by kodein()
     private val factory: AuthViewModelFactory by instance()
@@ -51,6 +55,8 @@ class LoginActivity : AppCompatActivity(), KodeinAware {
 
         auth = FirebaseAuth.getInstance()
 
+        FirebaseDynamicLinks.getInstance().getDynamicLink(intent)
+
         this.requestPermissions()
     }
 
@@ -70,7 +76,11 @@ class LoginActivity : AppCompatActivity(), KodeinAware {
 
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             100 -> {
                 for (i in permissions.indices) {
@@ -89,6 +99,57 @@ class LoginActivity : AppCompatActivity(), KodeinAware {
     fun toRegister(v: View) {
         Intent(v.context, SignupActivity::class.java).also {
             v.context.startActivity(it)
+        }
+    }
+
+    /**
+     * Metoda uruchamia [PasswordResetFragment] w którym po wpisaniu email możemy zresetować hasło
+     */
+    fun passwordReset(v: View) {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(
+            R.id.login_container,
+            PasswordResetFragment.newInstance(),
+            "PASSWORD_RESET_FRAGMENT"
+        )
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+    /**
+     * Listener, kiedy w [PasswordResetFragment] zostanie naciśnięty przycik wyślij to zostanie uruchomiona ta metoda
+     * Zostaje tu usunięty [PasswordResetFragment] i przywrócony [LoginActivity]
+     * Jeżeli został podany błędny email to zostanie wyświetlony odpowiedni komunikat
+     * Walidacja jest przeprowadzana w [PasswordResetFragment]
+     */
+    override fun onButtonClick(email: String?) {
+
+        if (email != null){
+            FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    Dialog.newInstance("Wiadomość z linkiem resetującym hasło została wysłana na email")
+                        .show(supportFragmentManager, "password_reset_success")
+                }
+                else {
+                    Dialog.newInstance("Wiadomość z linkiem resetującym hasło nie została wysłana, błędne dane")
+                        .show(supportFragmentManager, "password_reset_fail")
+                }
+            }
+                .addOnFailureListener {
+                    Dialog.newInstance("Wiadomość z linkiem resetującym hasło nie została wysłana. ${it.localizedMessage}")
+                        .show(supportFragmentManager, "password_reset_fail")
+                }
+        }
+        else{
+            Log.i(javaClass.simpleName, "PasswordResetFragment cancel click")
+        }
+
+        val fragment = supportFragmentManager.findFragmentByTag("PASSWORD_RESET_FRAGMENT")
+        if(fragment != null){
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.remove(fragment)
+            transaction.commit()
         }
     }
 

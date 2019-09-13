@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
+import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -16,9 +17,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.BuildConfig
 import com.client.traveller.R
 import com.client.traveller.ui.auth.LoginActivity
+import com.client.traveller.ui.dialogs.Dialog
 import com.client.traveller.ui.settings.SettingsActivity
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import kotlinx.android.synthetic.main.action_bar.*
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.nav_header.view.*
@@ -29,8 +33,8 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-
-class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, KodeinAware {
+class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
+    KodeinAware {
 
     private lateinit var toggle: ActionBarDrawerToggle
     override val kodein by kodein()
@@ -63,6 +67,9 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val map = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         viewModel.initLocationProvider(map, this, savedInstanceState)
+
+        if (intent != null)
+            this.getDynamicLinks()
 
     }
 
@@ -114,7 +121,11 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             121 -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -163,4 +174,60 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
     }
+
+
+    private fun getDynamicLinks() {
+        FirebaseDynamicLinks.getInstance()
+            .getDynamicLink(intent)
+            .addOnSuccessListener(this) {
+                var deepLink: Uri? = null
+
+                if (it != null) {
+                    Log.e(
+                        javaClass.simpleName,
+                        "dynamic Link working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                    )
+//                    FirebaseAuth.getInstance().applyActionCode()
+                    deepLink = it.link
+                    viewModel.setEmailVerified()
+                    Dialog.newInstance(getString(R.string.post_email_verification_success))
+                        .show(this.supportFragmentManager, "Weryfikacja e-mail")
+                } else {
+                    if (intent.data != null) {
+                        this.handleLink(intent.data)
+                    }
+                }
+            }
+            .addOnFailureListener {
+                Log.e(javaClass.simpleName, it.localizedMessage)
+            }
+    }
+
+    //https://travellersystems.page.link?
+// link=https://traveller-249409.firebaseapp.com/__/auth/action?
+// apiKey%3DAIzaSyCrwQqjOn5v4BDdkKCZHMmmav1YEzvaq5s%26mode%3D
+// verifyEmail%26oobCode%3DL5SpczQtw2sKuIaCPOu8s9CFcziz3Cdmo1KB9JLWY5UAAAFtJizsbA%26
+// continueUrl%3Dhttps://travellersystems.page.link/verify?email%253Ddaniellegawiec20@gmail.com%26lang%3Dpl&
+// apn=com.client.traveller&amv
+    private fun handleLink(uri: Uri) {
+
+        val link = Uri.parse(uri.getQueryParameter("link"))
+
+        var mode = link.getQueryParameter("mode")
+        var actionCode = link.getQueryParameter("oobCode")
+        var apiKey = link.getQueryParameter("apiKey")
+        var continueUrl = link.getQueryParameter("continueUrl")
+
+        if (mode == "verifyEmail" && actionCode != null){
+            viewModel.setEmailVerified()
+            FirebaseAuth.getInstance().applyActionCode(actionCode)
+            Dialog.newInstance(getString(R.string.post_email_verification_success))
+                .show(this.supportFragmentManager, "Weryfikacja e-mail")
+        }
+        else{
+            Dialog.newInstance(getString(R.string.post_email_verification_fail))
+                .show(this.supportFragmentManager, "Weryfikacja e-mail")
+        }
+    }
+
 }

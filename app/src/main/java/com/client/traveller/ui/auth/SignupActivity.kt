@@ -82,6 +82,7 @@ class SignupActivity : AppCompatActivity(), KodeinAware {
                         .build()
                     this.updateProfile(task.result?.user, profileUpdates)
                     viewModel.logInUser(task.result?.user)
+                    viewModel.sendEmailVerification(task.result?.user)
                     progress_bar.hide()
                 } else{
                     progress_bar.hide()
@@ -101,4 +102,5 @@ class SignupActivity : AppCompatActivity(), KodeinAware {
             user.updateProfile(profileUpdates)
         }
     }
+
 }
