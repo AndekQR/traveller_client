@@ -1,64 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.drawerlayout.widget.DrawerLayout
+<androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:openDrawer="start"
         tools:context=".ui.home.HomeActivity"
 >
 
-
     <fragment
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            app:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/nav_host_fragment_home"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:fitsSystemWindows="true"
-            app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!--ten z ikona do otwierania drawera ( hamburger ) -->
-    <include
-            layout="@layout/action_bar"
-    />
-
-    <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
-
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="bottom"
-                android:layout_alignParentBottom="true"
-                android:orientation="horizontal">
-
-                <!--tu były przyciski od mapy-->
-
-        </LinearLayout>
-    </FrameLayout>
+            app:navGraph="@navigation/nav_graph_home" />
 
 
-    <!--Drawer-->
-    <com.google.android.material.navigation.NavigationView
-            android:id="@+id/navigation_view"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            app:headerLayout="@layout/nav_header"
-            app:menu="@menu/drawer_menu"
-            android:background="@color/colorWhiteMaterial"
-            app:itemTextColor="@color/colorDark"
-            app:itemIconTint="@color/colorDark"
-            android:theme="@style/AppTheme.NavigationView"
 
-
-    />
-
-</androidx.drawerlayout.widget.DrawerLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 
 

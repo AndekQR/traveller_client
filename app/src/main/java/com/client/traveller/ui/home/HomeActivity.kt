@@ -7,37 +7,24 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
 import android.util.Log
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.BuildConfig
 import com.client.traveller.R
-import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.dialog.Dialog
-import com.client.traveller.ui.settings.SettingsActivity
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
-import kotlinx.android.synthetic.main.action_bar.*
-import kotlinx.android.synthetic.main.activity_home.*
-import kotlinx.android.synthetic.main.nav_header.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.android.synthetic.main.fragment_home.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
+class HomeActivity : AppCompatActivity(),
     KodeinAware {
 
-    private lateinit var toggle: ActionBarDrawerToggle
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
     private lateinit var viewModel: HomeViewModel
@@ -47,58 +34,11 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-
         viewModel = ViewModelProvider(this, factory).get(HomeViewModel::class.java)
-
-        floating_search_view.setOnQueryChangeListener { oldQuery, newQuery ->
-            //get suggestions based on newQuery
-            //https://github.com/arimorty/floatingsearchview/blob/master/sample/src/main/java/com/arlib/floatingsearchviewdemo/data/DataHelper.java
-            //pass them on to the search view
-            var lista = listOf<MySearchSuggestion>()
-            floating_search_view.swapSuggestions(lista)
-        }
-        floating_search_view.attachNavigationDrawerToMenuButton(drawer_layout)
-        navigation_view.setNavigationItemSelectedListener(this)
-
-        viewModel.getLoggedInUser().observe(this, Observer { user ->
-            if (user != null) {
-                setSubtitleNavView(user.email!!)
-            }
-        })
-
-        val map = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        viewModel.initLocationProvider(map, this, savedInstanceState)
 
         if (intent != null)
             this.getDynamicLinks()
 
-    }
-
-
-    private fun setSubtitleNavView(subtitle: String) = GlobalScope.launch(Dispatchers.Main) {
-        navigation_view.getHeaderView(0).subtitle.text = subtitle
-    }
-
-    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
-        when (menuItem.itemId) {
-            R.id.ustawienia_item -> {
-                val intent = Intent(this, SettingsActivity::class.java)
-                startActivity(intent)
-            }
-            R.id.tworca_item -> {
-//                val intent = Intent(this, AuthorActivity::class.java)
-//                startActivity(intent)
-            }
-            R.id.logout -> {
-                viewModel.logoutUser()
-                Intent(this, AuthActivity::class.java).also {
-                    it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(it)
-                }
-            }
-        }
-        drawer_layout.closeDrawer(GravityCompat.START)
-        return true
     }
 
     override fun onBackPressed() {
@@ -115,13 +55,12 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Handler().postDelayed({ doubleBack = false }, 2000)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if (toggle.onOptionsItemSelected(item)) {
-            return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
+    /**
+     * Uprawnienia lokalizacji są także sprawdzane w [LocationProviderImpl] z kodem 121
+     * tutaj jest sprawdzane czy te uprawnienia zostały przyznane
+     * jeżeli tak to zostaje wywołana metoda startLocationUpdates
+     * jeżeli nie zostają otworzone ustawienia gdzie możemy zmienić uprawnienia [openSettings]
+     */
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -141,29 +80,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    /**
-     * wywoływana po ponownym stworzeniu aktywności
-     */
-    override fun onResume() {
-        super.onResume()
-
-        if (viewModel.sendingLocationData()) {
-            viewModel.startLocationUpdates()
-        }
-    }
-
-
-    /**
-     * wywoływana gdy aktywność przejdzie na drugi plan
-     */
-    override fun onPause() {
-        super.onPause()
-
-        if (viewModel.sendingLocationData()) {
-            viewModel.stopLocationUpdates()
-        }
-    }
-
     private fun openSettings() {
         val intent = Intent()
         intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
@@ -176,7 +92,29 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         startActivity(intent)
     }
 
+    /**
+     * wywoływana po ponownym stworzeniu aktywności
+     */
+    override fun onResume() {
+        super.onResume()
 
+        if (viewModel.sendingLocationData()) {
+            viewModel.startLocationUpdates()
+        }
+    }
+
+    /**
+     * wywoływana gdy aktywność przejdzie na drugi plan
+     */
+    override fun onPause() {
+        super.onPause()
+
+        if (viewModel.sendingLocationData()) {
+            viewModel.stopLocationUpdates()
+        }
+    }
+
+    //TODO trzeba pprawić metodę
     private fun getDynamicLinks() {
         FirebaseDynamicLinks.getInstance()
             .getDynamicLink(intent)
@@ -216,7 +154,10 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 // verifyEmail%26oobCode%3DL5SpczQtw2sKuIaCPOu8s9CFcziz3Cdmo1KB9JLWY5UAAAFtJizsbA%26
 // continueUrl%3Dhttps://travellersystems.page.link/verify?email%253Ddaniellegawiec20@gmail.com%26lang%3Dpl&
 // apn=com.client.traveller&amv
-    private fun handleLink(uri: Uri) {
+    private fun handleLink(uri: Uri?) {
+
+        if (uri == null)
+            return
 
         val link = Uri.parse(uri.getQueryParameter("link"))
 

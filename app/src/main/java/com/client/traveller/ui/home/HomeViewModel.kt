@@ -54,4 +54,5 @@ class HomeViewModel(
         return locationProvider.sendingLocationData()
     }
 
+
 }

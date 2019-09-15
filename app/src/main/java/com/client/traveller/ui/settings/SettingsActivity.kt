@@ -2,7 +2,7 @@ package com.client.traveller.ui.settings
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.client.traveller.R
@@ -21,7 +21,7 @@ class SettingsActivity : AppCompatActivity(), KodeinAware {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = ViewModelProviders.of(this, factory).get(SettingsViewModel::class.java)
+        viewModel = ViewModelProvider(this, factory).get(SettingsViewModel::class.java)
 
         setContentView(R.layout.settings_activity)
         setSupportActionBar(toolbar)

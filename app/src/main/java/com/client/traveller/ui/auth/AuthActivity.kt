@@ -4,12 +4,14 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.R
+import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.home.HomeActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
@@ -23,8 +25,6 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
     override val kodein by kodein()
     private val factory: AuthViewModelFactory by instance()
     private lateinit var viewModel: AuthViewModel
-    private lateinit var auth: FirebaseAuth
-    private var doubleBack = false
 
     private val REQUIRED_PERMISSIONS = listOf(
         Manifest.permission.INTERNET,
@@ -50,14 +50,15 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
             }
         })
 
-
-        auth = FirebaseAuth.getInstance()
-        FirebaseDynamicLinks.getInstance().getDynamicLink(intent)
         this.requestPermissions()
 
     }
 
 
+    /**
+     * Metoda sprawdza czy potrzebne uprawnienia są przyznane, jeżeli nie to prosi użytkownika o nie.
+     * Potrzebne uprawnienia są zawarte w [REQUIRED_PERMISSIONS]
+     */
     private fun requestPermissions() {
         val permissionsNotGranted = mutableListOf<String>()
 
@@ -73,7 +74,9 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
 
     }
 
-    //TODO do poprawienia
+    /**
+     * Metoda sprawdza czy użytkownik przyznał wszystkie uprawnienia, jeżeli nie to zostaje wyświetlony odpowiedni komunikat
+     */
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -83,11 +86,14 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
             100 -> {
                 for (i in permissions.indices) {
                     if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                        Toast.makeText(
-                            this, "Required permission: " + permissions[i] +
-                                    " not granted.", Toast.LENGTH_LONG
-                        ).show()
-                        this.finish()
+                        Dialog.Builder()
+                            .addTitle("Ostrzeżenie!")
+                            .addMessage("Wymagane uprawnienia nie zostały przyznane. Aplikacja może działać w niewłaściwy sposób.")
+                            .addPositiveButton("Ok", View.OnClickListener {
+                                val dialog = supportFragmentManager.findFragmentByTag(javaClass.simpleName) as Dialog
+                                dialog.dismiss()
+                            })
+                            .build(supportFragmentManager, javaClass.simpleName)
                     }
                 }
             }
