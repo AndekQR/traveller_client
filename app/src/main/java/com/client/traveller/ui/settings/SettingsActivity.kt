@@ -35,14 +35,16 @@ class SettingsActivity : AppCompatActivity(), KodeinAware {
 
     }
 
-    class SettingsFragment(private val locationProvider: LocationProvider) : PreferenceFragmentCompat() {
+    class SettingsFragment(private val locationProvider: LocationProvider) :
+        PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
         }
 
         override fun onActivityCreated(savedInstanceState: Bundle?) {
             super.onActivityCreated(savedInstanceState)
-            (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.title_activity_settings)
+            (activity as? AppCompatActivity)?.supportActionBar?.title =
+                getString(R.string.title_activity_settings)
             (activity as? AppCompatActivity)?.supportActionBar?.subtitle = null
 
             val sendingLocation = findPreference<SwitchPreference>("SEND_LOCATION")

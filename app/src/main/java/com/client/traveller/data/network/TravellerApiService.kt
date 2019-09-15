@@ -16,19 +16,19 @@ interface TravellerApiService {
     @POST("login")
     suspend fun userLogin(
         @Body data: Map<String, String>
-    ):Response<LoginResponse>
+    ): Response<LoginResponse>
 
     @POST("register")
     suspend fun register(
         @Body data: Map<String, String>
     ): Response<LoginResponse>
 
-    companion object{
+    companion object {
         operator fun invoke(
             networkInterceptor: NetworkInterceptorImpl
-        ): TravellerApiService{
+        ): TravellerApiService {
 
-            val requestInterceptor = Interceptor {chain ->
+            val requestInterceptor = Interceptor { chain ->
                 val client = chain.request()
                     .newBuilder()
                     .header("Content-Type", "application/json")
@@ -48,14 +48,14 @@ interface TravellerApiService {
 
 
 
-           return Retrofit.Builder()
-               .client(okHttpClient)
+            return Retrofit.Builder()
+                .client(okHttpClient)
 //               .baseUrl("https://traveller-server-andekqr.herokuapp.com/auth/")
-               .baseUrl("http://192.168.43.215:8080/auth/")
-               .addCallAdapterFactory(CoroutineCallAdapterFactory())
-               .addConverterFactory(GsonConverterFactory.create())
-               .build()
-               .create(TravellerApiService::class.java)
+                .baseUrl("http://192.168.43.215:8080/auth/")
+                .addCallAdapterFactory(CoroutineCallAdapterFactory())
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(TravellerApiService::class.java)
         }
     }
 

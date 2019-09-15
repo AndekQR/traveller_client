@@ -8,16 +8,15 @@ import retrofit2.Response
 
 abstract class SafeApiRequest {
 
-    suspend fun <T: Any> apiRequest(call: suspend () -> Response<T>): T{
+    suspend fun <T : Any> apiRequest(call: suspend () -> Response<T>): T {
         val response = call.invoke()
-        if (response.isSuccessful){
+        if (response.isSuccessful) {
             try {
                 return response.body()!!
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 throw ApiException("Exception in the success body of the response")
             }
-        }
-        else{
+        } else {
             val error = response.errorBody()?.string()
             val errorMessage = StringBuilder()
             error.let {
@@ -26,8 +25,7 @@ abstract class SafeApiRequest {
                     errorMessage.append("\n")
                     errorMessage.append(JSONObject(it).getJSONArray("details").toString())
                     errorMessage.append("\n")
-                }
-                catch (e: JSONException){
+                } catch (e: JSONException) {
                     Log.d("SafeRequest", e.toString())
                 }
             }

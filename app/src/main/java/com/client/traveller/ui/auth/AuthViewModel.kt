@@ -4,22 +4,18 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import com.client.traveller.BuildConfig
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.repository.Repository
 import com.client.traveller.ui.util.Coroutines
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.dynamiclinks.DynamicLink
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
-import java.net.URL
-import java.net.URLDecoder
 
 class AuthViewModel(
     private val repository: Repository
 ) : ViewModel() {
 
+    val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     fun getLoggedInUser(): LiveData<User> {
         return repository.getUser()
@@ -34,20 +30,25 @@ class AuthViewModel(
         }
     }
 
-    fun validate(email: String, password: String, displayName: String? = null, rePassword: String? = null): Boolean{
+    fun validate(
+        email: String,
+        password: String,
+        displayName: String? = null,
+        rePassword: String? = null
+    ): Boolean {
         var valid = true
 
+        // logowanie i rejestracja
         if (email.isEmpty() || password.isEmpty())
             valid = false
 
-        if (displayName !=null  && rePassword != null){
+        // rejestracja
+        if (displayName != null && rePassword != null) {
             if (displayName.isEmpty() || rePassword.isEmpty())
                 valid = false
             else if (password != rePassword)
                 valid = false
         }
-        else
-            valid = false
 
         return valid
     }
@@ -58,7 +59,7 @@ class AuthViewModel(
      *
      * @param user użytkownik do którego zostanie wysłany email weryfikacyjny
      */
-    fun sendEmailVerification(user: FirebaseUser?){
+    fun sendEmailVerification(user: FirebaseUser?) {
 
         val baseUrl = "https://travellersystems.page.link/"
         val fullUrl = Uri.parse(baseUrl).buildUpon()
@@ -73,13 +74,14 @@ class AuthViewModel(
             .build()
 
         user?.sendEmailVerification(actionCodeSettings)
-            ?.addOnCompleteListener{task ->
-                if (task.isSuccessful){
+            ?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
                     Log.e(javaClass.simpleName, "sendEmailVerification successful")
-                }
-                else{
+                } else {
                     Log.e(javaClass.simpleName, task.exception?.localizedMessage)
                 }
             }
     }
+
+
 }

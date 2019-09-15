@@ -25,7 +25,7 @@ import org.kodein.di.generic.instance
 import org.kodein.di.generic.provider
 import org.kodein.di.generic.singleton
 
-class TravellerAplication: Application(), KodeinAware {
+class TravellerAplication : Application(), KodeinAware {
     override val kodein = Kodein.lazy {
         import(androidXModule(this@TravellerAplication))
 
@@ -41,14 +41,6 @@ class TravellerAplication: Application(), KodeinAware {
         bind() from singleton { NetworkInterceptorImpl(instance()) }
         bind() from provider { HomeViewModelFactory(instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }
-
-
-
-
-    }
-
-    override fun onCreate() {
-        super.onCreate()
 
 
     }

@@ -44,10 +44,7 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".ui.auth.SignupActivity"
-                android:theme="@style/AppTheme.StatusBar.Transparent" />
-        <activity
-                android:name=".ui.auth.LoginActivity"
+                android:name=".ui.auth.AuthActivity"
                 android:theme="@style/AppTheme.StatusBar.Transparent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -6,7 +6,7 @@ import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion
 
 class MySearchSuggestion(private var name: String) : SearchSuggestion {
 
-    constructor(parcel: Parcel): this(parcel.readString()!!)
+    constructor(parcel: Parcel) : this(parcel.readString()!!)
 
     override fun describeContents(): Int {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

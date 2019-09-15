@@ -69,7 +69,11 @@ class LocationProviderImpl(
      * @param context: context [HomeActivity]
      * @param savedInstanceState: dane dotyczące lokalizacji, zapisane przed znisczeniem aktywności
      */
-    override fun init(mapFragment: SupportMapFragment, context: Context, savedInstanceState: Bundle?) {
+    override fun init(
+        mapFragment: SupportMapFragment,
+        context: Context,
+        savedInstanceState: Bundle?
+    ) {
 
         this.restoreValuesFromBundle(savedInstanceState)
 
@@ -246,7 +250,10 @@ class LocationProviderImpl(
         ) {
             ActivityCompat.requestPermissions(
                 context as Activity,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
                 121
             )
         }
@@ -259,7 +266,10 @@ class LocationProviderImpl(
             return false
         } else if (requestingLocationUpdates && preferenceProvider.getPreferenceState(SEND_LOCATION)) {
             return true
-        } else if (!requestingLocationUpdates && !preferenceProvider.getPreferenceState(SEND_LOCATION)) {
+        } else if (!requestingLocationUpdates && !preferenceProvider.getPreferenceState(
+                SEND_LOCATION
+            )
+        ) {
             return false
         }
         return false
@@ -272,7 +282,10 @@ class LocationProviderImpl(
      *
      * W przypadku [newValue]==true nie ma potrzeby wywoływać [startLocationUpdates] ponieważ jest wywołana w [onRosume] w [HomeActivity]
      */
-    override fun onPreferenceChange(preference: androidx.preference.Preference?, newValue: Any?): Boolean {
+    override fun onPreferenceChange(
+        preference: androidx.preference.Preference?,
+        newValue: Any?
+    ): Boolean {
         if (newValue != null && preference?.key == SEND_LOCATION) {
             if (newValue as Boolean)
                 requestingLocationUpdates = true
@@ -281,7 +294,6 @@ class LocationProviderImpl(
         }
         return true
     }
-
 
 
     override fun onMapClick(position: LatLng) {
@@ -303,7 +315,11 @@ class LocationProviderImpl(
             mMap?.moveCamera(CameraUpdateFactory.newLatLng(latlng))
             mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 12.0f))
         } catch (ex: NullPointerException) {
-            Toast.makeText(context, "The current location's latitude or longitude is not present!", Toast.LENGTH_LONG)
+            Toast.makeText(
+                context,
+                "The current location's latitude or longitude is not present!",
+                Toast.LENGTH_LONG
+            )
                 .show()
         }
 

@@ -8,7 +8,8 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 
-interface LocationProvider : OnMapReadyCallback, GoogleMap.OnMapClickListener, Preference.OnPreferenceChangeListener {
+interface LocationProvider : OnMapReadyCallback, GoogleMap.OnMapClickListener,
+    Preference.OnPreferenceChangeListener {
 
     fun init(mapFragment: SupportMapFragment, context: Context, savedInstanceState: Bundle?)
     fun startLocationUpdates()

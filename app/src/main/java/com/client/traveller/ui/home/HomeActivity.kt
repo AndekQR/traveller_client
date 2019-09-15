@@ -8,6 +8,7 @@ import android.os.Handler
 import android.provider.Settings
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -16,8 +17,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.BuildConfig
 import com.client.traveller.R
-import com.client.traveller.ui.auth.LoginActivity
-import com.client.traveller.ui.dialogs.Dialog
+import com.client.traveller.ui.auth.AuthActivity
+import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.settings.SettingsActivity
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.material.navigation.NavigationView
@@ -90,7 +91,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.logout -> {
                 viewModel.logoutUser()
-                Intent(this, LoginActivity::class.java).also {
+                Intent(this, AuthActivity::class.java).also {
                     it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(it)
                 }
@@ -190,8 +191,14 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //                    FirebaseAuth.getInstance().applyActionCode()
                     deepLink = it.link
                     viewModel.setEmailVerified()
-                    Dialog.newInstance(getString(R.string.post_email_verification_success))
-                        .show(this.supportFragmentManager, "Weryfikacja e-mail")
+                    Dialog.Builder()
+                        .addMessage(getString(R.string.post_email_verification_success))
+                        .addPositiveButton("Ok", View.OnClickListener {
+                            val dialog =
+                                supportFragmentManager.findFragmentByTag(javaClass.simpleName) as Dialog?
+                            dialog?.dismiss()
+                        })
+                        .build(supportFragmentManager, javaClass.simpleName)
                 } else {
                     if (intent.data != null) {
                         this.handleLink(intent.data)
@@ -218,15 +225,31 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var apiKey = link.getQueryParameter("apiKey")
         var continueUrl = link.getQueryParameter("continueUrl")
 
-        if (mode == "verifyEmail" && actionCode != null){
+        if (mode == "verifyEmail" && actionCode != null) {
             viewModel.setEmailVerified()
             FirebaseAuth.getInstance().applyActionCode(actionCode)
-            Dialog.newInstance(getString(R.string.post_email_verification_success))
-                .show(this.supportFragmentManager, "Weryfikacja e-mail")
-        }
-        else{
-            Dialog.newInstance(getString(R.string.post_email_verification_fail))
-                .show(this.supportFragmentManager, "Weryfikacja e-mail")
+                .addOnSuccessListener {
+                    Dialog.Builder()
+                        .addMessage(getString(R.string.post_email_verification_success))
+                        .addPositiveButton("Ok", View.OnClickListener {
+                            val dialog =
+                                supportFragmentManager.findFragmentByTag(javaClass.simpleName) as Dialog?
+                            dialog?.dismiss()
+                        })
+                        .build(supportFragmentManager, javaClass.simpleName)
+                }
+                .addOnFailureListener {
+                    Dialog.Builder()
+                        .addTitle(getString(R.string.post_email_verification_fail))
+                        .addMessage(it.localizedMessage)
+                        .addPositiveButton("Ok", View.OnClickListener {
+                            val dialog =
+                                supportFragmentManager.findFragmentByTag(javaClass.simpleName) as Dialog?
+                            dialog?.dismiss()
+                        })
+                        .build(supportFragmentManager, javaClass.simpleName)
+                }
+
         }
     }
 

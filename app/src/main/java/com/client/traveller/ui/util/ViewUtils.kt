@@ -1,17 +1,18 @@
 package com.client.traveller.ui.util
 
 import android.view.View
-import android.widget.ProgressBar
+import android.widget.RelativeLayout
 
 
-fun ProgressBar.show(){
-    Coroutines.main{
+fun RelativeLayout.showProgressBar() {
+    Coroutines.main {
         visibility = View.VISIBLE
     }
 }
 
-fun ProgressBar.hide(){
-    Coroutines.main{
+
+fun RelativeLayout.hideProgressBar() {
+    Coroutines.main {
         visibility = View.GONE
     }
 }

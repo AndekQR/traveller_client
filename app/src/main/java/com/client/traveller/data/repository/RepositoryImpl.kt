@@ -17,7 +17,12 @@ class RepositoryImpl(
 
     override suspend fun saveUser(firebaseUser: FirebaseUser) {
         GlobalScope.launch(Dispatchers.IO) {
-            val user = User(firebaseUser.uid, firebaseUser.displayName, firebaseUser.email, firebaseUser.isEmailVerified)
+            val user = User(
+                firebaseUser.uid,
+                firebaseUser.displayName,
+                firebaseUser.email,
+                firebaseUser.isEmailVerified
+            )
             userDao.upsert(user)
         }
     }
@@ -27,9 +32,9 @@ class RepositoryImpl(
     }
 
     override suspend fun deleteUser() {
-            GlobalScope.launch(Dispatchers.IO){
-                userDao.deleteUser()
-            }
+        GlobalScope.launch(Dispatchers.IO) {
+            userDao.deleteUser()
+        }
 
     }
 

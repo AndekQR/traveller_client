@@ -6,7 +6,7 @@ import com.client.traveller.data.repository.Repository
 
 class AuthViewModelFactory(
     private val repository: Repository
-): ViewModelProvider.NewInstanceFactory() {
+) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {

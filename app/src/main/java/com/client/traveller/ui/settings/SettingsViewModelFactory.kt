@@ -7,7 +7,7 @@ import com.client.traveller.data.provider.LocationProvider
 
 class SettingsViewModelFactory(
     private val locationProvider: LocationProvider
-): ViewModelProvider.NewInstanceFactory() {
+) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {

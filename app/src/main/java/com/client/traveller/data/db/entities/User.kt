@@ -12,7 +12,7 @@ data class User(
     var displayName: String? = null,
     var email: String? = null,
     var verified: Boolean = false
-){
+) {
     @PrimaryKey(autoGenerate = false)
     var uid: Int = CURRENT_USER_ID
 }

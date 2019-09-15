@@ -6,7 +6,7 @@ import com.client.traveller.ui.util.NoInternetAvailableException
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class NetworkInterceptorImpl(context: Context): NetworkInterceptor {
+class NetworkInterceptorImpl(context: Context) : NetworkInterceptor {
 
     private val applicationContext = context.applicationContext
 
@@ -17,10 +17,11 @@ class NetworkInterceptorImpl(context: Context): NetworkInterceptor {
         return chain.proceed(chain.request())
     }
 
-    private fun isInternetAvailable(): Boolean{
-        val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private fun isInternetAvailable(): Boolean {
+        val connectivityManager =
+            applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         connectivityManager.activeNetworkInfo.also {
-            return it!=null && it.isConnected
+            return it != null && it.isConnected
         }
     }
 }
