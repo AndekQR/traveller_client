@@ -3,6 +3,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        xmlns:facebook="http://schemas.android.com/apk/res-auto"
         tools:context=".ui.auth.LoginFragment">
 
     <RelativeLayout
@@ -167,35 +168,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:layout_marginBottom="35dp"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
-                <ImageView
-                        android:layout_width="26.7dp"
-                        android:layout_height="26.7dp"
-                        android:src="@drawable/fb"
-                        android:contentDescription="facebook"/>
+                <com.google.android.gms.common.SignInButton
+                        android:id="@+id/google_sign_in_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
 
-                <ImageView
-                        android:layout_width="26.7dp"
-                        android:layout_height="26.7dp"
-                        android:layout_marginRight="20dp"
-                        android:layout_marginLeft="20dp"
-                        android:src="@drawable/instagram"
-                        android:contentDescription="instagram"/>
 
-                <ImageView
-                        android:layout_width="26.7dp"
-                        android:layout_height="26.7dp"
-                        android:layout_marginRight="20dp"
-                        android:src="@drawable/twitter"
-                        android:contentDescription="twitter"/>
-
-                <ImageView
-                        android:layout_width="26.7dp"
-                        android:layout_height="26.7dp"
-                        android:src="@drawable/linkedin"
-                        android:contentDescription="linkedIn"/>
+                <com.facebook.login.widget.LoginButton
+                        android:id="@+id/login_button_facebook"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="30dp" />
 
             </LinearLayout>
 

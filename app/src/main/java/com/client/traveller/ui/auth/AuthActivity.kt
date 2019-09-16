@@ -1,11 +1,14 @@
 package com.client.traveller.ui.auth
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
@@ -13,11 +16,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.R
 import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.home.HomeActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import java.security.MessageDigest
 
 
 class AuthActivity : AppCompatActivity(), KodeinAware {
@@ -41,6 +44,10 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
             ViewModelProvider(this, factory).get(AuthViewModel::class.java)
         }
 
+        //sprawdza czy użytkownik google już jest zalogowany w aplikacji
+        // po wylogowaniu ta wartość staje się nullem
+        val signInAccountGoogle = GoogleSignIn.getLastSignedInAccount(this)
+
         viewModel.getLoggedInUser().observe(this, Observer { user ->
             if (user != null) {
                 Intent(this, HomeActivity::class.java).also {
@@ -48,9 +55,29 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
                     startActivity(it)
                 }
             }
+
+            if (signInAccountGoogle != null && user == null){
+                viewModel.logInGoogleUser(signInAccountGoogle)
+            }
         })
 
         this.requestPermissions()
+        generateSSHKey(this)
+    }
+
+    @SuppressLint("NewApi")
+    fun generateSSHKey(context: Context){
+        try {
+            val info = context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_SIGNATURES)
+            for (signature in info.signatures) {
+                val md = MessageDigest.getInstance("SHA")
+                md.update(signature.toByteArray())
+                val hashKey = String(java.util.Base64.getEncoder().encode(md.digest()))
+                Log.i("AppLog", "key:$hashKey=")
+            }
+        } catch (e: Exception) {
+            Log.e("AppLog", "error:", e)
+        }
 
     }
 

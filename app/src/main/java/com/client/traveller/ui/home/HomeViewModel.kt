@@ -8,6 +8,9 @@ import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.repository.Repository
 import com.client.traveller.ui.util.Coroutines
+import com.facebook.login.LoginManager
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.firebase.auth.FirebaseAuth
 
@@ -21,11 +24,13 @@ class HomeViewModel(
         return repository.getUser()
     }
 
-    fun logoutUser() {
+    fun logoutUser(mGoogleSignInClient: GoogleSignInClient) {
         Coroutines.io {
             repository.deleteUser()
         }
         FirebaseAuth.getInstance().signOut()
+        mGoogleSignInClient.signOut()
+        LoginManager.getInstance().logOut()
     }
 
     fun setEmailVerified() {

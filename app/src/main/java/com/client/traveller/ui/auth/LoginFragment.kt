@@ -1,5 +1,6 @@
 package com.client.traveller.ui.auth
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,12 +12,28 @@ import androidx.navigation.Navigation
 import com.client.traveller.R
 import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.showProgressBar
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
+import android.util.Log
+import com.client.traveller.ui.dialog.Dialog
+import com.facebook.AccessToken
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
+import com.google.firebase.auth.FacebookAuthProvider
+
 
 class LoginFragment : Fragment(), KodeinAware {
 
@@ -24,6 +41,9 @@ class LoginFragment : Fragment(), KodeinAware {
     private val factory: AuthViewModelFactory by instance()
     private lateinit var auth: FirebaseAuth
     private lateinit var viewModel: AuthViewModel
+    private lateinit var mGoogleSignInClient: GoogleSignInClient
+    private val RC_SIGN_IN = 140
+    private lateinit var callbackManagerFacebook: CallbackManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +52,16 @@ class LoginFragment : Fragment(), KodeinAware {
         viewModel = activity?.run {
             ViewModelProvider(this, factory).get(AuthViewModel::class.java)
         } ?: throw Exception("Invalid activity")
+
+        //dane jakie google zwróci po zalogowaniu, tymidanymi inicjalizujemy klienta logowania
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestProfile()
+            .build()
+        mGoogleSignInClient = GoogleSignIn.getClient(activity!!, gso)
+
+        callbackManagerFacebook = CallbackManager.Factory.create()
+
     }
 
     override fun onCreateView(
@@ -50,16 +80,85 @@ class LoginFragment : Fragment(), KodeinAware {
         login_button.setOnClickListener {
             this.onLoginButtonClick()
         }
+        google_sign_in_button.setOnClickListener {
+            this.googleSignIn()
+        }
+        login_button_facebook.fragment = this
+        login_button_facebook.setReadPermissions("email", "public_profile")
+        login_button_facebook.registerCallback(callbackManagerFacebook, object : FacebookCallback<LoginResult>{
+            override fun onError(error: FacebookException?) {
+                Log.e(javaClass.simpleName, error?.localizedMessage)
+                Dialog.Builder()
+                    .addMessage("Logowanie nieudane. Spróbuj ponowanie za kilka minut")
+                    .addPositiveButton("Ok", View.OnClickListener {
+                        val dialog =
+                            fragmentManager?.findFragmentByTag(javaClass.simpleName) as Dialog?
+                        dialog?.dismiss()
+                    })
+                    .build(fragmentManager, javaClass.simpleName)
+            }
+
+            override fun onCancel() {
+
+            }
+
+            override fun onSuccess(result: LoginResult?) {
+                if (result != null)
+                    handleFacebookAccessToken(result.accessToken)
+            }
+        })
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance(): LoginFragment {
-            return LoginFragment()
+    private fun handleFacebookAccessToken(accessToken: AccessToken){
+        val credential = FacebookAuthProvider.getCredential(accessToken.token)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener{
+                if (it.isSuccessful){
+                    viewModel.logInEmailUser(auth.currentUser)
+                }
+                else{
+                    Log.e(javaClass.simpleName, it.exception?.localizedMessage)
+                    Dialog.Builder()
+                        .addMessage("Logowanie nieudane")
+                        .addPositiveButton("Ok", View.OnClickListener {
+                            val dialog =
+                                fragmentManager?.findFragmentByTag(javaClass.simpleName) as Dialog?
+                            dialog?.dismiss()
+                        })
+                        .build(fragmentManager, javaClass.simpleName)
+                }
+            }
+    }
+
+    private fun googleSignIn(){
+        val signInIntent = mGoogleSignInClient.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RC_SIGN_IN){
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            this.handleSignInResult(task)
         }
 
-        val TAG = "LOGIN_FRAGMENT"
+        callbackManagerFacebook.onActivityResult(requestCode, resultCode, data)
     }
+
+    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+        try {
+            val account = completedTask.getResult(ApiException::class.java)
+            if (account != null)
+                viewModel.logInGoogleUser(account)
+            else
+                Log.e(javaClass.simpleName, "google account == null")
+        }
+        catch (ex: ApiException){
+            Log.e(javaClass.simpleName, "signInResult:failed code=" + ex.statusCode)
+        }
+    }
+
 
     /**
      * Akcja po naciśnięciu przycisku zaloguj
@@ -87,7 +186,7 @@ class LoginFragment : Fragment(), KodeinAware {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    viewModel.logInUser(task.result?.user)
+                    viewModel.logInEmailUser(task.result?.user)
                     progress_bar_background.hideProgressBar()
 
                 } else {
@@ -99,4 +198,6 @@ class LoginFragment : Fragment(), KodeinAware {
                 Toast.makeText(activity, it.localizedMessage, Toast.LENGTH_LONG).show()
             }
     }
+
+
 }

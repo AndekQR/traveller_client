@@ -50,6 +50,8 @@
 
     <!--    important-->
     <string name="google_maps_key">AIzaSyAfGoF9YliSCVlIBi3pSshQpDpb10uD0WM</string>
+    <string name="facebook_app_id">1482538888552931</string>
+    <string name="fb_login_protocol_scheme">fb1482538888552931</string>
 
 
     <string name="send_location_title">Wysyłaj lokalizację urządzenia</string>

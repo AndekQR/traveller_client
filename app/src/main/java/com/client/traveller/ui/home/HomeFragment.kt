@@ -15,6 +15,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.R
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.settings.SettingsActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.action_bar.*
@@ -99,7 +101,10 @@ class HomeFragment : Fragment(), KodeinAware, NavigationView.OnNavigationItemSel
 //                startActivity(intent)
             }
             R.id.logout -> {
-                viewModel.logoutUser()
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                val mGoogleSignInClient = GoogleSignIn.getClient(activity!!, gso)
+
+                viewModel.logoutUser(mGoogleSignInClient)
                 Intent(activity, AuthActivity::class.java).also {
                     it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(it)

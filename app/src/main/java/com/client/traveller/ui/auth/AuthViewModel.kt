@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.repository.Repository
 import com.client.traveller.ui.util.Coroutines
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -21,14 +22,37 @@ class AuthViewModel(
         return repository.getUser()
     }
 
-    fun logInUser(firebaseUser: FirebaseUser?) {
-        Coroutines.io {
-            if (firebaseUser != null) {
-                repository.saveUser(firebaseUser)
+    fun logInEmailUser(firebaseUser: FirebaseUser?) {
+        if (firebaseUser != null){
+            val user = User(
+                firebaseUser.uid,
+                firebaseUser.displayName,
+                firebaseUser.email,
+                firebaseUser.isEmailVerified
+            )
+
+            Coroutines.io {
+                repository.saveUser(user)
+                return@io
             }
+        }
+    }
+
+    fun logInGoogleUser(googleUser: GoogleSignInAccount){
+        val user = User(
+            googleUser.id,
+            googleUser.displayName,
+            googleUser.email,
+            true
+        )
+
+        Coroutines.io {
+            repository.saveUser(user)
             return@io
         }
     }
+
+
 
     fun validate(
         email: String,

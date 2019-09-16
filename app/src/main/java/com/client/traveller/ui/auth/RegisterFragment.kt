@@ -96,7 +96,7 @@ class RegisterFragment : Fragment(), KodeinAware {
                         .setDisplayName(displayName)
                         .build()
                     this.updateProfile(task.result?.user, profileUpdates)
-                    viewModel.logInUser(task.result?.user)
+                    viewModel.logInEmailUser(task.result?.user)
                     viewModel.sendEmailVerification(task.result?.user)
                     progress_bar_background.hideProgressBar()
                 } else {

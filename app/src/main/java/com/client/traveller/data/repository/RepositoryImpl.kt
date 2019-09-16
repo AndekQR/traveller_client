@@ -15,14 +15,9 @@ class RepositoryImpl(
     private val userDao: UserDao
 ) : Repository, SafeApiRequest() {
 
-    override suspend fun saveUser(firebaseUser: FirebaseUser) {
+    override suspend fun saveUser(user: User) {
         GlobalScope.launch(Dispatchers.IO) {
-            val user = User(
-                firebaseUser.uid,
-                firebaseUser.displayName,
-                firebaseUser.email,
-                firebaseUser.isEmailVerified
-            )
+
             userDao.upsert(user)
         }
     }

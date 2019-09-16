@@ -5,7 +5,7 @@ import com.client.traveller.data.db.entities.User
 import com.google.firebase.auth.FirebaseUser
 
 interface Repository {
-    suspend fun saveUser(firebaseUser: FirebaseUser)
+    suspend fun saveUser(user: User)
     fun getUser(): LiveData<User>
     suspend fun deleteUser() //jest tylko jeden aktualnie zalogowany!
     suspend fun setEmailVerified()
