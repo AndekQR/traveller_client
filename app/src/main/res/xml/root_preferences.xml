@@ -18,7 +18,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-            app:title="@string/messages_header"
+            app:title="@string/preferences_localization_title"
             app:iconSpaceReserved="false">
 
         <SwitchPreference
@@ -41,6 +41,19 @@
                 app:iconSpaceReserved="false"
                 android:dependency = "SEND_LOCATION"
         />
+
+        <ListPreference
+                android:key="SENDING_DATA_INTERVAL"
+                android:title="@string/interval_send_data"
+                android:summary="%s"
+                android:dependency="SEND_LOCATION"
+                app:iconSpaceReserved="false"
+                android:disableDependentsState="true"
+                android:entries="@array/intervals"
+                android:entryValues="@array/intervals_values"
+                android:defaultValue="2"
+                />
+
 
 
     </PreferenceCategory>

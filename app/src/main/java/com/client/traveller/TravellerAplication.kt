@@ -3,9 +3,8 @@ package com.client.traveller
 import android.app.Application
 import android.content.Context
 import com.client.traveller.data.db.AppDatabase
-import com.client.traveller.data.network.NetworkInterceptor
-import com.client.traveller.data.network.NetworkInterceptorImpl
-import com.client.traveller.data.network.TravellerApiService
+import com.client.traveller.data.network.db_remote.Users
+
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.provider.LocationProviderImpl
 import com.client.traveller.data.provider.PreferenceProvider
@@ -33,12 +32,10 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from singleton { PreferenceProvider(instance()) }
         bind<LocationProvider>() with singleton { LocationProviderImpl(instance(), instance()) }
         bind() from singleton { AppDatabase(instance()) }
-        bind() from singleton { instance<AppDatabase>().UserDao() }
-        bind<NetworkInterceptor>() with singleton { NetworkInterceptorImpl(instance()) }
-        bind() from singleton { TravellerApiService(instance()) }
+        bind() from singleton { Users() }
+        bind() from singleton { instance<AppDatabase>().userDao() }
         bind<Repository>() with singleton { RepositoryImpl(instance(), instance()) }
         bind() from provider { AuthViewModelFactory(instance()) }
-        bind() from singleton { NetworkInterceptorImpl(instance()) }
         bind() from provider { HomeViewModelFactory(instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }
 

@@ -13,6 +13,7 @@ data class User(
     var email: String? = null,
     var verified: Boolean = false
 ) {
+    //lokalne id
     @PrimaryKey(autoGenerate = false)
     var uid: Int = CURRENT_USER_ID
 }

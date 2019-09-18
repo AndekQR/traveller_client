@@ -52,6 +52,7 @@
     <string name="google_maps_key">AIzaSyAfGoF9YliSCVlIBi3pSshQpDpb10uD0WM</string>
     <string name="facebook_app_id">1482538888552931</string>
     <string name="fb_login_protocol_scheme">fb1482538888552931</string>
+    <string name="google_client_id">98668081815-f8kdmk55hpjilmpmnbbd858849hnutk7.apps.googleusercontent.com</string>
 
 
     <string name="send_location_title">Wysyłaj lokalizację urządzenia</string>
@@ -66,4 +67,21 @@
     <string name="password_reset_button">Wyślij</string>
     <string name="password_reset_cancel_button">Anuluj</string>
     <string name="password_reset_wrong_email">Podaj poprawny email!</string>
+    <string name="preferences_localization_title">Lokalizacja</string>
+    <string name="interval_send_data">Częstotliwość wysyłania danych</string>
+    <string name="interval_send_data_summary">Jak często aplikacja ma wysyłać dane o twojeje lokalizacji</string>
+
+    <string-array name="intervals">
+        <item>"1 sekunda"</item>
+        <item>"2 sekundy"</item>
+        <item>"4 sekundy"</item>
+        <item>"6 sekund"</item>
+    </string-array>
+    <string-array name="intervals_values">
+        <item>"1"</item>
+        <item>"2"</item>
+        <item>"4"</item>
+        <item>"6"</item>
+    </string-array>
+
 </resources>

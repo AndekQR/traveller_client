@@ -3,32 +3,31 @@ package com.client.traveller.data.repository
 import androidx.lifecycle.LiveData
 import com.client.traveller.data.db.UserDao
 import com.client.traveller.data.db.entities.User
-import com.client.traveller.data.network.SafeApiRequest
-import com.client.traveller.data.network.TravellerApiService
-import com.google.firebase.auth.FirebaseUser
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.client.traveller.data.network.db_remote.Users
+import com.google.android.gms.tasks.Task
+import kotlinx.coroutines.*
 
 class RepositoryImpl(
-    private val travellerApiService: TravellerApiService,
-    private val userDao: UserDao
-) : Repository, SafeApiRequest() {
+    private val userDao: UserDao,
+    private val usersFirestore: Users
+) : Repository {
 
-    override suspend fun saveUser(user: User) {
+    override fun saveUser(user: User): Task<Void> {
         GlobalScope.launch(Dispatchers.IO) {
-
             userDao.upsert(user)
         }
+        //operacje na firestore są już asynchroniczne
+        return usersFirestore.createUser(user)
     }
 
     override fun getUser(): LiveData<User> {
         return userDao.getUser()
     }
 
-    override suspend fun deleteUser() {
+    override fun deleteUser() {
         GlobalScope.launch(Dispatchers.IO) {
             userDao.deleteUser()
+
         }
 
     }

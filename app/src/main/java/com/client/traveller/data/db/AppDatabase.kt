@@ -19,7 +19,7 @@ import com.client.traveller.data.db.entities.User
 )
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun UserDao(): UserDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile

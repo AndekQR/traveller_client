@@ -32,7 +32,10 @@ import com.facebook.FacebookCallback
 import com.facebook.FacebookException
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FacebookAuthProvider
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 
 
 class LoginFragment : Fragment(), KodeinAware {
@@ -44,6 +47,7 @@ class LoginFragment : Fragment(), KodeinAware {
     private lateinit var mGoogleSignInClient: GoogleSignInClient
     private val RC_SIGN_IN = 140
     private lateinit var callbackManagerFacebook: CallbackManager
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,10 +61,17 @@ class LoginFragment : Fragment(), KodeinAware {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
             .requestProfile()
+            .requestIdToken(getString(R.string.google_client_id))
             .build()
-        mGoogleSignInClient = GoogleSignIn.getClient(activity!!, gso)
+        activity?.let {
+            mGoogleSignInClient = GoogleSignIn.getClient(it, gso)
+        }
 
         callbackManagerFacebook = CallbackManager.Factory.create()
+
+        activity?.let {
+            firebaseAnalytics = FirebaseAnalytics.getInstance(it)
+        }
 
     }
 
@@ -84,7 +95,7 @@ class LoginFragment : Fragment(), KodeinAware {
             this.googleSignIn()
         }
         login_button_facebook.fragment = this
-        login_button_facebook.setReadPermissions("email", "public_profile")
+        login_button_facebook.setPermissions("email", "public_profile")
         login_button_facebook.registerCallback(callbackManagerFacebook, object : FacebookCallback<LoginResult>{
             override fun onError(error: FacebookException?) {
                 Log.e(javaClass.simpleName, error?.localizedMessage)
@@ -99,24 +110,48 @@ class LoginFragment : Fragment(), KodeinAware {
             }
 
             override fun onCancel() {
-
+                Log.e(javaClass.simpleName, "facebook cancel")
             }
 
             override fun onSuccess(result: LoginResult?) {
-                if (result != null)
-                    handleFacebookAccessToken(result.accessToken)
+                Log.e(javaClass.simpleName, "facebook success")
+
+                val bundle = Bundle()
+                bundle.putString(FirebaseAnalytics.Param.METHOD, "Facebook")
+                firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
+
+                result?.let {
+                    handleFacebookAccessToken(it.accessToken)
+                }
+
             }
         })
     }
 
+    /**
+     * Metoda na podstawie tokena pobiera z facebooka dane o użytkowniku
+     * i wykorzystuje je do utworzenia konta w firebase
+     *
+     * @param accessToken token użytkownika facebooka
+     */
     private fun handleFacebookAccessToken(accessToken: AccessToken){
         val credential = FacebookAuthProvider.getCredential(accessToken.token)
         auth.signInWithCredential(credential)
             .addOnCompleteListener{
                 if (it.isSuccessful){
-                    viewModel.logInEmailUser(auth.currentUser)
+                    val bundle = Bundle()
+                    bundle.putString(FirebaseAnalytics.Param.METHOD, "facebook")
+                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
+
+                    auth.currentUser?.let {user ->
+                        viewModel.logInEmailUser(user)
+                            .addOnFailureListener {exception ->
+                                Log.e(javaClass.simpleName, exception.localizedMessage)
+                            }
+                    }
                 }
                 else{
+                    LoginManager.getInstance().logOut()
                     Log.e(javaClass.simpleName, it.exception?.localizedMessage)
                     Dialog.Builder()
                         .addMessage("Logowanie nieudane")
@@ -128,6 +163,8 @@ class LoginFragment : Fragment(), KodeinAware {
                         .build(fragmentManager, javaClass.simpleName)
                 }
             }
+
+
     }
 
     private fun googleSignIn(){
@@ -149,14 +186,45 @@ class LoginFragment : Fragment(), KodeinAware {
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
         try {
             val account = completedTask.getResult(ApiException::class.java)
-            if (account != null)
-                viewModel.logInGoogleUser(account)
+            if (account != null){
+                this.firebaseAuthWithGoogle(account)
+            }
             else
                 Log.e(javaClass.simpleName, "google account == null")
         }
         catch (ex: ApiException){
             Log.e(javaClass.simpleName, "signInResult:failed code=" + ex.statusCode)
         }
+    }
+
+    private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
+        val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener{
+                if (it.isSuccessful){
+                    val bundle = Bundle()
+                    bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
+                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
+
+                    auth.currentUser?.let {user ->
+                        viewModel.logInEmailUser(user)
+                            .addOnFailureListener {exception ->
+                                Log.e(javaClass.simpleName, exception.localizedMessage)
+                            }
+                    }
+                }
+                else{
+                    Log.e(javaClass.simpleName, it.exception?.localizedMessage)
+                    Dialog.Builder()
+                        .addMessage("Logowanie nieudane")
+                        .addPositiveButton("Ok", View.OnClickListener {
+                            val dialog =
+                                fragmentManager?.findFragmentByTag(javaClass.simpleName) as Dialog?
+                            dialog?.dismiss()
+                        })
+                        .build(fragmentManager, javaClass.simpleName)
+                }
+            }
     }
 
 
@@ -186,7 +254,16 @@ class LoginFragment : Fragment(), KodeinAware {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    viewModel.logInEmailUser(task.result?.user)
+                    val bundle = Bundle()
+                    bundle.putString(FirebaseAnalytics.Param.METHOD, "facebook")
+                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
+
+                    task.result?.user?.let {user ->
+                        viewModel.logInEmailUser(user)
+                            .addOnFailureListener {exception ->
+                                Log.e(javaClass.simpleName, exception.localizedMessage)
+                            }
+                    }
                     progress_bar_background.hideProgressBar()
 
                 } else {

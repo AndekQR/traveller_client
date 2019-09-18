@@ -17,6 +17,7 @@ import com.client.traveller.R
 import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.home.HomeActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.firebase.analytics.FirebaseAnalytics
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
@@ -28,6 +29,7 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
     override val kodein by kodein()
     private val factory: AuthViewModelFactory by instance()
     private lateinit var viewModel: AuthViewModel
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     private val REQUIRED_PERMISSIONS = listOf(
         Manifest.permission.INTERNET,
@@ -57,30 +59,18 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
             }
 
             if (signInAccountGoogle != null && user == null){
+                val bundle = Bundle()
+                bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
+                firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
+
                 viewModel.logInGoogleUser(signInAccountGoogle)
             }
         })
 
         this.requestPermissions()
-        generateSSHKey(this)
+
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
     }
-
-    @SuppressLint("NewApi")
-    fun generateSSHKey(context: Context){
-        try {
-            val info = context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_SIGNATURES)
-            for (signature in info.signatures) {
-                val md = MessageDigest.getInstance("SHA")
-                md.update(signature.toByteArray())
-                val hashKey = String(java.util.Base64.getEncoder().encode(md.digest()))
-                Log.i("AppLog", "key:$hashKey=")
-            }
-        } catch (e: Exception) {
-            Log.e("AppLog", "error:", e)
-        }
-
-    }
-
 
     /**
      * Metoda sprawdza czy potrzebne uprawnienia są przyznane, jeżeli nie to prosi użytkownika o nie.

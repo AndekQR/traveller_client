@@ -1,6 +1,7 @@
 package com.client.traveller.ui.auth
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import androidx.navigation.findNavController
 import com.client.traveller.R
 import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.showProgressBar
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -27,6 +29,7 @@ class RegisterFragment : Fragment(), KodeinAware {
     private val factory: AuthViewModelFactory by instance()
     private lateinit var auth: FirebaseAuth
     private lateinit var viewModel: AuthViewModel
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +39,10 @@ class RegisterFragment : Fragment(), KodeinAware {
         viewModel = activity?.run {
             ViewModelProvider(this, factory).get(AuthViewModel::class.java)
         } ?: throw Exception("Invalid activity")
+
+        activity?.let {
+            firebaseAnalytics = FirebaseAnalytics.getInstance(it)
+        }
     }
 
     override fun onCreateView(
@@ -58,15 +65,6 @@ class RegisterFragment : Fragment(), KodeinAware {
         register_button.setOnClickListener {
             this.onSignUpButtonClick()
         }
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(): RegisterFragment {
-            return RegisterFragment()
-        }
-
-        val TAG = "REGISTER_FRAGMENT"
     }
 
     /**
@@ -92,11 +90,21 @@ class RegisterFragment : Fragment(), KodeinAware {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    val bundle = Bundle()
+                    bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
+                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
+
+
                     val profileUpdates = UserProfileChangeRequest.Builder()
                         .setDisplayName(displayName)
                         .build()
                     this.updateProfile(task.result?.user, profileUpdates)
-                    viewModel.logInEmailUser(task.result?.user)
+                    task.result?.user?.let {user ->
+                        viewModel.logInEmailUser(user)
+                            .addOnFailureListener {exception ->
+                                Log.e(javaClass.simpleName, exception.localizedMessage)
+                            }
+                    }
                     viewModel.sendEmailVerification(task.result?.user)
                     progress_bar_background.hideProgressBar()
                 } else {
