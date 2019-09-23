@@ -18,6 +18,11 @@
               android:id="@+id/tworca_item"
               android:icon="@drawable/ic_autor"
         />
+        <item
+                android:title="@string/profile"
+                android:id="@+id/profile"
+                android:icon="@drawable/ic_person"
+                />
 
     </group>
     <group

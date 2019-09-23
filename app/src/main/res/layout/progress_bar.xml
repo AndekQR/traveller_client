@@ -12,7 +12,6 @@
             android:visibility="invisible"
             >
         <LinearLayout
-                android:id="@+id/ll_mask"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
@@ -23,7 +22,6 @@
         <ProgressBar
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/progress_bar"
                 android:layout_centerInParent="true"
 
                 />

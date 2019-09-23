@@ -11,6 +11,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import kotlin.math.log
 
 class AuthViewModel(
     private val repository: Repository
@@ -22,18 +23,18 @@ class AuthViewModel(
         return repository.getUser()
     }
 
-    fun logInEmailUser(firebaseUser: FirebaseUser): Task<Void> {
+    fun logInEmailUser(firebaseUser: FirebaseUser, displayName: String? = null) {
         val user = User(
             firebaseUser.uid,
-            firebaseUser.displayName,
+            displayName ?: firebaseUser.displayName,
             firebaseUser.email,
             firebaseUser.isEmailVerified
         )
 
-        return repository.saveUser(user)
+        repository.saveUser(user)
     }
 
-    fun logInGoogleUser(googleUser: GoogleSignInAccount): Task<Void> {
+    fun logInGoogleUser(googleUser: GoogleSignInAccount){
         val user = User(
             googleUser.id,
             googleUser.displayName,
@@ -41,7 +42,7 @@ class AuthViewModel(
             true
         )
 
-        return repository.saveUser(user)
+        repository.saveUser(user)
     }
 
 

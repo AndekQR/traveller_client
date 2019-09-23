@@ -145,9 +145,9 @@ class LoginFragment : Fragment(), KodeinAware {
 
                     auth.currentUser?.let {user ->
                         viewModel.logInEmailUser(user)
-                            .addOnFailureListener {exception ->
-                                Log.e(javaClass.simpleName, exception.localizedMessage)
-                            }
+//                            .addOnFailureListener {exception ->
+//                                Log.e(javaClass.simpleName, exception.localizedMessage)
+//                            }
                     }
                 }
                 else{
@@ -208,9 +208,9 @@ class LoginFragment : Fragment(), KodeinAware {
 
                     auth.currentUser?.let {user ->
                         viewModel.logInEmailUser(user)
-                            .addOnFailureListener {exception ->
-                                Log.e(javaClass.simpleName, exception.localizedMessage)
-                            }
+//                            .addOnFailureListener {exception ->
+//                                Log.e(javaClass.simpleName, exception.localizedMessage)
+//                            }
                     }
                 }
                 else{
@@ -260,9 +260,9 @@ class LoginFragment : Fragment(), KodeinAware {
 
                     task.result?.user?.let {user ->
                         viewModel.logInEmailUser(user)
-                            .addOnFailureListener {exception ->
-                                Log.e(javaClass.simpleName, exception.localizedMessage)
-                            }
+//                            .addOnFailureListener {exception ->
+//                                Log.e(javaClass.simpleName, exception.localizedMessage)
+//                            }
                     }
                     progress_bar_background.hideProgressBar()
 

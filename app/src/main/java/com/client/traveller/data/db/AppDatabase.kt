@@ -1,9 +1,7 @@
 package com.client.traveller.data.db
 
 import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import androidx.room.*
 import com.client.traveller.data.db.entities.User
 
 /**
@@ -15,7 +13,11 @@ import com.client.traveller.data.db.entities.User
 
 @Database(
     entities = [User::class],
-    version = 1
+    version = 1,
+    exportSchema = true
+)
+@TypeConverters(
+    DataTypeConverter::class
 )
 abstract class AppDatabase : RoomDatabase() {
 

@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import com.client.traveller.R
+import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.showProgressBar
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -91,7 +92,7 @@ class RegisterFragment : Fragment(), KodeinAware {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val bundle = Bundle()
-                    bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
+                    bundle.putString(FirebaseAnalytics.Param.METHOD, "Normal")
                     firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
 
 
@@ -99,11 +100,22 @@ class RegisterFragment : Fragment(), KodeinAware {
                         .setDisplayName(displayName)
                         .build()
                     this.updateProfile(task.result?.user, profileUpdates)
+
                     task.result?.user?.let {user ->
-                        viewModel.logInEmailUser(user)
-                            .addOnFailureListener {exception ->
-                                Log.e(javaClass.simpleName, exception.localizedMessage)
-                            }
+                        try {
+                            viewModel.logInEmailUser(user, displayName)
+                        }
+                        catch (ex: Exception){
+                            Log.e(javaClass.simpleName, ex.localizedMessage)
+                            Dialog.Builder()
+                                .addMessage(getString(R.string.something_went_wrong))
+                                .addPositiveButton("ok", View.OnClickListener {
+                                    val dialog =
+                                        fragmentManager?.findFragmentByTag(javaClass.simpleName) as Dialog?
+                                    dialog?.dismiss()
+                                })
+                                .build(fragmentManager, javaClass.simpleName)
+                        }
                     }
                     viewModel.sendEmailVerification(task.result?.user)
                     progress_bar_background.hideProgressBar()
@@ -114,7 +126,6 @@ class RegisterFragment : Fragment(), KodeinAware {
             }
             .addOnFailureListener {
                 Toast.makeText(activity, it.localizedMessage, Toast.LENGTH_LONG).show()
-
             }
     }
 
@@ -127,6 +138,9 @@ class RegisterFragment : Fragment(), KodeinAware {
     private fun updateProfile(user: FirebaseUser?, profileUpdates: UserProfileChangeRequest?) {
         if (user != null && profileUpdates != null) {
             user.updateProfile(profileUpdates)
+                .addOnFailureListener {
+                    Log.e(javaClass.simpleName, getString(R.string.profile_update_failure))
+                }
         }
     }
 }

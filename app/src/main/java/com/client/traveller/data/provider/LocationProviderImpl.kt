@@ -137,9 +137,10 @@ class LocationProviderImpl(
 
         ui?.isMyLocationButtonEnabled = false
         ui?.isCompassEnabled = false
-        mMap?.isBuildingsEnabled = true // 3D buildigs
+        mMap?.isBuildingsEnabled = true
     }
 
+    //TODO w HomeActivity nie ma zapisywania tych wartości -> nie ma co przywracać
     private fun restoreValuesFromBundle(savedInstanceState: Bundle?) {
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey("is_requesting_updates")) {

@@ -7,8 +7,9 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Deferred
 
 interface Repository {
-    fun saveUser(user: User): Task<Void>
+    fun saveUser(user: User)
     fun getUser(): LiveData<User>
-    fun deleteUser() //jest tylko jeden aktualnie zalogowany!
+    fun deleteUserLocal() //jest tylko jeden aktualnie zalogowany!
     suspend fun setEmailVerified()
+    fun updateProfile(user: User)
 }

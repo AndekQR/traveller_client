@@ -1,5 +1,7 @@
 package com.client.traveller.ui.home
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -12,8 +14,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.client.traveller.BuildConfig
 import com.client.traveller.R
+import com.client.traveller.data.services.UploadService
 import com.client.traveller.ui.dialog.Dialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
@@ -30,6 +34,7 @@ class HomeActivity : AppCompatActivity(),
     private lateinit var viewModel: HomeViewModel
     private var doubleBack = false
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
@@ -39,6 +44,18 @@ class HomeActivity : AppCompatActivity(),
         if (intent != null)
             this.getDynamicLinks()
 
+
+
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        // Sprawdza czy aktywność zotała uruchomiona kliknięciem na powiadomienie z wysyłania pliku
+        if (intent.hasExtra(UploadService.EXTRA_DOWNLOAD_URL)) {
+//            onUploadResultIntent(intent)
+            Log.e(javaClass.simpleName, "powiadomienie!")
+        }
     }
 
     override fun onBackPressed() {
@@ -104,7 +121,7 @@ class HomeActivity : AppCompatActivity(),
     }
 
     /**
-     * wywoływana gdy aktywność przejdzie na drugi plan
+     * wywoływana gdy aktywność przejdzie na drugi plan ( zakryje ją inna aktywność )
      */
     override fun onPause() {
         super.onPause()

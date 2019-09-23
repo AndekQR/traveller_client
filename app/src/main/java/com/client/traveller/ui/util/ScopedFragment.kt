@@ -1,4 +1,4 @@
-package com.client.traveller.ui.base
+package com.client.traveller.ui.util
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

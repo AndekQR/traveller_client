@@ -65,11 +65,22 @@
     <string name="post_email_verification_fail">Weryfikacja e-mail zakończyła się niepowodzeniem. Skontaktuj się z twórcą.</string>
     <string name="reset_password">Zapomniałeś hasła? Utwórz nowe!</string>
     <string name="password_reset_button">Wyślij</string>
-    <string name="password_reset_cancel_button">Anuluj</string>
+    <string name="cancel_button_text">Anuluj</string>
     <string name="password_reset_wrong_email">Podaj poprawny email!</string>
     <string name="preferences_localization_title">Lokalizacja</string>
     <string name="interval_send_data">Częstotliwość wysyłania danych</string>
     <string name="interval_send_data_summary">Jak często aplikacja ma wysyłać dane o twojeje lokalizacji</string>
+    <string name="progress_upload">Wysyłanie...</string>
+    <string name="upload_success">Wysyłanie powiodło się</string>
+    <string name="upload_failure">Niepowodzenie</string>
+    <string name="profile">Profil</string>
+    <string name="progress_downloading">Pobieranie...</string>
+    <string name="download_success">Pobieranie zakończone</string>
+    <string name="download_failure">Pobieranie nieudane</string>
+    <string name="apply">Zatwierdź</string>
+    <string name="update_profile_success">Dane zostały zaktualizowane</string>
+    <string name="profile_update_failure">Aktualizacja profile zakończyła się niepowodzeniem</string>
+    <string name="something_went_wrong">Coś poszło nie tak</string>
 
     <string-array name="intervals">
         <item>"1 sekunda"</item>

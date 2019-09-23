@@ -3,7 +3,8 @@ package com.client.traveller
 import android.app.Application
 import android.content.Context
 import com.client.traveller.data.db.AppDatabase
-import com.client.traveller.data.network.db_remote.Users
+import com.client.traveller.data.network.firebase.firestore.Users
+import com.client.traveller.data.network.firebase.storage.Avatars
 
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.provider.LocationProviderImpl
@@ -33,8 +34,9 @@ class TravellerAplication : Application(), KodeinAware {
         bind<LocationProvider>() with singleton { LocationProviderImpl(instance(), instance()) }
         bind() from singleton { AppDatabase(instance()) }
         bind() from singleton { Users() }
+        bind() from provider { Avatars() }
         bind() from singleton { instance<AppDatabase>().userDao() }
-        bind<Repository>() with singleton { RepositoryImpl(instance(), instance()) }
+        bind<Repository>() with singleton { RepositoryImpl(instance(), instance(), instance()) }
         bind() from provider { AuthViewModelFactory(instance()) }
         bind() from provider { HomeViewModelFactory(instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }

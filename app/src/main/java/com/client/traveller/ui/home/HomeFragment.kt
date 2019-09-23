@@ -12,6 +12,7 @@ import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import com.client.traveller.R
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.settings.SettingsActivity
@@ -42,15 +43,6 @@ class HomeFragment : Fragment(), KodeinAware, NavigationView.OnNavigationItemSel
         // do obługi kliknięć w menu bocznym
         this.setHasOptionsMenu(true)
 
-        viewModel = activity?.run {
-            ViewModelProvider(this, factory).get(HomeViewModel::class.java)
-        } ?: throw Exception("Invalid activity")
-
-        viewModel.getLoggedInUser().observe(this, Observer { user ->
-            if (user != null) {
-                setSubtitleNavView(user.email!!)
-            }
-        })
     }
 
     override fun onCreateView(
@@ -77,11 +69,27 @@ class HomeFragment : Fragment(), KodeinAware, NavigationView.OnNavigationItemSel
 
         floating_search_view.attachNavigationDrawerToMenuButton(drawer_layout)
         navigation_view.setNavigationItemSelectedListener(this)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        viewModel = activity?.run {
+            ViewModelProvider(this, factory).get(HomeViewModel::class.java)
+        } ?: throw Exception("Invalid activity")
+
+        viewModel.getLoggedInUser().observe(viewLifecycleOwner, Observer { user ->
+            if (user != null) {
+                setSubtitleNavView(user.email!!)
+            }
+        })
 
         // childFragmentManager służy do zarządzania fragmentami w tym fagmencie
         // a fragmentManager do zarządzania fragmentami które są związane z activity tego fragmentu
         (childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?)?.let {
-            viewModel.initLocationProvider(it, activity!!, savedInstanceState)
+            activity?.let {activity ->
+                viewModel.initLocationProvider(it, activity, savedInstanceState)
+            }
         }
     }
 
@@ -108,6 +116,11 @@ class HomeFragment : Fragment(), KodeinAware, NavigationView.OnNavigationItemSel
                 Intent(activity, AuthActivity::class.java).also {
                     it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(it)
+                }
+            }
+            R.id.profile -> {
+                view?.let {
+                    Navigation.findNavController(it).navigate(R.id.profileFragment)
                 }
             }
         }
