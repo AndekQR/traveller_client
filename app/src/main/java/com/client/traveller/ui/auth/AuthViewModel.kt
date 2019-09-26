@@ -1,48 +1,52 @@
 package com.client.traveller.ui.auth
 
-import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.client.traveller.data.db.entities.User
-import com.client.traveller.data.repository.Repository
+import com.client.traveller.data.repository.UserRepository
+import com.facebook.AccessToken
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import kotlin.math.log
+import com.google.firebase.auth.UserProfileChangeRequest
 
 class AuthViewModel(
-    private val repository: Repository
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     fun getLoggedInUser(): LiveData<User> {
-        return repository.getUser()
+        return userRepository.getUser()
     }
 
-    fun logInEmailUser(firebaseUser: FirebaseUser, displayName: String? = null) {
-        val user = User(
-            firebaseUser.uid,
-            displayName ?: firebaseUser.displayName,
-            firebaseUser.email,
-            firebaseUser.isEmailVerified
-        )
-
-        repository.saveUser(user)
-    }
-
-    fun logInGoogleUser(googleUser: GoogleSignInAccount){
+    fun loginJustLocalGoogle(
+        googleUser: GoogleSignInAccount
+    ) {
         val user = User(
             googleUser.id,
             googleUser.displayName,
             googleUser.email,
-            true
+            true,
+            googleUser.photoUrl.toString()
         )
 
-        repository.saveUser(user)
+        userRepository.updateLocalUserDataAsync(user)
+    }
+
+    fun loginUser(username: String, password: String, function: (Boolean, Exception?) -> Unit) {
+        userRepository.loginUser(username, password, function)
+    }
+
+    fun createUserNormal(
+        email: String,
+        password: String,
+        displayName: String,
+        function: (Boolean, Exception?, FirebaseUser?) -> Unit
+    ) {
+        userRepository.createUserEmailPassword(email, password, displayName, function)
     }
 
 
@@ -75,28 +79,49 @@ class AuthViewModel(
      *
      * @param user użytkownik do którego zostanie wysłany email weryfikacyjny
      */
-    fun sendEmailVerification(user: FirebaseUser?) {
+    //TODO trzeba zmiany wysyłac do firestore i metoda przeniesc do authNormal
+    fun sendEmailVerification(user: FirebaseUser) {
 
-        val baseUrl = "https://travellersystems.page.link/"
-        val fullUrl = Uri.parse(baseUrl).buildUpon()
-            .appendPath("verify")
-            .appendQueryParameter("email", FirebaseAuth.getInstance().currentUser?.email)
-            .build()
-
-        val actionCodeSettings = ActionCodeSettings.newBuilder()
-            .setUrl(Uri.decode(fullUrl.toString()))
-            .setAndroidPackageName("com.client.traveller", true, null)
-            .setHandleCodeInApp(true)
-            .build()
-
-        user?.sendEmailVerification(actionCodeSettings)
-            ?.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.e(javaClass.simpleName, "sendEmailVerification successful")
-                } else {
-                    Log.e(javaClass.simpleName, task.exception?.localizedMessage)
-                }
+        userRepository.sendEmailVerification(user) { isSuccessful, exception ->
+            if (!isSuccessful) {
+                Log.e(javaClass.simpleName, exception?.message)
             }
+        }
+    }
+
+    fun loginUserByGoogle(
+        task: Task<GoogleSignInAccount>?,
+        function: (Boolean, Exception?) -> Unit
+    ) {
+        userRepository.loginGoogleUser(task, function)
+    }
+
+    fun loginUserByFacebook(
+        accessToken: AccessToken,
+        function: (Boolean, Exception?) -> Unit
+    ) {
+        userRepository.loginFacebookUser(accessToken, function)
+    }
+
+    fun resetPassword(
+        email: String,
+        function: (Boolean, Exception?) -> Unit
+    ) {
+        userRepository.resetPasswordSendEmail(email, function)
+    }
+
+    /**
+     * Aktualizacja usera w firebase
+     *
+     * @param user użytkownik do aktualizacji
+     * @param profileUpdates zaktualizowane dane
+     */
+    fun updateProfile(
+        user: FirebaseUser,
+        profileChangeRequest: UserProfileChangeRequest,
+        function: (Boolean, Exception?) -> Unit
+    ) {
+        userRepository.updateProfile(user, profileChangeRequest, function)
     }
 
 

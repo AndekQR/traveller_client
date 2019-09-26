@@ -1,6 +1,5 @@
 package com.client.traveller.ui.util
 
-import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

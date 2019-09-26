@@ -13,7 +13,7 @@ import com.client.traveller.R
 //https://github.com/firebase/quickstart-android/blob/master/storage/app/src/main/java/com/google/firebase/quickstart/firebasestorage/kotlin/MyBaseTaskService.kt
 abstract class BaseTaskService : Service() {
 
-    companion object{
+    companion object {
         private const val CHANNEL_ID_DEFAULT = "default"
         internal const val PROGRESS_NOTIFICATION_ID = 0
         internal const val FINISHED_NOTIFICATION_ID = 1
@@ -26,11 +26,11 @@ abstract class BaseTaskService : Service() {
         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
-    fun taskStarted(){
+    fun taskStarted() {
         this.changeNumberOfTasks(1)
     }
 
-    fun taskCompleted(){
+    fun taskCompleted() {
         this.changeNumberOfTasks(-1)
     }
 
@@ -38,15 +38,19 @@ abstract class BaseTaskService : Service() {
         numberTasks += i
 
         //gdy nie ma zadań, zatrzymaj działanie serwisu
-        if (numberTasks <= 0){
+        if (numberTasks <= 0) {
             stopSelf()
         }
     }
 
-    private fun createDefaultChannel(){
+    private fun createDefaultChannel() {
         //Powyżej androida O jest potrzebny notification channel
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            val channel = NotificationChannel(CHANNEL_ID_DEFAULT, "Default", NotificationManager.IMPORTANCE_DEFAULT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID_DEFAULT,
+                "Default",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
             manager.createNotificationChannel(channel)
         }
     }
@@ -54,7 +58,11 @@ abstract class BaseTaskService : Service() {
     /**
      * Metoda pokazuje notifikacje z paskiem postępu
      */
-    protected fun showProgressNotification(caption: String, completedUnits: Long, totalUnits: Long){
+    protected fun showProgressNotification(
+        caption: String,
+        completedUnits: Long,
+        totalUnits: Long
+    ) {
         var percentComplete = 0
         if (totalUnits > 0)
             percentComplete = (100 * completedUnits / totalUnits).toInt() //procent
@@ -74,8 +82,9 @@ abstract class BaseTaskService : Service() {
     /**
      * Metoda pokazuje powiadomienie a zakończonym zadaniu
      */
-    protected fun showFinishedNotification(caption: String, intent: Intent, success: Boolean){
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    protected fun showFinishedNotification(caption: String, intent: Intent, success: Boolean) {
+        val pendingIntent =
+            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val icon = if (success) R.drawable.ic_check else R.drawable.ic_error
 
@@ -90,7 +99,7 @@ abstract class BaseTaskService : Service() {
         manager.notify(FINISHED_NOTIFICATION_ID, builder.build())
     }
 
-    protected fun dismissProgressNotification(){
+    protected fun dismissProgressNotification() {
         manager.cancel(PROGRESS_NOTIFICATION_ID)
     }
 

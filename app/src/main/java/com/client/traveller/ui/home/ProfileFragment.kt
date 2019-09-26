@@ -6,9 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -17,13 +19,16 @@ import com.bumptech.glide.Glide
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.services.UploadService
-import com.client.traveller.ui.util.ScopedFragment
 import com.client.traveller.ui.dialog.Dialog
+import com.client.traveller.ui.util.Constants.Companion.KEY_FILE_URI
+import com.client.traveller.ui.util.Constants.Companion.READ_REQUEST_CODE
+import com.client.traveller.ui.util.ScopedFragment
 import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.showProgressBar
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.progress_bar.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
@@ -31,11 +36,6 @@ import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
 
 class ProfileFragment : ScopedFragment(), KodeinAware {
-
-    companion object {
-        private const val KEY_FILE_URI = "key_file_uri"
-        private const val READ_REQUEST_CODE = 42
-    }
 
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
@@ -64,10 +64,13 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
         super.onViewCreated(view, savedInstanceState)
 
         apply_button.setOnClickListener {
+            progress_bar.showProgressBar()
             this.updateProfile()
         }
 
         cancel.setOnClickListener {
+            downloadUrl = null
+            fileUri = null
             Navigation.findNavController(view).navigate(R.id.homeFragment)
         }
 
@@ -79,6 +82,7 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        //wynik działania UploadService
         broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 when (intent.action) {
@@ -101,44 +105,39 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
         })
     }
 
-    //Coroutine Scope luanch użyty bez parametrów dziedziczy dispatchera po kontekstcie rodzica
     private fun updateProfileViewData() = launch {
-        if (downloadUrl != null)
-            Glide.with(this@ProfileFragment).load(downloadUrl).into(avatar)
+        if (fileUri != null)
+            Glide.with(this@ProfileFragment).load(fileUri).into(avatar)
         else
             Glide.with(this@ProfileFragment).load(currentUser.image).into(avatar)
-
 
         displayName.setText(currentUser.displayName)
         email.setText(currentUser.email)
     }
 
-    //TODO trzeba przetestować i sprawdzenie czy wykonało się
     private fun updateProfile() {
-        progress_bar_background.showProgressBar()
 
         var userDataToUpdate = currentUser
-        if (downloadUrl != null){
-            userDataToUpdate.image = downloadUrl.toString()
-        }
         userDataToUpdate.displayName = displayName.text.toString()
         userDataToUpdate = this.checkEmail(userDataToUpdate, email.text.toString())
+
+        fileUri?.let {
+            // image/png
+            val type = DocumentFile.fromSingleUri(context!!, fileUri!!)?.type?.substringAfterLast("/")
+            if (type != null && (type.equals("png") || type.equals("jpg") || type.equals("jpeg"))) {
+                val fileName = currentUser.idUserFirebase+"."+type
+                this.uploadFromUri(it, fileName)
+            }
+        }
+
         viewModel.updateProfile(userDataToUpdate)
 
-        progress_bar_background.hideProgressBar()
+    }
 
-        Dialog.Builder()
-            .addPositiveButton("ok", View.OnClickListener {
-                val dialog =
-                    fragmentManager?.findFragmentByTag(javaClass.simpleName) as Dialog?
-                dialog?.dismiss()
-                view?.let {
-                    Navigation.findNavController(it).navigate(R.id.homeFragment)
-                }
-            })
-            .addMessage(getString(R.string.update_profile_success))
-            .build(fragmentManager, javaClass.simpleName)
-
+    private fun updateUserAvatar() = launch{
+        if (downloadUrl != null) {
+            viewModel.updateAvatar(currentUser, downloadUrl.toString())
+        }
     }
 
     private fun checkEmail(userDataToUpdate: User, email: String): User {
@@ -148,12 +147,11 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
         userDataToUpdate.email = email
         userDataToUpdate.verified = false
 
-        GlobalScope.launch {
+        launch {
             viewModel.sendEmailVerification(FirebaseAuth.getInstance().currentUser)
         }
 
         return userDataToUpdate
-
     }
 
     /**
@@ -189,13 +187,16 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
     private fun onUploadResultIntent(intent: Intent) {
         fileUri = intent.getParcelableExtra(UploadService.EXTRA_FILE_URI)
         downloadUrl = intent.getParcelableExtra(UploadService.EXTRA_DOWNLOAD_URL)
+        // aktualizcja avatara musi być po wgraniu go na storage
+        this.updateUserAvatar()
         this.updateProfileViewData()
+        progress_bar.hideProgressBar()
     }
 
     /**
      * uruchamia serwis [UploadService] który w tyle wtgrywa plik do storage
      */
-    private fun uploadFromUri(uploadUri: Uri) {
+    private fun uploadFromUri(uploadUri: Uri, fileName: String) {
 
         fileUri = uploadUri
 
@@ -203,7 +204,7 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
             it.startService(
                 Intent(it, UploadService::class.java)
                     .putExtra(UploadService.EXTRA_FILE_URI, uploadUri)
-                    .putExtra(UploadService.EXTRA_FILE_NAME, this.currentUser.idUserFirebase)
+                    .putExtra(UploadService.EXTRA_FILE_NAME, fileName)
                     .setAction(UploadService.ACTION_UPLOAD)
             )
         }
@@ -220,14 +221,11 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
         //po wybraniu obrazu zostaje on wgrany do storage
         if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             data?.data.also { uri ->
                 this.fileUri = uri
-                fileUri?.let {
-                    this.uploadFromUri(it)
-                }
+                this.updateProfileViewData()
             }
         }
     }

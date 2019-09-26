@@ -1,6 +1,5 @@
 package com.client.traveller.data.services
 
-import android.app.Service
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
@@ -10,7 +9,7 @@ import com.client.traveller.ui.home.HomeActivity
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
-class DownloadService: BaseTaskService() {
+class DownloadService : BaseTaskService() {
 
     companion object {
 
@@ -70,8 +69,10 @@ class DownloadService: BaseTaskService() {
 
             while (size != -1) {
                 bytesDownloaded += size.toLong()
-                showProgressNotification(getString(R.string.progress_downloading),
-                    bytesDownloaded, totalBytes)
+                showProgressNotification(
+                    getString(R.string.progress_downloading),
+                    bytesDownloaded, totalBytes
+                )
 
                 size = inputStream.read(buffer)
             }

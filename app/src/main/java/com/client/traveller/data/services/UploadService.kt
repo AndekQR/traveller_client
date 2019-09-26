@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.IBinder
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.client.traveller.R
 import com.client.traveller.data.network.firebase.storage.Avatars
@@ -22,6 +23,8 @@ class UploadService : BaseTaskService() {
 
         const val EXTRA_FILE_URI = "extra_file_uri"
         const val EXTRA_DOWNLOAD_URL = "extra_download_url"
+
+        //z formacie: title.extension
         const val EXTRA_FILE_NAME = "extra_file_name"
 
         val intentFilter: IntentFilter
@@ -65,11 +68,10 @@ class UploadService : BaseTaskService() {
     private fun uploadFromUri(fileUri: Uri, fileName: String) {
 
         taskStarted()
-
         showProgressNotification(getString(R.string.progress_upload), 0, 0)
 
         val avatarRef = storageReference.child(Avatars.AVATARS)
-            .child(fileName + "." + this.getFileType(fileUri))
+            .child(fileName)
 
         avatarRef.putFile(fileUri)
             .addOnSuccessListener { taskSnapshot ->
@@ -93,11 +95,7 @@ class UploadService : BaseTaskService() {
 
     private fun getFileType(uri: Uri): String {
         val fileName = uri.lastPathSegment
-        val type = fileName?.substringAfterLast('.')
-        if (type != null)
-            return type
-        else
-            return ".png"
+        return fileName?.substringAfterLast('.') ?: ".png"
     }
 
     private fun broadcastUploadFinished(downloadUri: Uri?, fileUri: Uri?): Boolean {

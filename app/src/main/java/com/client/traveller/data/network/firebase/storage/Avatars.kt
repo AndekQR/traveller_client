@@ -4,9 +4,11 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.io.InputStream
 
-class Avatars{
+//TODO trzeba sprawdzic dodawanie zdjec z serwisow spolecznosciowych do storage
+// z google dodaja się zle, a z facebook w ogóle
+class Avatars {
 
-    companion object{
+    companion object {
         internal const val AVATARS = "users_image"
         private const val DEFAULT_AVATAR = "avatar_default.png"
     }
@@ -19,7 +21,4 @@ class Avatars{
         return this.getAvatarsReference().child(DEFAULT_AVATAR)
     }
 
-    fun uploadNewAvatar(userUid: String, filteType: String, file: InputStream){
-        this.getAvatarsReference().child("${userUid}.${filteType}").putStream(file)
-    }
 }

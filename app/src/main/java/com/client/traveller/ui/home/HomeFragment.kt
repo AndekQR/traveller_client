@@ -16,6 +16,7 @@ import androidx.navigation.Navigation
 import com.client.traveller.R
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.settings.SettingsActivity
+import com.client.traveller.ui.util.ScopedFragment
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.maps.SupportMapFragment
@@ -30,7 +31,7 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
 
-class HomeFragment : Fragment(), KodeinAware, NavigationView.OnNavigationItemSelectedListener {
+class HomeFragment : ScopedFragment(), KodeinAware, NavigationView.OnNavigationItemSelectedListener {
 
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
@@ -42,7 +43,6 @@ class HomeFragment : Fragment(), KodeinAware, NavigationView.OnNavigationItemSel
 
         // do obługi kliknięć w menu bocznym
         this.setHasOptionsMenu(true)
-
     }
 
     override fun onCreateView(
@@ -87,14 +87,14 @@ class HomeFragment : Fragment(), KodeinAware, NavigationView.OnNavigationItemSel
         // childFragmentManager służy do zarządzania fragmentami w tym fagmencie
         // a fragmentManager do zarządzania fragmentami które są związane z activity tego fragmentu
         (childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?)?.let {
-            activity?.let {activity ->
+            activity?.let { activity ->
                 viewModel.initLocationProvider(it, activity, savedInstanceState)
             }
         }
     }
 
 
-    private fun setSubtitleNavView(subtitle: String) = GlobalScope.launch(Dispatchers.Main) {
+    private fun setSubtitleNavView(subtitle: String) = launch {
         navigation_view.getHeaderView(0).subtitle.text = subtitle
     }
 

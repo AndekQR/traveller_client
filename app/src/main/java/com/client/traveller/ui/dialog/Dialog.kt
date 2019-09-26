@@ -22,9 +22,10 @@ class Dialog : DialogFragment() {
     private var title: String? = null
     private var message: String? = null
     private var positivieButtonText: String? = null
-    private var positivieButtonListener: View.OnClickListener? = null
-    private var negativeButtonListener: View.OnClickListener? = null
     private var negativeButtonText: String? = null
+    private var negativeButtonAction: ((Dialog) -> Unit)? = null
+    private var positiveButtonAction: ((Dialog) -> Unit)? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,6 +37,7 @@ class Dialog : DialogFragment() {
     }
 
     private fun initializeView(view: View) {
+
 
         title?.let {
             view.dialog_title.text = title
@@ -51,16 +53,18 @@ class Dialog : DialogFragment() {
 
         positivieButtonText?.let {
             view.positive_button.text = positivieButtonText
-            if (positivieButtonListener != null)
-                view.positive_button.setOnClickListener(positivieButtonListener)
+            view.positive_button.setOnClickListener {
+                positiveButtonAction?.invoke(this)
+            }
         } ?: run {
             view.positive_button.visibility = View.GONE
         }
 
         negativeButtonText?.let {
             view.negative_button.text = negativeButtonText
-            if (negativeButtonListener != null)
-                view.negative_button.setOnClickListener(negativeButtonListener)
+            view.negative_button.setOnClickListener {
+                negativeButtonAction?.invoke(this)
+            }
         } ?: run {
             view.negative_button.visibility = View.GONE
         }
@@ -80,18 +84,18 @@ class Dialog : DialogFragment() {
             title: String?,
             message: String?,
             positivieButtonText: String?,
-            positivieButtonListener: View.OnClickListener?,
             negativeButtonText: String?,
-            negativeButtonListener: View.OnClickListener?
+            negativeButtonAction: ((Dialog) -> Unit)?,
+            positiveButtonAction: ((Dialog) -> Unit)?
         ): Dialog {
 
             val dialog = Dialog()
             dialog.title = title
             dialog.message = message
             dialog.positivieButtonText = positivieButtonText
-            dialog.positivieButtonListener = positivieButtonListener
             dialog.negativeButtonText = negativeButtonText
-            dialog.negativeButtonListener = negativeButtonListener
+            dialog.negativeButtonAction = negativeButtonAction
+            dialog.positiveButtonAction = positiveButtonAction
             return dialog
 
         }
@@ -102,9 +106,10 @@ class Dialog : DialogFragment() {
         private var title: String? = null
         private var message: String? = null
         private var positivieButtonText: String? = null
-        private var positivieButtonListener: View.OnClickListener? = null
-        private var negativeButtonListener: View.OnClickListener? = null
         private var negativeButtonText: String? = null
+        private var negativeButtonAction: ((Dialog) -> Unit)? = null
+        private var positiveButtonAction: ((Dialog) -> Unit)? = null
+
 
         fun addTitle(title: String) = apply {
             this.title = title
@@ -114,14 +119,14 @@ class Dialog : DialogFragment() {
             this.message = message
         }
 
-        fun addPositiveButton(title: String, listener: View.OnClickListener) = apply {
+        fun addPositiveButton(title: String, func: (Dialog) -> Unit) = apply {
             this.positivieButtonText = title
-            this.positivieButtonListener = listener
+            this.positiveButtonAction = func
         }
 
-        fun addNegativeButton(title: String, listener: View.OnClickListener) = apply {
+        fun addNegativeButton(title: String, func: (Dialog) -> Unit) = apply {
             this.negativeButtonText = title
-            this.negativeButtonListener = listener
+            this.negativeButtonAction = func
         }
 
         fun build(manager: FragmentManager?, tag: String) {
@@ -129,9 +134,9 @@ class Dialog : DialogFragment() {
                 title,
                 message,
                 positivieButtonText,
-                positivieButtonListener,
                 negativeButtonText,
-                negativeButtonListener
+                negativeButtonAction,
+                positiveButtonAction
             )
 
             if (manager != null)

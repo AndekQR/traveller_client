@@ -1,14 +1,9 @@
 package com.client.traveller.ui.auth
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Base64
-import android.util.Log
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
@@ -21,7 +16,6 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import java.security.MessageDigest
 
 
 class AuthActivity : AppCompatActivity(), KodeinAware {
@@ -31,12 +25,14 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
     private lateinit var viewModel: AuthViewModel
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
-    private val REQUIRED_PERMISSIONS = listOf(
-        Manifest.permission.INTERNET,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_NETWORK_STATE
-    )
+    companion object{
+        private val REQUIRED_PERMISSIONS = listOf(
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_NETWORK_STATE
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,9 +42,6 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
             ViewModelProvider(this, factory).get(AuthViewModel::class.java)
         }
 
-        //sprawdza czy użytkownik google już jest zalogowany w aplikacji
-        // po wylogowaniu ta wartość staje się nullem
-        val signInAccountGoogle = GoogleSignIn.getLastSignedInAccount(this)
 
         viewModel.getLoggedInUser().observe(this, Observer { user ->
             if (user != null) {
@@ -58,12 +51,15 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
                 }
             }
 
-            if (signInAccountGoogle != null && user == null){
+            //sprawdza czy użytkownik google już jest zalogowany w aplikacji
+            // po wylogowaniu ta wartość staje się nullem
+            val signInAccountGoogle = GoogleSignIn.getLastSignedInAccount(this)
+            if (signInAccountGoogle != null && user == null) {
                 val bundle = Bundle()
                 bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
                 firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
 
-                viewModel.logInGoogleUser(signInAccountGoogle)
+                viewModel.loginJustLocalGoogle(signInAccountGoogle)
             }
         })
 
@@ -104,12 +100,11 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
                 for (i in permissions.indices) {
                     if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                         Dialog.Builder()
-                            .addTitle("Ostrzeżenie!")
-                            .addMessage("Wymagane uprawnienia nie zostały przyznane. Aplikacja może działać w niewłaściwy sposób.")
-                            .addPositiveButton("Ok", View.OnClickListener {
-                                val dialog = supportFragmentManager.findFragmentByTag(javaClass.simpleName) as Dialog
+                            .addTitle(getString(R.string.warning))
+                            .addMessage(getString(R.string.not_all_permissions_granted))
+                            .addPositiveButton("Ok") { dialog ->
                                 dialog.dismiss()
-                            })
+                            }
                             .build(supportFragmentManager, javaClass.simpleName)
                     }
                 }

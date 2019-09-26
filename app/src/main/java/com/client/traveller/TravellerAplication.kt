@@ -3,14 +3,16 @@ package com.client.traveller
 import android.app.Application
 import android.content.Context
 import com.client.traveller.data.db.AppDatabase
+import com.client.traveller.data.network.firebase.auth.*
+
 import com.client.traveller.data.network.firebase.firestore.Users
 import com.client.traveller.data.network.firebase.storage.Avatars
 
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.provider.LocationProviderImpl
 import com.client.traveller.data.provider.PreferenceProvider
-import com.client.traveller.data.repository.Repository
-import com.client.traveller.data.repository.RepositoryImpl
+import com.client.traveller.data.repository.UserRepository
+import com.client.traveller.data.repository.UserRepositoryImpl
 import com.client.traveller.ui.auth.AuthViewModelFactory
 import com.client.traveller.ui.home.HomeViewModelFactory
 import com.client.traveller.ui.settings.SettingsViewModelFactory
@@ -35,8 +37,24 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from singleton { AppDatabase(instance()) }
         bind() from singleton { Users() }
         bind() from provider { Avatars() }
+        bind() from provider { AuthNormal() }
+        bind() from provider { AuthGoogle() }
+        bind() from provider { AuthFacebook() }
+        bind() from provider { AuthUtils() }
+        bind() from provider { AuthProvider() }
         bind() from singleton { instance<AppDatabase>().userDao() }
-        bind<Repository>() with singleton { RepositoryImpl(instance(), instance(), instance()) }
+        bind<UserRepository>() with singleton {
+            UserRepositoryImpl(
+                instance(),
+                instance(),
+                instance(),
+                instance(),
+                instance(),
+                instance(),
+                instance(),
+                instance()
+            )
+        }
         bind() from provider { AuthViewModelFactory(instance()) }
         bind() from provider { HomeViewModelFactory(instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }

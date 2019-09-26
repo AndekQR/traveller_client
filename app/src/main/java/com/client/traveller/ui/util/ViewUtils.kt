@@ -4,15 +4,15 @@ import android.view.View
 import android.widget.RelativeLayout
 
 
-fun RelativeLayout.showProgressBar() {
+fun RelativeLayout?.showProgressBar() {
     Coroutines.main {
-        visibility = View.VISIBLE
+        this?.visibility = View.VISIBLE
     }
 }
 
 
-fun RelativeLayout.hideProgressBar() {
+fun RelativeLayout?.hideProgressBar() {
     Coroutines.main {
-        visibility = View.GONE
+        this?.visibility = View.GONE
     }
 }

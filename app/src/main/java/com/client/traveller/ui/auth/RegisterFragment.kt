@@ -15,8 +15,6 @@ import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.showProgressBar
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.android.synthetic.main.fragment_register.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -28,14 +26,12 @@ class RegisterFragment : Fragment(), KodeinAware {
 
     override val kodein by kodein()
     private val factory: AuthViewModelFactory by instance()
-    private lateinit var auth: FirebaseAuth
     private lateinit var viewModel: AuthViewModel
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
 
-        auth = FirebaseAuth.getInstance()
         // dzięki takiej inicializacji jeden viewmodel jest współdzielony przez wszystkie fragmenty
         viewModel = activity?.run {
             ViewModelProvider(this, factory).get(AuthViewModel::class.java)
@@ -75,72 +71,62 @@ class RegisterFragment : Fragment(), KodeinAware {
      */
     private fun onSignUpButtonClick() {
 
-        progress_bar_background.showProgressBar()
+        progress_bar.showProgressBar()
 
-        val email = email.text.toString()
+        val email = email.text.toString().trim()
         val password = password.text.toString()
-        val displayName = displayName.text.toString()
+        val displayName = displayName.text.toString().trim()
         val confirmPassword = re_password.text.toString()
 
         if (!viewModel.validate(email, password, displayName, confirmPassword)) {
-            progress_bar_background.hideProgressBar()
+            progress_bar.hideProgressBar()
             Toast.makeText(activity, "Niepoprawne dane", Toast.LENGTH_LONG).show()
             return
         }
 
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val bundle = Bundle()
-                    bundle.putString(FirebaseAnalytics.Param.METHOD, "Normal")
-                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
+        viewModel.createUserNormal(
+            email,
+            password,
+            displayName
+        ) { isSuccessful, exception, firebaseUser ->
+            if (isSuccessful && firebaseUser != null) {
+                val bundle = Bundle()
+                bundle.putString(FirebaseAnalytics.Param.METHOD, "Normal")
+                firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
 
+                val profileUpdates = UserProfileChangeRequest.Builder()
+                    .setDisplayName(displayName)
+                    .build()
 
-                    val profileUpdates = UserProfileChangeRequest.Builder()
-                        .setDisplayName(displayName)
-                        .build()
-                    this.updateProfile(task.result?.user, profileUpdates)
-
-                    task.result?.user?.let {user ->
-                        try {
-                            viewModel.logInEmailUser(user, displayName)
-                        }
-                        catch (ex: Exception){
-                            Log.e(javaClass.simpleName, ex.localizedMessage)
-                            Dialog.Builder()
-                                .addMessage(getString(R.string.something_went_wrong))
-                                .addPositiveButton("ok", View.OnClickListener {
-                                    val dialog =
-                                        fragmentManager?.findFragmentByTag(javaClass.simpleName) as Dialog?
-                                    dialog?.dismiss()
-                                })
-                                .build(fragmentManager, javaClass.simpleName)
-                        }
+                viewModel.updateProfile(
+                    firebaseUser,
+                    profileUpdates
+                ) { isSuccessfulProfileUpdates, exceptionProfileUpdates ->
+                    if (!isSuccessfulProfileUpdates) {
+                        Dialog.Builder()
+                            .addTitle(getString(R.string.something_went_wrong))
+                            .addMessage(exceptionProfileUpdates?.message!!)
+                            .addPositiveButton("ok") { dialog ->
+                                dialog.dismiss()
+                            }
+                            .build(fragmentManager, javaClass.simpleName)
                     }
-                    viewModel.sendEmailVerification(task.result?.user)
-                    progress_bar_background.hideProgressBar()
-                } else {
-                    progress_bar_background.hideProgressBar()
-                    Toast.makeText(activity, task.exception?.message, Toast.LENGTH_LONG).show()
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(activity, it.localizedMessage, Toast.LENGTH_LONG).show()
-            }
-    }
 
-    /**
-     * Aktualizacja usera w firebase
-     *
-     * @param user użytkownik do aktualizacji
-     * @param profileUpdates zaktualizowane dane
-     */
-    private fun updateProfile(user: FirebaseUser?, profileUpdates: UserProfileChangeRequest?) {
-        if (user != null && profileUpdates != null) {
-            user.updateProfile(profileUpdates)
-                .addOnFailureListener {
-                    Log.e(javaClass.simpleName, getString(R.string.profile_update_failure))
-                }
+                viewModel.sendEmailVerification(firebaseUser)
+                progress_bar.hideProgressBar()
+
+            } else {
+                progress_bar.hideProgressBar()
+                Log.e(javaClass.simpleName, exception?.message)
+                Dialog.Builder()
+                    .addTitle(getString(R.string.something_went_wrong))
+                    .addMessage(exception?.message!!)
+                    .addPositiveButton("ok") { dialog ->
+                        dialog.dismiss()
+                    }
+                    .build(fragmentManager, javaClass.simpleName)
+            }
         }
     }
 }

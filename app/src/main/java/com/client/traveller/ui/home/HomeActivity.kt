@@ -1,7 +1,5 @@
 package com.client.traveller.ui.home
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -9,12 +7,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.client.traveller.BuildConfig
 import com.client.traveller.R
 import com.client.traveller.data.services.UploadService
@@ -45,7 +41,6 @@ class HomeActivity : AppCompatActivity(),
             this.getDynamicLinks()
 
 
-
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -59,7 +54,7 @@ class HomeActivity : AppCompatActivity(),
     }
 
     override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+        if (drawer_layout != null && drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
             return
         } else if (doubleBack) {
@@ -148,11 +143,9 @@ class HomeActivity : AppCompatActivity(),
                     viewModel.setEmailVerified()
                     Dialog.Builder()
                         .addMessage(getString(R.string.post_email_verification_success))
-                        .addPositiveButton("Ok", View.OnClickListener {
-                            val dialog =
-                                supportFragmentManager.findFragmentByTag(javaClass.simpleName) as Dialog?
-                            dialog?.dismiss()
-                        })
+                        .addPositiveButton("Ok") { dialog ->
+                            dialog.dismiss()
+                        }
                         .build(supportFragmentManager, javaClass.simpleName)
                 } else {
                     if (intent.data != null) {
@@ -189,22 +182,18 @@ class HomeActivity : AppCompatActivity(),
                 .addOnSuccessListener {
                     Dialog.Builder()
                         .addMessage(getString(R.string.post_email_verification_success))
-                        .addPositiveButton("Ok", View.OnClickListener {
-                            val dialog =
-                                supportFragmentManager.findFragmentByTag(javaClass.simpleName) as Dialog?
-                            dialog?.dismiss()
-                        })
+                        .addPositiveButton("Ok") { dialog ->
+                            dialog.dismiss()
+                        }
                         .build(supportFragmentManager, javaClass.simpleName)
                 }
                 .addOnFailureListener {
                     Dialog.Builder()
                         .addTitle(getString(R.string.post_email_verification_fail))
                         .addMessage(it.localizedMessage)
-                        .addPositiveButton("Ok", View.OnClickListener {
-                            val dialog =
-                                supportFragmentManager.findFragmentByTag(javaClass.simpleName) as Dialog?
-                            dialog?.dismiss()
-                        })
+                        .addPositiveButton("Ok") { dialog ->
+                            dialog.dismiss()
+                        }
                         .build(supportFragmentManager, javaClass.simpleName)
                 }
 

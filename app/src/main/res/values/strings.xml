@@ -81,6 +81,9 @@
     <string name="update_profile_success">Dane zostały zaktualizowane</string>
     <string name="profile_update_failure">Aktualizacja profile zakończyła się niepowodzeniem</string>
     <string name="something_went_wrong">Coś poszło nie tak</string>
+    <string name="Invalid_data">Niepoprawne dane</string>
+    <string name="not_all_permissions_granted">Wymagane uprawnienia nie zostały przyznane. Aplikacja może działać w niewłaściwy sposób.</string>
+    <string name="warning">Ostrzeżenie!</string>
 
     <string-array name="intervals">
         <item>"1 sekunda"</item>
