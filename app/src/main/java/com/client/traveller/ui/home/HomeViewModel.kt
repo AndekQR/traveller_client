@@ -7,7 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.provider.LocationProvider
-import com.client.traveller.data.repository.UserRepository
+import com.client.traveller.data.repository.user.UserRepository
 import com.client.traveller.ui.util.Coroutines
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.SupportMapFragment

@@ -1,4 +1,4 @@
-package com.client.traveller.data.repository
+package com.client.traveller.data.repository.user
 
 import androidx.lifecycle.LiveData
 import com.client.traveller.data.db.entities.User

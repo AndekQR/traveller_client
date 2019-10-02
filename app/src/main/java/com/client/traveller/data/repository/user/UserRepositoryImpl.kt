@@ -1,4 +1,4 @@
-package com.client.traveller.data.repository
+package com.client.traveller.data.repository.user
 
 import android.net.Uri
 import android.util.Log
@@ -13,12 +13,16 @@ import com.facebook.AccessToken
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class UserRepositoryImpl(
     private val userDao: UserDao,
@@ -81,7 +85,20 @@ class UserRepositoryImpl(
                     function.invoke(it.isSuccessful, it.exception)
                 }
             }
+
+
+        // TODO może lepiej tak:
+//        val value = suspendCoroutine<AuthResult?> { continuation ->
+//            authNormal.login(username, password).addOnCompleteListener {
+//                if (it.isSuccessful) {
+//                    this.updateLocalUserDataAsync(it.result?.user?.toLocalUser()!!)
+//                } else {
+//                    continuation.resume(it.result)
+//                }
+//            }
+//        }
     }
+
 
     override fun loginGoogleUser(
         task: Task<GoogleSignInAccount>?,
@@ -93,14 +110,13 @@ class UserRepositoryImpl(
                     val user = it.result?.user
                     user?.let {
                         usersFirestore.getUser(user.uid).addOnCompleteListener {
-                            this.registerUser(user.toLocalUser(), function)
-//                            if (!it.result?.exists()!!) {
-//                                // createUser
-//                                this.registerUser(user.toLocalUser(), function)
-//                            } else {
-//                                // login
-//                                this.updateLocalUserDataAsync(user.toLocalUser())
-//                            }
+                            if (!it.result?.exists()!!) {
+                                // createUser
+                                this.registerUser(user.toLocalUser(), function)
+                            } else {
+                                // login
+                                this.updateLocalUserDataAsync(user.toLocalUser())
+                            }
                         }
                     }
                 } else {
@@ -111,7 +127,7 @@ class UserRepositoryImpl(
 
     override fun loginFacebookUser(
         accessToken: AccessToken,
-        function: (Boolean, java.lang.Exception?) -> Unit
+        function: (Boolean, Exception?) -> Unit
     ) {
         authFacebook.login(accessToken).addOnCompleteListener {
             if (it.isSuccessful) {
@@ -186,7 +202,7 @@ class UserRepositoryImpl(
 
     override fun sendEmailVerification(
         user: FirebaseUser,
-        function: (Boolean, java.lang.Exception?) -> Unit
+        function: (Boolean, Exception?) -> Unit
     ) {
         authUtils.sendEmailVerification(user).addOnCompleteListener {
             function.invoke(it.isSuccessful, it.exception)

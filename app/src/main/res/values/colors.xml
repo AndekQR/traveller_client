@@ -8,6 +8,7 @@
     <color name="colorSecondaryDark">#001970</color>
     <color name="colorWhiteMaterial">#fafafa</color>
     <color name="colorWhiteLightMaterial">#ffffff</color>
-    <color name="colorWhiteDarkMaterial">#f5f5f5</color>
+    <color name="colorWhiteDarkMaterial">#F6F6F6</color>
     <color name="colorDark">#212121</color>
+    <color name="grey">#E0E0E0</color>
 </resources>

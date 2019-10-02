@@ -3,7 +3,7 @@ package com.client.traveller.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.data.provider.LocationProvider
-import com.client.traveller.data.repository.UserRepository
+import com.client.traveller.data.repository.user.UserRepository
 
 class HomeViewModelFactory(
     private val userRepository: UserRepository,

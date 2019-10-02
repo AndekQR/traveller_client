@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hideProgressBar the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Threeten backport
+-dontwarn java.util.spi.LocaleServiceProvider
+-dontwarn sun.util.calendar.*
+-keep class org.threeten.bp.zone.*

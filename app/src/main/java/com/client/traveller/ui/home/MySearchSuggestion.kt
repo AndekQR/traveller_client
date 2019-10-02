@@ -4,6 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion
 
+//TODO można przenieść wyżej (np. jako provider)
 class MySearchSuggestion(private var name: String) : SearchSuggestion {
 
     constructor(parcel: Parcel) : this(parcel.readString()!!)

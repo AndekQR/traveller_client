@@ -49,7 +49,7 @@
     <string name="camera_tracking_description">Gdy włączone, kamera śledzi twoją lokalizację</string>
 
     <!--    important-->
-    <string name="google_maps_key">AIzaSyAfGoF9YliSCVlIBi3pSshQpDpb10uD0WM</string>
+    <string name="google_maps_key">AIzaSyAd9mVHXtr7oJkIwt605x3Wu5A65srtq6Q</string>
     <string name="facebook_app_id">1482538888552931</string>
     <string name="fb_login_protocol_scheme">fb1482538888552931</string>
     <string name="google_client_id">98668081815-f8kdmk55hpjilmpmnbbd858849hnutk7.apps.googleusercontent.com</string>
@@ -84,6 +84,19 @@
     <string name="Invalid_data">Niepoprawne dane</string>
     <string name="not_all_permissions_granted">Wymagane uprawnienia nie zostały przyznane. Aplikacja może działać w niewłaściwy sposób.</string>
     <string name="warning">Ostrzeżenie!</string>
+    <string name="trips_title_menu">Wycieczki</string>
+    <string name="title_trips_list">Wycieczki</string>
+    <string name="trip_name">Nazwa wycieczki</string>
+    <string name="trip_start_address">Adres początkowy wycieczki</string>
+    <string name="trip_end_address">Adres końcoey wycieczki</string>
+    <string name="trip_start_date">Data początku wycieczki</string>
+    <string name="trip_end_date">Data końcawycieczki</string>
+    <string name="person_hint">e-email osoby</string>
+    <string name="waypoint_hint">Przystanek</string>
+    <string name="add_trip_text_button">Dodaj</string>
+    <string name="trip_participants_divider_title">Uczestnicy wycieczki</string>
+    <string name="waypoints_divider_title">Przystanki</string>
+    <string name="main_data">Podstawowe dane</string>
 
     <string-array name="intervals">
         <item>"1 sekunda"</item>

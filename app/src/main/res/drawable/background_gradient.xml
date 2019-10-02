@@ -1,33 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-<item>
-    <layer-list>
-        <item android:left="5dp" android:top="5dp">
-            <shape>
-                <corners android:radius="3dp" />
-                <solid android:color="#1A000000" />
 
-                <corners android:topLeftRadius="25dp"
-                    android:bottomLeftRadius="25dp"
-                    android:topRightRadius="25dp"
-                    android:bottomRightRadius="25dp"/>
-            </shape>
-        </item>
-        <item android:bottom="2dp" android:left="2dp">
-            <shape  android:id="@+id/listview_background_shape">
-                <gradient
-                    android:type="linear"
-                    android:angle="180"
-                    android:startColor="#55CAB3"
-                    android:endColor="#1581CD" />
+    <item android:bottom="2dp" android:left="2dp">
+        <shape
+                android:id="@+id/listview_background_shape">
+            <solid android:color="@color/colorWhiteDarkMaterial"
 
-                <corners android:topLeftRadius="25dp"
-                    android:bottomLeftRadius="25dp"
-                    android:topRightRadius="25dp"
-                    android:bottomRightRadius="25dp"/>
-            </shape>
-        </item>
-    </layer-list>
-</item>
+                    />
+            <corners
+                    android:bottomLeftRadius="5dp"
+                    android:bottomRightRadius="5dp"
+                    android:topLeftRadius="5dp"
+                    android:topRightRadius="5dp" />
+        </shape>
+    </item>
+
 
 </selector>

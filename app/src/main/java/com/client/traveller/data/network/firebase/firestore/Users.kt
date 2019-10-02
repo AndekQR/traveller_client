@@ -1,13 +1,12 @@
 package com.client.traveller.data.network.firebase.firestore
 
-import android.util.Log
 import com.client.traveller.data.db.entities.User
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 
 /**
@@ -27,7 +26,7 @@ class Users {
         return this.getUsersCollection().document(user.idUserFirebase!!).set(user)
     }
 
-    fun getUser(uid: String): Task<DocumentSnapshot> {
+     fun getUser(uid: String): Task<DocumentSnapshot> {
         return this.getUsersCollection().document(uid).get()
     }
 
@@ -57,17 +56,4 @@ class Users {
         return null
     }
 
-    //TODO mozna cos z tym zrobic zamiast monualnie sprawdzac
-    fun checkUserExists(uid: String): Boolean {
-        var user: DocumentSnapshot? = null
-        val task = getUsersCollection().document(uid).get()
-            .addOnCompleteListener {
-                user = it.result
-            }
-        user?.let {
-            Log.e(javaClass.simpleName, "weszlo")
-            return it.exists()
-        }
-        return false
-    }
 }

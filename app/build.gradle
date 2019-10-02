@@ -47,6 +47,10 @@ android {
         jvmTarget = "1.8"
     }
     buildToolsVersion = '28.0.3'
+
+    androidExtensions {
+        experimental = true
+    }
 }
 
 dependencies {
@@ -105,20 +109,31 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     kapt 'com.github.bumptech.glide:compiler:4.9.0'
 
+    // groupie - recycler view
+    implementation "com.xwray:groupie:2.6.0"
+    implementation "com.xwray:groupie-kotlin-android-extensions:2.6.0"
+
+    // Better dateTime-time support even on older Android versions
+    implementation "com.jakewharton.threetenabp:threetenabp:1.2.0"
+
     implementation 'com.github.arimorty:floatingsearchview:2.1.1'
     implementation 'androidx.appcompat:appcompat:1.1.0'
 
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.1.1'
     implementation "com.google.android.gms:play-services-maps:17.0.0"
     implementation "com.google.android.gms:play-services-location:17.0.0"
     implementation 'com.google.android.gms:play-services-auth:17.0.0'
     implementation "com.google.maps:google-maps-services:0.9.4"
     implementation "org.slf4j:slf4j-simple:1.7.26"
 
+    //firebase compontents
     implementation 'com.google.firebase:firebase-analytics:17.2.0'
     implementation 'com.google.firebase:firebase-auth:19.0.0'
     implementation 'com.google.firebase:firebase-dynamic-links:19.0.0'
     implementation 'com.facebook.android:facebook-login:5.5.1'
     implementation 'com.google.firebase:firebase-firestore:21.1.1'
     implementation 'com.google.firebase:firebase-storage:19.0.1'
+
+    implementation 'com.google.android.libraries.places:places:2.0.0'
 
 }

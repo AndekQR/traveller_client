@@ -16,6 +16,7 @@ import androidx.navigation.Navigation
 import com.client.traveller.R
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.settings.SettingsActivity
+import com.client.traveller.ui.trips.TripActivity
 import com.client.traveller.ui.util.ScopedFragment
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -104,9 +105,12 @@ class HomeFragment : ScopedFragment(), KodeinAware, NavigationView.OnNavigationI
                 val intent = Intent(activity, SettingsActivity::class.java)
                 startActivity(intent)
             }
-            R.id.tworca_item -> {
-//                val intent = Intent(this, AuthorActivity::class.java)
-//                startActivity(intent)
+            R.id.trips -> {
+                Intent(activity, TripActivity::class.java).also {
+                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    it.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    startActivity(it)
+                }
             }
             R.id.logout -> {
                 val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
@@ -119,9 +123,7 @@ class HomeFragment : ScopedFragment(), KodeinAware, NavigationView.OnNavigationI
                 }
             }
             R.id.profile -> {
-                view?.let {
-                    Navigation.findNavController(it).navigate(R.id.profileFragment)
-                }
+                view?.let { Navigation.findNavController(it).navigate(R.id.profileFragment) }
             }
         }
         drawer_layout.closeDrawer(GravityCompat.START)

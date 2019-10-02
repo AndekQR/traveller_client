@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/nav_graph_trip.xml"
+        app:startDestination="@id/tripListFragment">
+
+    <fragment
+            android:id="@+id/tripCreatorFragment"
+            android:name="com.client.traveller.ui.trips.TripCreatorFragment"
+            android:label="fragment_trip_creator"
+            tools:layout="@layout/fragment_trip_creator" >
+        <action
+                android:id="@+id/action_tripCreatorFragment_to_tripListFragment"
+                app:destination="@id/tripListFragment" />
+    </fragment>
+    <fragment
+            android:id="@+id/tripListFragment"
+            android:name="com.client.traveller.ui.trips.TripListFragment"
+            android:label="fragment_trip_list"
+            tools:layout="@layout/fragment_trip_list" >
+        <action
+                android:id="@+id/action_tripListFragment_to_tripCreatorFragment"
+                app:destination="@id/tripCreatorFragment" />
+    </fragment>
+</navigation>

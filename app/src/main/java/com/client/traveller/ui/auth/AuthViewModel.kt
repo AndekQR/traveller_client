@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.client.traveller.data.db.entities.User
-import com.client.traveller.data.repository.UserRepository
+import com.client.traveller.data.repository.user.UserRepository
 import com.facebook.AccessToken
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.Task
@@ -16,7 +16,6 @@ class AuthViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     fun getLoggedInUser(): LiveData<User> {
         return userRepository.getUser()

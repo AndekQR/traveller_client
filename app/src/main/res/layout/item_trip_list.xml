@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:minHeight="?listPreferredItemHeightLarge"
+        android:maxHeight="100dp"
+
+        >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/trip_inner_card"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:minHeight="?listPreferredItemHeightLarge"
+            android:background="@drawable/background_gradient"
+            android:padding="10dp"
+
+        >
+
+<!--        <View-->
+<!--                android:layout_width="2dp"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:layout_marginTop="5dp"-->
+<!--                android:background="@color/colorPrimaryDark"-->
+<!--                app:layout_constraintLeft_toLeftOf="parent"-->
+
+<!--                />-->
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/card_top"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                >
+            <TextView
+                    android:id="@+id/trip_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:textSize="30sp"
+
+                    android:text="Wycieczka testowa"
+                    />
+
+            <TextView
+                    android:id="@+id/trip_city"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/trip_name"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:textSize="20sp"
+
+                    android:text="XXXXXXX" />
+            <TextView
+                    android:id="@+id/trip_author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/trip_name"
+                    app:layout_constraintLeft_toRightOf="@id/trip_city"
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:textSize="20sp"
+                    android:layout_marginStart="10dp"
+
+                    android:text="Twórca: XXXXX XXXXXXXX" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/card_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/card_top"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                android:layout_marginTop="10dp"
+                android:textAlignment="center"
+                android:background="@color/grey"
+            >
+
+            <TextView
+                    android:id="@+id/trip_people"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/trip_distance"
+
+                    android:text="Osoby: XX"
+
+                    />
+            <TextView
+                    android:id="@+id/trip_distance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintLeft_toRightOf="@id/trip_people"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginStart="10dp"
+                    app:layout_constraintRight_toLeftOf="@id/trip_waypoints"
+
+                    android:text="Trasa: XXkm"
+
+                    />
+            <TextView
+                    android:id="@+id/trip_waypoints"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintLeft_toRightOf="@id/trip_distance"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_marginStart="10dp"
+
+
+                    android:text="Przystanki: XX"
+
+                    />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

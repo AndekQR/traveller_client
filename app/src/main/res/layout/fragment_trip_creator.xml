@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
+        tools:context=".ui.trips.TripCreatorFragment"
+        android:background="@color/colorWhiteDarkMaterial"
+        >
+
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+        >
+        <LinearLayout
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="10dp"
+                    >
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/main_data" />
+                <include layout="@layout/divider" />
+            </LinearLayout>
+            <EditText
+                    android:id="@+id/trip_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/trip_name"
+                    android:gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@drawable/background_gradient2"
+                    android:inputType="text"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:textSize="15sp"
+                    android:textColorHint="@color/colorDark"
+                    android:textColor="@color/colorDark"
+                    />
+
+            <EditText
+                    android:id="@+id/trip_start_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/trip_start_date"
+                    android:gravity="center"
+                    android:background="@drawable/background_gradient2"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:textCursorDrawable="@drawable/cursor_color"
+                    android:inputType="date"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:textSize="15sp"
+                    android:textColorHint="@color/colorDark"
+                    android:textColor="@color/colorDark"
+                    android:clickable="true"
+                    android:focusable="false"
+                    />
+
+            <EditText
+                    android:id="@+id/trip_start_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/trip_start_address"
+                    android:gravity="center"
+                    android:background="@drawable/background_gradient2"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:textCursorDrawable="@drawable/cursor_color"
+                    android:inputType="textPostalAddress"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:textSize="15sp"
+                    android:textColorHint="@color/colorDark"
+                    android:textColor="@color/colorDark"
+                    />
+
+            <EditText
+                    android:id="@+id/trip_end_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/trip_end_date"
+                    android:gravity="center"
+                    android:background="@drawable/background_gradient2"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:textCursorDrawable="@drawable/cursor_color"
+                    android:inputType="date"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:textSize="15sp"
+                    android:textColorHint="@color/colorDark"
+                    android:textColor="@color/colorDark"
+                    android:clickable="true"
+                    android:focusable="false"
+                    />
+
+            <EditText
+                    android:id="@+id/trip_end_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/trip_end_address"
+                    android:gravity="center"
+                    android:background="@drawable/background_gradient2"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:textCursorDrawable="@drawable/cursor_color"
+                    android:inputType="textPostalAddress"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:textSize="15sp"
+                    android:textColorHint="@color/colorDark"
+                    android:textColor="@color/colorDark"
+                    />
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="10dp">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/trip_participants_divider_title" />
+                <include layout="@layout/divider" />
+            </LinearLayout>
+
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/persons_list_relative_layout"
+                    android:orientation="vertical"
+                    >
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="10dp"
+                    >
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/waypoints_divider_title" />
+                <include layout="@layout/divider" />
+            </LinearLayout>
+
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/waypoints_list_relative_layout"
+                    android:orientation="vertical"
+
+                >
+
+            </LinearLayout>
+
+            <Button
+                    android:id="@+id/add_trip_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_trip_text_button"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:background="@color/colorPrimary"
+                    />
+        </LinearLayout>
+    </ScrollView>
+
+    <include layout="@layout/progress_bar" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
