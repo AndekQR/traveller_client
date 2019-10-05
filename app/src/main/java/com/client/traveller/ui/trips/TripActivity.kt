@@ -11,8 +11,6 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
 
-
-
 class TripActivity : AppCompatActivity(), KodeinAware {
 
     override val kodein by kodein()

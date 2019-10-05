@@ -1,8 +1,6 @@
 package com.client.traveller.data.network.firebase.auth
 
 import android.net.Uri
-import com.facebook.login.LoginManager
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth

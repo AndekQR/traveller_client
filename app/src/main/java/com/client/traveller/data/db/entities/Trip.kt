@@ -2,8 +2,6 @@ package com.client.traveller.data.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import org.threeten.bp.LocalDate
-import org.threeten.bp.LocalDateTime
 
 /**
  * Dane wycieczki tylko w której aktualnie użytkownik uczestniczy

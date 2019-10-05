@@ -13,16 +13,12 @@ import com.facebook.AccessToken
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class UserRepositoryImpl(
     private val userDao: UserDao,
@@ -150,7 +146,7 @@ class UserRepositoryImpl(
     }
 
     override fun updateLocalUserDataAsync(user: User) {
-        GlobalScope.launch(Dispatchers.IO){
+        GlobalScope.launch(Dispatchers.IO) {
             userDao.upsert(user)
         }
     }
@@ -253,12 +249,12 @@ class UserRepositoryImpl(
     }
 
     override fun logoutUser(googleSignInClient: GoogleSignInClient) {
-        GlobalScope.launch(Dispatchers.IO){
+        GlobalScope.launch(Dispatchers.IO) {
             userDao.deleteUser()
         }
         val currentUser = FirebaseAuth.getInstance().currentUser
-        currentUser?.let {user ->
-            when(true){
+        currentUser?.let { user ->
+            when (true) {
                 authProvider.isUserFacebookAuth(user) -> authFacebook.logout()
                 authProvider.isUserGoogleAuth(user) -> authGoogle.logout(googleSignInClient)
                 authProvider.isUserNormalAuth(user) -> authNormal.logout()

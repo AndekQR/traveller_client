@@ -36,7 +36,7 @@ class HomeViewModel(
         userRepository.updateProfile(user)
     }
 
-    fun updateAvatar(user: User, avatarUrl: String){
+    fun updateAvatar(user: User, avatarUrl: String) {
         userRepository.updateAvatar(user, avatarUrl)
     }
 

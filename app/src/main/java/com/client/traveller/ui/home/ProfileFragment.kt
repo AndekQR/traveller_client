@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +18,6 @@ import com.bumptech.glide.Glide
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.services.UploadService
-import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.util.Constants.Companion.KEY_FILE_URI
 import com.client.traveller.ui.util.Constants.Companion.READ_REQUEST_CODE
 import com.client.traveller.ui.util.ScopedFragment
@@ -28,8 +26,6 @@ import com.client.traveller.ui.util.showProgressBar
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.progress_bar.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
@@ -123,9 +119,10 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
 
         fileUri?.let {
             // image/png
-            val type = DocumentFile.fromSingleUri(context!!, fileUri!!)?.type?.substringAfterLast("/")
+            val type =
+                DocumentFile.fromSingleUri(context!!, fileUri!!)?.type?.substringAfterLast("/")
             if (type != null && (type.equals("png") || type.equals("jpg") || type.equals("jpeg"))) {
-                val fileName = currentUser.idUserFirebase+"."+type
+                val fileName = currentUser.idUserFirebase + "." + type
                 this.uploadFromUri(it, fileName)
             }
         }
@@ -134,7 +131,7 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
 
     }
 
-    private fun updateUserAvatar() = launch{
+    private fun updateUserAvatar() = launch {
         if (downloadUrl != null) {
             viewModel.updateAvatar(currentUser, downloadUrl.toString())
         }

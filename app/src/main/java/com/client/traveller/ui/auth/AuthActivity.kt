@@ -25,7 +25,7 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
     private lateinit var viewModel: AuthViewModel
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
-    companion object{
+    companion object {
         private val REQUIRED_PERMISSIONS = listOf(
             Manifest.permission.INTERNET,
             Manifest.permission.ACCESS_COARSE_LOCATION,

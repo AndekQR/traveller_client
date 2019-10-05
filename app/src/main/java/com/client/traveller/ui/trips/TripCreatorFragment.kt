@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,14 +16,12 @@ import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.ui.util.ScopedFragment
-import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.showProgressBar
 import kotlinx.android.synthetic.main.fragment_trip_creator.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.trip_creator_edit_form.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
@@ -131,33 +128,35 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
      * Metoda suspend wykonuje wszyzstko po koleji
      * Suspend bo musimy czekać na wynik dodawania wycieczki do baz danych
      */
-    private suspend fun addTripShowResult(trip: Trip){
+    private suspend fun addTripShowResult(trip: Trip) {
         try {
             viewModel.addTripAsync(trip)
-        } catch (ex: Exception){
+        } catch (ex: Exception) {
             com.client.traveller.ui.dialog.Dialog.Builder()
                 .addMessage(ex.message!!)
-                .addPositiveButton("ok"){dialog ->
+                .addPositiveButton("ok") { dialog ->
                     dialog.dismiss()
-                    Navigation.findNavController(this@TripCreatorFragment.view!!).navigate(R.id.tripListFragment)
+                    Navigation.findNavController(this@TripCreatorFragment.view!!)
+                        .navigate(R.id.tripListFragment)
                 }.build(fragmentManager, javaClass.simpleName)
             return
         }
-        Navigation.findNavController(this@TripCreatorFragment.view!!).navigate(R.id.tripListFragment)
+        Navigation.findNavController(this@TripCreatorFragment.view!!)
+            .navigate(R.id.tripListFragment)
     }
 
     /**
      * Metoda ładuje dane z pól do edycji
      * Usuwa też spacje na początku i na końcu
      */
-    private fun loadData(){
+    private fun loadData() {
         tripName = trip_name.text.toString().trim()
         tripStartAddress = trip_start_address.text.toString().trim()
         tripEndAddress = trip_end_address.text.toString().trim()
         personsEmailString = persons.map {
             it.edit_text.text.toString().trim()
         }
-        personsEmailString = personsEmailString.filter {email: String ->
+        personsEmailString = personsEmailString.filter { email: String ->
             email.isNotBlank()
         }
         waypointsString = waypoints.map {
@@ -278,7 +277,7 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
         )
             return false
 
-        if (personsEmailString.isNotEmpty()){
+        if (personsEmailString.isNotEmpty()) {
             personsEmailString.forEach {
                 if (!android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches())
                     return false

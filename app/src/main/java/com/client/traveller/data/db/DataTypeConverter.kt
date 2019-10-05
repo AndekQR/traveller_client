@@ -6,10 +6,8 @@ import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.threeten.bp.LocalDate
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
-import java.util.*
 
 object DataTypeConverter {
 
@@ -30,20 +28,20 @@ object DataTypeConverter {
 
     @TypeConverter
     @JvmStatic
-    fun listToJson(value: List<String>?): String?{
+    fun listToJson(value: List<String>?): String? {
         return Gson().toJson(value)
     }
 
     @TypeConverter
     @JvmStatic
-    fun jsonToList(value: String?): List<String>?{
+    fun jsonToList(value: String?): List<String>? {
         val listType = object : TypeToken<List<Trip>>() {}.type
         return Gson().fromJson(value, listType)
     }
 
     @TypeConverter
     @JvmStatic
-    fun stringToDate(value: String?): LocalDateTime?{
+    fun stringToDate(value: String?): LocalDateTime? {
         if (value == null)
             return null
         else
@@ -52,19 +50,19 @@ object DataTypeConverter {
 
     @TypeConverter
     @JvmStatic
-    fun dateToString(dateTime: LocalDateTime?): String?{
+    fun dateToString(dateTime: LocalDateTime?): String? {
         return dateTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     }
 
     @TypeConverter
     @JvmStatic
-    fun jsonToUser(value: String?): User?{
+    fun jsonToUser(value: String?): User? {
         return Gson().fromJson(value, User::class.java)
     }
 
     @TypeConverter
     @JvmStatic
-    fun userToJson(value: User?): String?{
+    fun userToJson(value: User?): String? {
         return Gson().toJson(value)
     }
 }

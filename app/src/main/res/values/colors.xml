@@ -11,4 +11,5 @@
     <color name="colorWhiteDarkMaterial">#F6F6F6</color>
     <color name="colorDark">#212121</color>
     <color name="grey">#E0E0E0</color>
+    <color name="transparent">#00000000</color>
 </resources>

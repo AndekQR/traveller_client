@@ -24,7 +24,7 @@ class AuthFacebook {
         return FirebaseAuth.getInstance().signInWithCredential(credential)
     }
 
-    fun logout(){
+    fun logout() {
         LoginManager.getInstance().logOut()
     }
 }

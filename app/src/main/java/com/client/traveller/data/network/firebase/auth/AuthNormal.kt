@@ -18,7 +18,7 @@ class AuthNormal {
         return FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
     }
 
-    fun logout(){
+    fun logout() {
         FirebaseAuth.getInstance().signOut()
     }
 }

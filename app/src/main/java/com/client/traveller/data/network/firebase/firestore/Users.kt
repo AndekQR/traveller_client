@@ -6,7 +6,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 
 
 /**
@@ -26,7 +25,7 @@ class Users {
         return this.getUsersCollection().document(user.idUserFirebase!!).set(user)
     }
 
-     fun getUser(uid: String): Task<DocumentSnapshot> {
+    fun getUser(uid: String): Task<DocumentSnapshot> {
         return this.getUsersCollection().document(uid).get()
     }
 

@@ -7,9 +7,10 @@ import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.network.firebase.firestore.Trips
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.QuerySnapshot
-import kotlinx.coroutines.*
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.suspendCoroutine
 
 class TripRepositoryImpl(
@@ -21,26 +22,27 @@ class TripRepositoryImpl(
 
     override suspend fun getAllTrips(): MutableLiveData<List<Trip>> {
 
-            this.trips.getAllTrips()
-                .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
-                    exception?.let {
-                        Log.e(javaClass.simpleName, exception.message)
-                        return@EventListener
-                    }
+        this.trips.getAllTrips()
+            .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
+                exception?.let {
+                    Log.e(javaClass.simpleName, exception.message)
+                    return@EventListener
+                }
 
 
-                    val trips = mutableListOf<Trip>()
-                    for (doc in querySnapshot!!) {
-                        val trip = doc.toObject(Trip::class.java)
-                        trips.add(trip)
-                    }
-                    tripList.value = trips
-                })
+                val trips = mutableListOf<Trip>()
+                for (doc in querySnapshot!!) {
+                    val trip = doc.toObject(Trip::class.java)
+                    trips.add(trip)
+                }
+                tripList.value = trips
+            })
 
         return this.tripList
     }
 
-    override suspend fun newTrip(trip: Trip)= withContext(Dispatchers.IO) {
+    // TODO withContext jest chyba nie potrzebne i logi
+    override suspend fun newTrip(trip: Trip) = withContext(Dispatchers.IO) {
         Log.e(javaClass.simpleName, "3")
         suspendCoroutine<Void?> { continuation ->
             trips.addNewTrip(trip).addOnCompleteListener {
@@ -50,7 +52,7 @@ class TripRepositoryImpl(
                     return@addOnCompleteListener
                 } else {
                     Log.e(javaClass.simpleName, "4")
-                    GlobalScope.launch(Dispatchers.IO){
+                    GlobalScope.launch(Dispatchers.IO) {
                         tripDao.upsert(trip)
                     }
                     continuation.resumeWith(Result.success(it.result))
