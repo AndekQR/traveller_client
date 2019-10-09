@@ -43,7 +43,6 @@ class TripRepositoryImpl(
 
     // TODO withContext jest chyba nie potrzebne i logi
     override suspend fun newTrip(trip: Trip) = withContext(Dispatchers.IO) {
-        Log.e(javaClass.simpleName, "3")
         suspendCoroutine<Void?> { continuation ->
             trips.addNewTrip(trip).addOnCompleteListener {
                 if (!it.isSuccessful) {
@@ -51,7 +50,6 @@ class TripRepositoryImpl(
                     continuation.resumeWith(Result.failure(it.exception!!))
                     return@addOnCompleteListener
                 } else {
-                    Log.e(javaClass.simpleName, "4")
                     GlobalScope.launch(Dispatchers.IO) {
                         tripDao.upsert(trip)
                     }

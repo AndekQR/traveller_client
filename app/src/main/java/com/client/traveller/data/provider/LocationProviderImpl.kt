@@ -12,6 +12,7 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.client.traveller.data.network.map.MapUtilsImpl
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -44,9 +45,12 @@ class LocationProviderImpl(
     private val SEND_LOCATION = "SEND_LOCATION"
     private val CAMERA_TRACKING = "CAMERA_TRACKING"
 
+
+    override var currentLocation: Location? = null
+    override var lastUpdateTime: String? = null
+
     private var mMap: GoogleMap? = null
 
-    var lastUpdateTime: String? = null
     private val updateIntervalMs: Long = 5000
     private val fastestUpdateIntervalMs: Long = 3000
     private val requestCheckSettings = 100
@@ -55,7 +59,7 @@ class LocationProviderImpl(
     private var locationRequest: LocationRequest? = null
     private var locationSettingsRequest: LocationSettingsRequest? = null
     private var locationCallback: LocationCallback? = null
-    var currentLocation: Location? = null
+
 
     private var requestingLocationUpdates: Boolean = false
 
@@ -83,7 +87,6 @@ class LocationProviderImpl(
         }
 
         this.context = context
-
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 super.onLocationResult(locationResult)
@@ -108,7 +111,7 @@ class LocationProviderImpl(
         settingsClient = LocationServices.getSettingsClient(context)
         locationSettingsRequest = builder.build()
 
-        mapFragment.getMapAsync(this)  // This class automatically initializes the maps system and the view.
+        mapFragment.getMapAsync(this)
     }
 
     /**
@@ -121,9 +124,10 @@ class LocationProviderImpl(
 
         mMap = googleMap
         checkPermissions()
-        mMap?.isMyLocationEnabled = true //blue dot on the map
+        // niebieska kropka na mapie
+        mMap?.isMyLocationEnabled = true
+        MapUtilsImpl(this)
         this.changeMapUI()
-        mMap?.setOnMapClickListener(this)
         startLocationUpdates()
 
     }
@@ -205,8 +209,6 @@ class LocationProviderImpl(
                 when ((e as ApiException).statusCode) {
                     LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> {
                         try {
-                            // Show the dialog by calling startResolutionForResult(), and check the
-                            // result in onActivityResult().
                             val rae = e as ResolvableApiException
                             rae.startResolutionForResult(context as Activity, requestCheckSettings)
                         } catch (sie: IntentSender.SendIntentException) {
@@ -296,34 +298,8 @@ class LocationProviderImpl(
         return true
     }
 
-
-    override fun onMapClick(position: LatLng) {
-        // TODO do zaimplementowania, po kliknięci wyskakuje menu z tym miejscem i z informacjami o nim, jeżeli nie ma w danym miejscu nic to obiekty w pobliżu
-        // znacznik czyszczony po po otwrciu menu
-        // mmenu się
-        mMap?.addMarker(MarkerOptions().position(position).title("onClick"))
-    }
-
-    fun showLastKnownLocation() {
-        Toast.makeText(
-            context, "Lat: " + currentLocation?.latitude
-                    + ", Lng: " + currentLocation?.longitude, Toast.LENGTH_LONG
-        ).show()
-        // Add a marker and move the camera
-        try {
-            val latlng = LatLng(currentLocation?.latitude!!, currentLocation?.longitude!!)
-            mMap?.addMarker(MarkerOptions().position(latlng).title("Last location"))
-            mMap?.moveCamera(CameraUpdateFactory.newLatLng(latlng))
-            mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 12.0f))
-        } catch (ex: NullPointerException) {
-            Toast.makeText(
-                context,
-                "The current location's latitude or longitude is not present!",
-                Toast.LENGTH_LONG
-            )
-                .show()
-        }
-
+    override fun getMap(): GoogleMap?{
+        return mMap
     }
 
 

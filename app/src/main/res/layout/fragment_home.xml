@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.drawerlayout.widget.DrawerLayout
+<androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:openDrawer="start"
         tools:context=".ui.home.HomeFragment"
         >
 
-    <fragment
+    <FrameLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+
+        <fragment
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/map"
@@ -22,42 +24,39 @@
             android:fitsSystemWindows="true"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!--ten z ikona do otwierania drawera ( hamburger ) -->
-    <include
-            layout="@layout/action_bar"
-            />
+        <!--ten z ikona do otwierania drawera ( hamburger ) -->
+<!--        <FrameLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:fitsSystemWindows="true"-->
 
-    <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
 
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="bottom"
-                android:layout_alignParentBottom="true"
-                android:orientation="horizontal">
+<!--            >-->
 
-            <!--tu były przyciski od mapy-->
+<!--            <com.arlib.floatingsearchview.FloatingSearchView-->
+<!--                android:id="@+id/floating_search_view"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                app:floatingSearch_searchHint="@string/search_hint"-->
+<!--                app:floatingSearch_suggestionsListAnimDuration="150"-->
+<!--                app:floatingSearch_showSearchKey="false"-->
+<!--                app:floatingSearch_leftActionMode="showHamburger"-->
+<!--                app:floatingSearch_close_search_on_keyboard_dismiss="true"-->
+<!--                android:gravity="center"-->
+<!--                android:theme="@style/DarkActionBar"-->
+<!--                />-->
 
-        </LinearLayout>
+
+<!--        </FrameLayout>-->
+
+
+
     </FrameLayout>
 
 
-    <!--Drawer-->
-    <com.google.android.material.navigation.NavigationView
-            android:id="@+id/navigation_view"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            app:headerLayout="@layout/nav_header"
-            app:menu="@menu/drawer_menu"
-            android:background="@color/colorWhiteMaterial"
-            app:itemTextColor="@color/colorDark"
-            app:itemIconTint="@color/colorDark"
-            android:theme="@style/AppTheme.NavigationView"
 
 
-            />
 
-</androidx.drawerlayout.widget.DrawerLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 
 

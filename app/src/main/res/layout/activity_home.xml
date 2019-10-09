@@ -1,28 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.drawerlayout.widget.DrawerLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.home.HomeActivity"
+        android:id="@+id/drawer_layout"
+        tools:openDrawer="start"
 >
 
     <fragment
-            android:id="@+id/nav_host_fragment_home"
-            android:name="androidx.navigation.fragment.NavHostFragment"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/nav_host_fragment_home"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
 
-            app:navGraph="@navigation/nav_graph_home" />
+        app:navGraph="@navigation/nav_graph_home" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        >
+
+        <com.paulrybitskyi.persistentsearchview.PersistentSearchView
+            android:id="@+id/persistentSearchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="4dp"
+            android:paddingLeft="4dp"
+            android:paddingStart="4dp"
+            android:paddingRight="4dp"
+            android:paddingEnd="4dp"
+            app:leftButtonDrawable="@drawable/ic_menu"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            app:queryInputHint="@string/search_hint"
+
+            />
+    </FrameLayout>
+
+    <!--Drawer-->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigation_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/drawer_menu"
+        android:background="@color/colorWhiteMaterial"
+        app:itemTextColor="@color/colorDark"
+        app:itemIconTint="@color/colorDark"
+        android:theme="@style/AppTheme.NavigationView"
 
 
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        />
+</androidx.drawerlayout.widget.DrawerLayout>
 
 

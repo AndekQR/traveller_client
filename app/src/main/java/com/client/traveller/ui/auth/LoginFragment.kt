@@ -80,18 +80,18 @@ class LoginFragment : Fragment(), KodeinAware {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        new_account.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.registerFragment))
-        password_reset_button.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.passwordResetFragment))
-        login_button.setOnClickListener {
+        new_account?.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.registerFragment))
+        password_reset_button?.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.passwordResetFragment))
+        login_button?.setOnClickListener {
             this.onLoginButtonClick()
         }
-        google_sign_in_button.setOnClickListener {
+        google_sign_in_button?.setOnClickListener {
             progress_bar.showProgressBar()
             this.googleSignIn()
         }
-        login_button_facebook.fragment = this
-        login_button_facebook.setPermissions("email", "public_profile")
-        login_button_facebook.registerCallback(
+        login_button_facebook?.fragment = this
+        login_button_facebook?.setPermissions("email", "public_profile")
+        login_button_facebook?.registerCallback(
             callbackManagerFacebook,
             object : FacebookCallback<LoginResult> {
                 override fun onError(error: FacebookException?) {

@@ -8,10 +8,14 @@ import com.client.traveller.data.network.firebase.firestore.Trips
 
 import com.client.traveller.data.network.firebase.firestore.Users
 import com.client.traveller.data.network.firebase.storage.Avatars
+import com.client.traveller.data.network.map.MapUtils
+import com.client.traveller.data.network.map.MapUtilsImpl
 
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.provider.LocationProviderImpl
 import com.client.traveller.data.provider.PreferenceProvider
+import com.client.traveller.data.repository.map.MapRepository
+import com.client.traveller.data.repository.map.MapRepositoryImpl
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.trip.TripRepositoryImpl
 import com.client.traveller.data.repository.user.UserRepository
@@ -39,6 +43,7 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { LocationServices.getFusedLocationProviderClient(instance<Context>()) }
         bind() from singleton { PreferenceProvider(instance()) }
         bind<LocationProvider>() with singleton { LocationProviderImpl(instance(), instance()) }
+//        bind<MapUtils>() with singleton { MapUtilsImpl(instance()) }
         bind() from singleton { AppDatabase(instance()) }
         bind() from singleton { Users() }
         bind() from provider { Avatars() }
@@ -67,6 +72,8 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { HomeViewModelFactory(instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }
         bind() from provider { TripViewModelFactory(instance(), instance()) }
+
+        bind<MapRepository>() with singleton { MapRepositoryImpl() }
 
     }
 

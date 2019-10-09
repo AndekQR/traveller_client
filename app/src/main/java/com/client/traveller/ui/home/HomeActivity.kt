@@ -1,35 +1,62 @@
 package com.client.traveller.ui.home
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.util.Log
+import android.view.Gravity
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.BuildConfig
 import com.client.traveller.R
+import com.client.traveller.data.provider.PlacesClientProvider
 import com.client.traveller.data.services.UploadService
+import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.dialog.Dialog
+import com.client.traveller.ui.settings.SettingsActivity
+import com.client.traveller.ui.trips.TripActivity
+import com.client.traveller.ui.util.hideLoding
+import com.client.traveller.ui.util.showLoading
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.libraries.places.api.model.AutocompletePrediction
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
-import kotlinx.android.synthetic.main.fragment_home.*
+import com.paulrybitskyi.persistentsearchview.PersistentSearchView
+import com.paulrybitskyi.persistentsearchview.utils.SuggestionCreationUtil
+import kotlinx.android.synthetic.main.activity_home.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import kotlin.coroutines.suspendCoroutine
 
 class HomeActivity : AppCompatActivity(),
-    KodeinAware {
+    KodeinAware, NavigationView.OnNavigationItemSelectedListener {
 
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
     private lateinit var viewModel: HomeViewModel
     private var doubleBack = false
 
+    private lateinit var searchView: PersistentSearchView
+    private lateinit var drawer: DrawerLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +67,82 @@ class HomeActivity : AppCompatActivity(),
         if (intent != null)
             this.getDynamicLinks()
 
+        drawer = drawer_layout
+        searchView = persistentSearchView
+        initSearchView()
+        navigation_view.setNavigationItemSelectedListener(this)
 
+
+    }
+
+    /**
+     * Inicjalizacja [searchView]
+     */
+    private fun initSearchView() {
+        searchView.hideRightButton()
+        searchView.setVoiceInputButtonDrawable(null)
+
+        searchView.setOnLeftBtnClickListener {
+            if (!this.drawer.isDrawerOpen(Gravity.LEFT))
+                drawer.openDrawer(Gravity.LEFT)
+            else
+                drawer.closeDrawer(Gravity.LEFT)
+        }
+
+        searchView.setOnSearchConfirmedListener { searchView, query ->
+            //TODO momżna wybierać pierwszy rezulatat
+        }
+        searchView.setOnSearchQueryChangeListener { _, _, newQuery ->
+            if (newQuery.isNotEmpty()){
+                this.searchView.showLoading()
+                performSearch(newQuery)
+            }
+        }
+    }
+
+    /**
+     * Pobranie i wpisanie wyników do sugestii searchview
+     * @param query zapytanie z searchview
+     */
+    private fun performSearch(query: String) = GlobalScope.launch(Dispatchers.Main) {
+        val suggestions =
+            SuggestionCreationUtil.asRegularSearchSuggestions(this@HomeActivity.search(query))
+        this@HomeActivity.searchView.hideLoding()
+        persistentSearchView.setSuggestions(suggestions, true)
+    }
+
+    /**
+     * Pobranie wyników z [PlacesClientProvider] na podstawie [query]
+     * @param query zapytanie z searchview
+     */
+    private suspend fun search(query: String): List<String> {
+        val placesClient = PlacesClientProvider.getClient(this)
+        val token = AutocompleteSessionToken.newInstance()
+        var predictionList: List<AutocompletePrediction>
+        var suggestionList: List<String>
+        val telephonyManager = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+
+        val predictionsRequest = FindAutocompletePredictionsRequest.builder()
+            .setCountry(telephonyManager.networkCountryIso)
+            .setTypeFilter(TypeFilter.ADDRESS)
+            .setSessionToken(token)
+            .setQuery(query)
+            .build()
+
+        return suspendCoroutine { continuation ->
+            placesClient.findAutocompletePredictions(predictionsRequest).addOnCompleteListener {
+                if (it.isSuccessful) {
+                    val predictionsResponse = it.result
+                    if (predictionsResponse != null) {
+                        predictionList = predictionsResponse.autocompletePredictions
+                        suggestionList = predictionList.map { prediction ->
+                            prediction.getFullText(null).toString()
+                        }
+                        continuation.resumeWith(Result.success(suggestionList))
+                    }
+                }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -113,6 +215,38 @@ class HomeActivity : AppCompatActivity(),
         if (viewModel.sendingLocationData()) {
             viewModel.startLocationUpdates()
         }
+
+    }
+
+    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.ustawienia_item -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+            }
+            R.id.trips -> {
+                Intent(this, TripActivity::class.java).also {
+                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    it.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    startActivity(it)
+                }
+            }
+            R.id.logout -> {
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                val mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+
+                viewModel.logoutUser(mGoogleSignInClient)
+                Intent(this, AuthActivity::class.java).also {
+                    it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(it)
+                }
+            }
+            R.id.profile -> {
+//                Navigation.findNavController(this, R.id.fragment_home).navigate(R.id.profileFragment)
+            }
+        }
+        drawer_layout.closeDrawer(GravityCompat.START)
+        return true
     }
 
     /**
