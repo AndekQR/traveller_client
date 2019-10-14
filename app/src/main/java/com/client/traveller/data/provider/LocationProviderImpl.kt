@@ -12,7 +12,10 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.network.map.MapUtilsImpl
+import com.client.traveller.ui.home.HomeActivity
+import com.client.traveller.ui.util.Coroutines
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -21,12 +24,17 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 
 /**
  * Klasa zarządzająca lokalizacją urządzenia
+ * Odpowiedzialna także za:
+ * - śledząca kamerę
+ * - wysyłanie lokalizacji do firestore TODO wysyłanie
  *
  * @param fusedLocationClient: zapewnia API do lokalizacji. Wstrzykiwany przez KODEIN
  * @param preferenceProvider: obiekt klasy [PreferenceProvider], zapewnia dostęp do stanu ustawień aplikacji. Wstrzykiwany przez KODEIN
@@ -36,20 +44,20 @@ class LocationProviderImpl(
     private val preferenceProvider: PreferenceProvider
 ) : LocationProvider {
 
-
     /**
      * [TAG] używany do logowania
      * [SEND_LOCATION] i [CAMERA_TRACKING] stałe które mają przypisane klucze pól w ustawieniach aplikacji
      */
-    val TAG = this::class.java.simpleName
-    private val SEND_LOCATION = "SEND_LOCATION"
-    private val CAMERA_TRACKING = "CAMERA_TRACKING"
+    companion object {
+        private const val SEND_LOCATION = "SEND_LOCATION"
+        private const val CAMERA_TRACKING = "CAMERA_TRACKING"
+    }
 
-
+    override var isInitialized: Boolean = false
     override var currentLocation: Location? = null
     override var lastUpdateTime: String? = null
-
-    private var mMap: GoogleMap? = null
+    override var mMap: GoogleMap? = null
+    override var mapFragment: SupportMapFragment? = null
 
     private val updateIntervalMs: Long = 5000
     private val fastestUpdateIntervalMs: Long = 3000
@@ -60,10 +68,10 @@ class LocationProviderImpl(
     private var locationSettingsRequest: LocationSettingsRequest? = null
     private var locationCallback: LocationCallback? = null
 
-
     private var requestingLocationUpdates: Boolean = false
 
     private lateinit var context: Context
+    private lateinit var function: () -> Unit
 
     /**
      * Metoda inicjalizująca jest wywoływana za każdym razem kiedy jest tworzona [HomeActivity]
@@ -76,10 +84,12 @@ class LocationProviderImpl(
     override fun init(
         mapFragment: SupportMapFragment,
         context: Context,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
+        function: () -> Unit
     ) {
-
         this.restoreValuesFromBundle(savedInstanceState)
+        this.mapFragment = mapFragment
+        this.function = function
 
         if (mMap != null) {
             mapFragment.getMapAsync(this)
@@ -97,6 +107,10 @@ class LocationProviderImpl(
                 lastUpdateTime = DateFormat.getTimeInstance().format(Date())
                 updateLocationUI()
 
+//                if (!preferenceProvider.getPreferenceState(SEND_LOCATION))
+//                    return
+                //wyślij lokalizacje do firestore
+
             }
         }
         locationRequest = LocationRequest.create()?.apply {
@@ -111,7 +125,7 @@ class LocationProviderImpl(
         settingsClient = LocationServices.getSettingsClient(context)
         locationSettingsRequest = builder.build()
 
-        mapFragment.getMapAsync(this)
+       mapFragment.getMapAsync(this)
     }
 
     /**
@@ -123,29 +137,18 @@ class LocationProviderImpl(
             return
 
         mMap = googleMap
+        function.invoke()
         checkPermissions()
         // niebieska kropka na mapie
         mMap?.isMyLocationEnabled = true
-        MapUtilsImpl(this)
-        this.changeMapUI()
         startLocationUpdates()
+        this.isInitialized = true
 
     }
 
-    /**
-     * isBuildingEnabled = włącza wyświetlanie budynków 3D
-     *
-     */
-    private fun changeMapUI() {
-        val ui = mMap?.uiSettings
-
-        ui?.isMyLocationButtonEnabled = false
-        ui?.isCompassEnabled = false
-        mMap?.isBuildingsEnabled = true
-    }
 
     //TODO w HomeActivity nie ma zapisywania tych wartości -> nie ma co przywracać
-    private fun restoreValuesFromBundle(savedInstanceState: Bundle?) {
+    private fun restoreValuesFromBundle(savedInstanceState: Bundle?) = Coroutines.main {
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey("is_requesting_updates")) {
                 requestingLocationUpdates = savedInstanceState.getBoolean("is_requesting_updates")
@@ -159,24 +162,16 @@ class LocationProviderImpl(
                 lastUpdateTime = savedInstanceState.getString("last_updated_on")
             }
         }
-
-        updateLocationUI()
     }
 
-    fun updateLocationUI() {
-        if (currentLocation == null)
-            return
-
-        // location last updated time
-        //txtUpdatedOn.setText("Last updated on: " + mLastUpdateTime);
-        Toast.makeText(
-            context,
-            "Lat: " + currentLocation?.latitude + ", Lng: " + currentLocation?.longitude,
-            Toast.LENGTH_LONG
-        ).show()
-
-        if (preferenceProvider.getPreferenceState(CAMERA_TRACKING)) {
-            var cameraPosition = CameraPosition.Builder().zoom(17F).tilt(50F).target(
+    /**
+     * Kamera śledząca
+     * Za każdą aktualizacją lokalizacji następuje zmiana kamery na tą lokalizacje jeśli
+     * kamera śledząca jest aktywna
+     */
+    fun updateLocationUI() = Coroutines.main {
+        if (preferenceProvider.getPreferenceState(CAMERA_TRACKING) && currentLocation != null) {
+            val cameraPosition = CameraPosition.Builder().zoom(17F).tilt(50F).target(
                 LatLng(
                     currentLocation?.latitude!!,
                     currentLocation?.longitude!!
@@ -190,10 +185,8 @@ class LocationProviderImpl(
 
     @SuppressLint("MissingPermission")
     override fun startLocationUpdates() {
-        if (!preferenceProvider.getPreferenceState(SEND_LOCATION))
-            return
 
-        checkPermissions()
+        this.checkPermissions()
         requestingLocationUpdates = true
         settingsClient?.checkLocationSettings(locationSettingsRequest)
             ?.addOnSuccessListener(context as Activity) {
@@ -212,14 +205,14 @@ class LocationProviderImpl(
                             val rae = e as ResolvableApiException
                             rae.startResolutionForResult(context as Activity, requestCheckSettings)
                         } catch (sie: IntentSender.SendIntentException) {
-                            Log.i(TAG, "PendingIntent unable to execute request.")
+                            Log.i(javaClass.simpleName, sie.message)
                         }
 
                     }
                     LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
                         val errorMessage =
                             "Location settings are inadequate, and cannot be " + "fixed here. Fix in Settings."
-                        Log.e(TAG, errorMessage)
+                        Log.e(javaClass.simpleName, errorMessage)
 
                         Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
                     }
@@ -230,11 +223,7 @@ class LocationProviderImpl(
 
     override fun stopLocationUpdates() {
         requestingLocationUpdates = false
-
         fusedLocationClient.removeLocationUpdates(locationCallback)
-            ?.addOnCompleteListener(context as Activity) {
-                Toast.makeText(context, "Location updates stopped!", Toast.LENGTH_SHORT).show()
-            }
     }
 
     /**
@@ -252,7 +241,7 @@ class LocationProviderImpl(
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                context as Activity,
+                context as HomeActivity,
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION
@@ -297,10 +286,4 @@ class LocationProviderImpl(
         }
         return true
     }
-
-    override fun getMap(): GoogleMap?{
-        return mMap
-    }
-
-
 }

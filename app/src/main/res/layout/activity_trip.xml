@@ -8,7 +8,7 @@
         android:orientation="vertical"
         android:fitsSystemWindows="true"
         android:background="@color/colorPrimary"
-        tools:context=".ui.trips.TripActivity">
+        tools:context=".ui.trip.TripActivity">
 
     <LinearLayout
             android:layout_width="match_parent"

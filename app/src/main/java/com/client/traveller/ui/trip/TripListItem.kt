@@ -1,4 +1,4 @@
-package com.client.traveller.ui.trips
+package com.client.traveller.ui.trip
 
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip

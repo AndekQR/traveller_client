@@ -1,6 +1,5 @@
 package com.client.traveller.ui.home
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,15 +15,19 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import com.client.traveller.BuildConfig
 import com.client.traveller.R
 import com.client.traveller.data.provider.PlacesClientProvider
 import com.client.traveller.data.services.UploadService
+import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.settings.SettingsActivity
-import com.client.traveller.ui.trips.TripActivity
+import com.client.traveller.ui.trip.TripActivity
+import com.client.traveller.ui.util.Coroutines
 import com.client.traveller.ui.util.hideLoding
 import com.client.traveller.ui.util.showLoading
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -39,9 +42,7 @@ import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.paulrybitskyi.persistentsearchview.PersistentSearchView
 import com.paulrybitskyi.persistentsearchview.utils.SuggestionCreationUtil
 import kotlinx.android.synthetic.main.activity_home.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.android.synthetic.main.nav_header.view.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
@@ -64,6 +65,12 @@ class HomeActivity : AppCompatActivity(),
 
         viewModel = ViewModelProvider(this, factory).get(HomeViewModel::class.java)
 
+        viewModel.getLoggedInUser().observe(this, Observer { user ->
+            if (user != null) {
+                this.setSubtitleNavView(user.email!!)
+            }
+        })
+
         if (intent != null)
             this.getDynamicLinks()
 
@@ -71,7 +78,6 @@ class HomeActivity : AppCompatActivity(),
         searchView = persistentSearchView
         initSearchView()
         navigation_view.setNavigationItemSelectedListener(this)
-
 
     }
 
@@ -93,18 +99,22 @@ class HomeActivity : AppCompatActivity(),
             //TODO momżna wybierać pierwszy rezulatat
         }
         searchView.setOnSearchQueryChangeListener { _, _, newQuery ->
-            if (newQuery.isNotEmpty()){
+            if (newQuery.isNotEmpty()) {
                 this.searchView.showLoading()
                 performSearch(newQuery)
             }
         }
     }
 
+    private fun setSubtitleNavView(subtitle: String) = Coroutines.main {
+        navigation_view.getHeaderView(0).subtitle.text = subtitle
+    }
+
     /**
      * Pobranie i wpisanie wyników do sugestii searchview
      * @param query zapytanie z searchview
      */
-    private fun performSearch(query: String) = GlobalScope.launch(Dispatchers.Main) {
+    private fun performSearch(query: String) = Coroutines.main {
         val suggestions =
             SuggestionCreationUtil.asRegularSearchSuggestions(this@HomeActivity.search(query))
         this@HomeActivity.searchView.hideLoding()
@@ -231,6 +241,11 @@ class HomeActivity : AppCompatActivity(),
                     startActivity(it)
                 }
             }
+            R.id.about -> {
+                Intent(this, AboutActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
             R.id.logout -> {
                 val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
                 val mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
@@ -242,7 +257,7 @@ class HomeActivity : AppCompatActivity(),
                 }
             }
             R.id.profile -> {
-//                Navigation.findNavController(this, R.id.fragment_home).navigate(R.id.profileFragment)
+                Navigation.findNavController(this, R.id.nav_host_fragment_home).navigate(R.id.profileFragment)
             }
         }
         drawer_layout.closeDrawer(GravityCompat.START)

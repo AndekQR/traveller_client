@@ -7,7 +7,7 @@
 
     <fragment
             android:id="@+id/tripCreatorFragment"
-            android:name="com.client.traveller.ui.trips.TripCreatorFragment"
+            android:name="com.client.traveller.ui.trip.TripCreatorFragment"
             android:label="fragment_trip_creator"
             tools:layout="@layout/fragment_trip_creator" >
         <action
@@ -16,7 +16,7 @@
     </fragment>
     <fragment
             android:id="@+id/tripListFragment"
-            android:name="com.client.traveller.ui.trips.TripListFragment"
+            android:name="com.client.traveller.ui.trip.TripListFragment"
             android:label="fragment_trip_list"
             tools:layout="@layout/fragment_trip_list" >
         <action

@@ -23,7 +23,7 @@ import com.client.traveller.data.repository.user.UserRepositoryImpl
 import com.client.traveller.ui.auth.AuthViewModelFactory
 import com.client.traveller.ui.home.HomeViewModelFactory
 import com.client.traveller.ui.settings.SettingsViewModelFactory
-import com.client.traveller.ui.trips.TripViewModelFactory
+import com.client.traveller.ui.trip.TripViewModelFactory
 import com.google.android.gms.location.LocationServices
 import com.jakewharton.threetenabp.AndroidThreeTen
 
@@ -31,19 +31,17 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.androidXModule
-import org.kodein.di.generic.bind
-import org.kodein.di.generic.instance
-import org.kodein.di.generic.provider
-import org.kodein.di.generic.singleton
+import org.kodein.di.generic.*
 
 class TravellerAplication : Application(), KodeinAware {
+
     override val kodein = Kodein.lazy {
         import(androidXModule(this@TravellerAplication))
 
         bind() from provider { LocationServices.getFusedLocationProviderClient(instance<Context>()) }
         bind() from singleton { PreferenceProvider(instance()) }
         bind<LocationProvider>() with singleton { LocationProviderImpl(instance(), instance()) }
-//        bind<MapUtils>() with singleton { MapUtilsImpl(instance()) }
+        bind<MapUtils>() with singleton { MapUtilsImpl(instance()) }
         bind() from singleton { AppDatabase(instance()) }
         bind() from singleton { Users() }
         bind() from provider { Avatars() }
@@ -65,6 +63,7 @@ class TravellerAplication : Application(), KodeinAware {
                 instance()
             )
         }
+        bind<MapRepository>() with singleton { MapRepositoryImpl(instance(), instance()) }
         bind() from provider { Trips() }
         bind() from singleton { instance<AppDatabase>().tripDao() }
         bind<TripRepository>() with singleton { TripRepositoryImpl(instance(), instance()) }
@@ -73,14 +72,20 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { SettingsViewModelFactory(instance()) }
         bind() from provider { TripViewModelFactory(instance(), instance()) }
 
-        bind<MapRepository>() with singleton { MapRepositoryImpl() }
+
 
     }
 
     override fun onCreate() {
         super.onCreate()
 
+        myContext = this
         AndroidThreeTen.init(this)
+    }
+
+    companion object {
+        private var myContext: Context? = null
+        fun getContext() = myContext
     }
 
 }

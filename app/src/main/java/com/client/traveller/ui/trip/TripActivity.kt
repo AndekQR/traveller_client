@@ -1,4 +1,4 @@
-package com.client.traveller.ui.trips
+package com.client.traveller.ui.trip
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

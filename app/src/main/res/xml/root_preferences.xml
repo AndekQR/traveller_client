@@ -39,7 +39,6 @@
                 android:checked="true"
                 android:disableDependentsState="true"
                 app:iconSpaceReserved="false"
-                android:dependency = "SEND_LOCATION"
         />
 
         <ListPreference

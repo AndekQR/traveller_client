@@ -1,4 +1,4 @@
-package com.client.traveller.ui.trips
+package com.client.traveller.ui.trip
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -130,7 +130,7 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
      */
     private suspend fun addTripShowResult(trip: Trip) {
         try {
-            viewModel.addTripAsync(trip)
+            viewModel.addTrip(trip)
         } catch (ex: Exception) {
             com.client.traveller.ui.dialog.Dialog.Builder()
                 .addMessage(ex.message!!)

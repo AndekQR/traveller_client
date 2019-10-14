@@ -1,4 +1,4 @@
-package com.client.traveller.ui.trips
+package com.client.traveller.ui.trip
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

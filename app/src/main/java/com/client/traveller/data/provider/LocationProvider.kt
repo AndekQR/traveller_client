@@ -12,13 +12,20 @@ import com.google.android.gms.maps.SupportMapFragment
 interface LocationProvider : OnMapReadyCallback,
     Preference.OnPreferenceChangeListener {
 
-    var currentLocation: Location?
-    var lastUpdateTime: String?
+    /**
+     * Pola w interfejsie są umieszczone jako val w rezultacie czego inne klasy nie mogą ich nadpisać
+     * W klasie implementującej ten interfejs są zaimplementowane jako var
+     */
+    val isInitialized: Boolean
+    val currentLocation: Location?
+    val lastUpdateTime: String?
+    val mMap: GoogleMap?
+    val mapFragment: SupportMapFragment?
 
-    fun init(mapFragment: SupportMapFragment, context: Context, savedInstanceState: Bundle?)
+    fun init(mapFragment: SupportMapFragment, context: Context, savedInstanceState: Bundle?, function: () -> Unit)
     fun startLocationUpdates()
     fun stopLocationUpdates()
     fun sendingLocationData(): Boolean
     fun checkPermissions()
-    fun getMap(): GoogleMap?
+
 }

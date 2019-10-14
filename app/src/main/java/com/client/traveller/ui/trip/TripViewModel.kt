@@ -1,4 +1,4 @@
-package com.client.traveller.ui.trips
+package com.client.traveller.ui.trip
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -20,7 +20,7 @@ class TripViewModel(
         return userRepository.getUser()
     }
 
-    suspend fun addTripAsync(trip: Trip): Void? {
+    suspend fun addTrip(trip: Trip): Void? {
         return tripRepository.newTrip(trip)
     }
 

@@ -14,7 +14,7 @@ interface UserRepository {
     fun loginUser(username: String, password: String, function: (Boolean, Exception?) -> Unit)
     fun getUser(): LiveData<User>
     fun logoutUser(googleSignInClient: GoogleSignInClient) //jest tylko jeden aktualnie zalogowany!
-    suspend fun setEmailVerifiedAsync()
+    fun setEmailVerifiedAsync()
     fun updateProfile(user: User)
     fun loginGoogleUser(task: Task<GoogleSignInAccount>?, function: (Boolean, Exception?) -> Unit)
     fun loginFacebookUser(accessToken: AccessToken, function: (Boolean, Exception?) -> Unit)

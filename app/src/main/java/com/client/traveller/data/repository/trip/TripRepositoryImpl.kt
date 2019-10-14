@@ -20,15 +20,17 @@ class TripRepositoryImpl(
 
     private val tripList: MutableLiveData<List<Trip>> = MutableLiveData()
 
-    override suspend fun getAllTrips(): MutableLiveData<List<Trip>> {
-
+    /**
+     * Dodanie obserwatora do wycieczek w firestore
+     * Przy każdej modyfkikacji tychdanych zostanie zaktualizowany [tripList]
+     */
+    init {
         this.trips.getAllTrips()
             .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
                 exception?.let {
                     Log.e(javaClass.simpleName, exception.message)
                     return@EventListener
                 }
-
 
                 val trips = mutableListOf<Trip>()
                 for (doc in querySnapshot!!) {
@@ -37,11 +39,17 @@ class TripRepositoryImpl(
                 }
                 tripList.value = trips
             })
-
-        return this.tripList
     }
 
-    // TODO withContext jest chyba nie potrzebne i logi
+
+    override suspend fun getAllTrips() = this.tripList
+
+    /**
+     * Metoda tworzy nową wycieczkę tzn. zapisuje wycieeczkę do firestore i do lokalnej bazy danych
+     * withContext zmmienia kontekst korutyny w jakiej jest wykonywane, sam nie tworzy nowej
+     *
+     * @param trip wycieczka do zapisania
+     */
     override suspend fun newTrip(trip: Trip) = withContext(Dispatchers.IO) {
         suspendCoroutine<Void?> { continuation ->
             trips.addNewTrip(trip).addOnCompleteListener {

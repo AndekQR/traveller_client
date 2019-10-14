@@ -97,6 +97,7 @@
     <string name="trip_participants_divider_title">Uczestnicy wycieczki</string>
     <string name="waypoints_divider_title">Przystanki</string>
     <string name="main_data">Podstawowe dane</string>
+    <string name="about">O aplikacji</string>
 
     <string-array name="intervals">
         <item>"1 sekunda"</item>

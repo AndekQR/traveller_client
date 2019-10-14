@@ -8,10 +8,6 @@
         tools:context=".ui.home.HomeFragment"
         >
 
-    <FrameLayout
-        android:layout_height="match_parent"
-        android:layout_width="match_parent">
-
 
         <fragment
             android:layout_width="match_parent"
@@ -23,39 +19,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:fitsSystemWindows="true"
             app:layout_constraintEnd_toEndOf="parent"/>
-
-        <!--ten z ikona do otwierania drawera ( hamburger ) -->
-<!--        <FrameLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:fitsSystemWindows="true"-->
-
-
-<!--            >-->
-
-<!--            <com.arlib.floatingsearchview.FloatingSearchView-->
-<!--                android:id="@+id/floating_search_view"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                app:floatingSearch_searchHint="@string/search_hint"-->
-<!--                app:floatingSearch_suggestionsListAnimDuration="150"-->
-<!--                app:floatingSearch_showSearchKey="false"-->
-<!--                app:floatingSearch_leftActionMode="showHamburger"-->
-<!--                app:floatingSearch_close_search_on_keyboard_dismiss="true"-->
-<!--                android:gravity="center"-->
-<!--                android:theme="@style/DarkActionBar"-->
-<!--                />-->
-
-
-<!--        </FrameLayout>-->
-
-
-
-    </FrameLayout>
-
-
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

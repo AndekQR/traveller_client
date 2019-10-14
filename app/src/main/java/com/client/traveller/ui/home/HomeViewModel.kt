@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.provider.LocationProvider
+import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.user.UserRepository
 import com.client.traveller.ui.util.Coroutines
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -15,7 +16,7 @@ import com.google.firebase.auth.FirebaseUser
 
 class HomeViewModel(
     private val userRepository: UserRepository,
-    private val locationProvider: LocationProvider
+    private val mapRepository: MapRepository
 ) : ViewModel() {
 
     fun getLoggedInUser(): LiveData<User> {
@@ -40,24 +41,24 @@ class HomeViewModel(
         userRepository.updateAvatar(user, avatarUrl)
     }
 
-    fun initLocationProvider(
+    fun initMap(
         map: SupportMapFragment,
         context: Context,
         savedInstanceState: Bundle?
     ) {
-        return locationProvider.init(map, context, savedInstanceState)
+        mapRepository.initializeMap(map, context, savedInstanceState)
     }
 
     fun startLocationUpdates() {
-        return locationProvider.startLocationUpdates()
+        return mapRepository.startLocationUpdates()
     }
 
     fun stopLocationUpdates() {
-        return locationProvider.stopLocationUpdates()
+        return mapRepository.stopLocationUpdates()
     }
 
     fun sendingLocationData(): Boolean {
-        return locationProvider.sendingLocationData()
+        return mapRepository.sendingLocationData()
     }
 
     /**
@@ -76,5 +77,6 @@ class HomeViewModel(
                 }
             }
     }
+
 
 }

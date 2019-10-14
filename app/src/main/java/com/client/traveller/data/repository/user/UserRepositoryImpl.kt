@@ -262,7 +262,7 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun setEmailVerifiedAsync() {
+    override fun setEmailVerifiedAsync() {
         GlobalScope.launch(Dispatchers.IO) {
             userDao.setEmailVerified()
             usersFirestore.changeVerifiedStatus(state = true)

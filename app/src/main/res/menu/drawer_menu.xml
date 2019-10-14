@@ -33,6 +33,10 @@
     <group
         android:id="@+id/group_2"
     >
+        <item
+            android:title="@string/about"
+            android:id="@+id/about"
+            android:icon="@drawable/ic_about" />
         <item android:title="@string/log_out"
               android:id="@+id/logout"
               android:icon="@drawable/ic_subdirectory_arrow_left"

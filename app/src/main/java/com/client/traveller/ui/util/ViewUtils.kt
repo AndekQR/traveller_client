@@ -18,14 +18,14 @@ fun RelativeLayout?.hideProgressBar() {
     }
 }
 
-fun PersistentSearchView?.showLoading(){
+fun PersistentSearchView?.showLoading() {
     this?.let {
         it.hideLeftButton()
         it.showProgressBar()
     }
 }
 
-fun PersistentSearchView?.hideLoding(){
+fun PersistentSearchView?.hideLoding() {
     this?.let {
         it.hideProgressBar()
         it.showLeftButton()
