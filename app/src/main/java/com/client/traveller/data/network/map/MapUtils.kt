@@ -11,4 +11,5 @@ interface MapUtils : GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListen
     fun drawRouteToMarker()
     fun drawRouteToLocation(origin: String, destination: String, locations: List<String>, mode: TravelMode)
     fun clearMap()
+    fun centerCurrentLocation()
 }

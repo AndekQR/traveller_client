@@ -11,13 +11,17 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.Gravity
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.NavHostFragment
 import com.client.traveller.BuildConfig
 import com.client.traveller.R
 import com.client.traveller.data.provider.PlacesClientProvider
@@ -36,6 +40,8 @@ import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.material.bottomnavigation.BottomNavigationMenu
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
@@ -49,7 +55,7 @@ import org.kodein.di.generic.instance
 import kotlin.coroutines.suspendCoroutine
 
 class HomeActivity : AppCompatActivity(),
-    KodeinAware, NavigationView.OnNavigationItemSelectedListener {
+    KodeinAware, NavigationView.OnNavigationItemSelectedListener, NavController.OnDestinationChangedListener {
 
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
@@ -58,6 +64,9 @@ class HomeActivity : AppCompatActivity(),
 
     private lateinit var searchView: PersistentSearchView
     private lateinit var drawer: DrawerLayout
+
+    private lateinit var navController: NavController
+    private lateinit var bottomNavigation: BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,8 +85,14 @@ class HomeActivity : AppCompatActivity(),
 
         drawer = drawer_layout
         searchView = persistentSearchView
+        bottomNavigation = bottom_navigation
+        bottomNavigation.selectedItemId = R.id.map
         initSearchView()
         navigation_view.setNavigationItemSelectedListener(this)
+
+        val host = nav_host_fragment_home as NavHostFragment
+        this.navController = host.navController
+        this.navController.addOnDestinationChangedListener(this)
 
     }
 
@@ -259,9 +274,37 @@ class HomeActivity : AppCompatActivity(),
             R.id.profile -> {
                 Navigation.findNavController(this, R.id.nav_host_fragment_home).navigate(R.id.profileFragment)
             }
+            R.id.trip -> {
+
+            }
+            R.id.chat -> {
+
+            }
+            R.id.map -> {
+                Navigation.findNavController(this, R.id.nav_host_fragment_home).navigate(R.id.homeFragment)
+            }
+            R.id.nearby -> {
+
+            }
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+        if (destination.id == R.id.homeFragment)
+            this.searchView.visibility = View.VISIBLE
+        else
+            this.searchView.visibility = View.GONE
+
+        if(destination.id == R.id.profileFragment)
+            this.bottomNavigation.visibility = View.GONE
+        else
+            this.bottomNavigation.visibility = View.VISIBLE
     }
 
     /**

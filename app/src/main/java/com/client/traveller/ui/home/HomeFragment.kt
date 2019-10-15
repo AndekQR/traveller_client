@@ -6,15 +6,22 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.R
 import com.client.traveller.ui.util.ScopedFragment
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
+import android.widget.LinearLayout
+import kotlinx.android.synthetic.main.fragment_home.*
+
 
 class HomeFragment : ScopedFragment(), KodeinAware {
 
@@ -29,6 +36,7 @@ class HomeFragment : ScopedFragment(), KodeinAware {
     ): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
+
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -47,6 +55,12 @@ class HomeFragment : ScopedFragment(), KodeinAware {
                 }
             }
 
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        my_location.setOnClickListener { viewModel.centerOnMe() }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

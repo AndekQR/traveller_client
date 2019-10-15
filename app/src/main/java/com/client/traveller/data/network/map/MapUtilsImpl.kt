@@ -40,7 +40,7 @@ class MapUtilsImpl(
         locationProvider.mMap?.setOnMapLongClickListener(this)
 
         val ui = locationProvider.mMap?.uiSettings
-        ui?.isMyLocationButtonEnabled = true
+        ui?.isMyLocationButtonEnabled = false
         ui?.isCompassEnabled = false
         ui?.isMapToolbarEnabled = false
         locationProvider.mMap?.isBuildingsEnabled = true
@@ -153,5 +153,20 @@ class MapUtilsImpl(
             }
             locationProvider.mMap?.addPolyline(lineOptions)
         }
+    }
+
+    override fun clearMap() {
+        locationProvider.mMap?.clear()
+    }
+
+    override fun centerCurrentLocation() {
+        val currentLocation = LatLng(locationProvider.currentLocation?.latitude!!, locationProvider.currentLocation?.longitude!!)
+        val cameraPosition = CameraPosition.Builder()
+            .target(currentLocation)
+            .zoom(17F)
+            .tilt(50F)
+            .build()
+        val cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition)
+        locationProvider.mMap?.animateCamera(cameraUpdate)
     }
 }

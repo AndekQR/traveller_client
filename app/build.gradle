@@ -136,5 +136,4 @@ dependencies {
 
     implementation 'com.google.android.libraries.places:places:2.0.0'
 
-
 }

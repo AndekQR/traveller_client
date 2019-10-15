@@ -9,4 +9,5 @@ interface MapRepository{
     fun startLocationUpdates()
     fun stopLocationUpdates()
     fun sendingLocationData(): Boolean
+    fun centerCurrentLocation()
 }

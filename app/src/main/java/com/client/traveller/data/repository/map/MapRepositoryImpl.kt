@@ -21,19 +21,11 @@ class MapRepositoryImpl(
         locationProvider.init(mapFragment, context, savedInstanceState){
             mapUtils.initializeMap(context)
         }
-
     }
 
-    override fun startLocationUpdates() {
-        locationProvider.startLocationUpdates()
-    }
-
-    override fun stopLocationUpdates() {
-        locationProvider.stopLocationUpdates()
-    }
-
-    override fun sendingLocationData(): Boolean {
-        return locationProvider.sendingLocationData()
-    }
+    override fun startLocationUpdates() = locationProvider.startLocationUpdates()
+    override fun stopLocationUpdates() = locationProvider.stopLocationUpdates()
+    override fun sendingLocationData() =  locationProvider.sendingLocationData()
+    override fun centerCurrentLocation() = mapUtils.centerCurrentLocation()
 
 }

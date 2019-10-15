@@ -205,7 +205,6 @@ class UserRepositoryImpl(
         }
     }
 
-
     override fun updateProfile(user: User) {
         val profileUpdates = UserProfileChangeRequest.Builder()
             .setDisplayName(user.displayName)
@@ -213,27 +212,10 @@ class UserRepositoryImpl(
             .build()
 
         FirebaseAuth.getInstance().currentUser?.updateEmail(user.email!!)
-            ?.addOnFailureListener {
-                Log.e(javaClass.simpleName, it.message)
-            }
-
         FirebaseAuth.getInstance().currentUser?.updateProfile(profileUpdates)
-            ?.addOnFailureListener {
-                Log.e(javaClass.simpleName, it.localizedMessage)
-            }
         usersFirestore.updateEmail(user.idUserFirebase!!, user.email!!)
-            .addOnFailureListener {
-                Log.e(javaClass.simpleName, it.localizedMessage)
-            }
         usersFirestore.updateImage(user.idUserFirebase!!, user.image!!)
-            .addOnFailureListener {
-                Log.e(javaClass.simpleName, it.localizedMessage)
-            }
         usersFirestore.updateUsername(user.idUserFirebase!!, user.displayName!!)
-            .addOnFailureListener {
-                Log.e(javaClass.simpleName, it.localizedMessage)
-            }
-
         this.updateLocalUserDataAsync(user)
     }
 

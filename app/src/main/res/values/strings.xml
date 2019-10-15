@@ -98,6 +98,11 @@
     <string name="waypoints_divider_title">Przystanki</string>
     <string name="main_data">Podstawowe dane</string>
     <string name="about">O aplikacji</string>
+    <string name="changes_in_minutes">Zmiany będą widoczna za kilka minut</string>
+    <string name="map">Mapa</string>
+    <string name="chat">Chat</string>
+    <string name="nearby">W pobliżu</string>
+    <string name="trip">Wycieczka</string>
 
     <string-array name="intervals">
         <item>"1 sekunda"</item>

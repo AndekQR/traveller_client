@@ -18,12 +18,14 @@ import com.bumptech.glide.Glide
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.services.UploadService
+import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.util.Constants.Companion.KEY_FILE_URI
 import com.client.traveller.ui.util.Constants.Companion.READ_REQUEST_CODE
 import com.client.traveller.ui.util.ScopedFragment
 import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.showProgressBar
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.launch
@@ -127,7 +129,16 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
             }
         }
 
-        viewModel.updateProfile(userDataToUpdate)
+        launch {
+            viewModel.updateProfile(userDataToUpdate)
+        }
+        progress_bar.hideProgressBar()
+        Dialog.Builder()
+            .addMessage(getString(R.string.changes_in_minutes))
+            .addPositiveButton("ok"){
+                it.dismiss()
+            }
+            .build(fragmentManager, javaClass.simpleName)
 
     }
 
@@ -226,6 +237,5 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
             }
         }
     }
-
 
 }

@@ -10,6 +10,7 @@ import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.user.UserRepository
 import com.client.traveller.ui.util.Coroutines
+import com.client.traveller.ui.util.Coroutines.io
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.firebase.auth.FirebaseUser
@@ -19,47 +20,28 @@ class HomeViewModel(
     private val mapRepository: MapRepository
 ) : ViewModel() {
 
-    fun getLoggedInUser(): LiveData<User> {
-        return userRepository.getUser()
-    }
-
-    fun logoutUser(mGoogleSignInClient: GoogleSignInClient) {
-        userRepository.logoutUser(mGoogleSignInClient)
-    }
+    fun getLoggedInUser() = userRepository.getUser()
+    fun logoutUser(mGoogleSignInClient: GoogleSignInClient) = userRepository.logoutUser(mGoogleSignInClient)
 
     fun setEmailVerified() {
-        Coroutines.io {
+        io {
             userRepository.setEmailVerifiedAsync()
         }
     }
 
-    fun updateProfile(user: User) {
-        userRepository.updateProfile(user)
-    }
-
-    fun updateAvatar(user: User, avatarUrl: String) {
-        userRepository.updateAvatar(user, avatarUrl)
-    }
+    fun updateProfile(user: User) = userRepository.updateProfile(user)
+    fun updateAvatar(user: User, avatarUrl: String) = userRepository.updateAvatar(user, avatarUrl)
 
     fun initMap(
         map: SupportMapFragment,
         context: Context,
         savedInstanceState: Bundle?
-    ) {
-        mapRepository.initializeMap(map, context, savedInstanceState)
-    }
+    ) = mapRepository.initializeMap(map, context, savedInstanceState)
 
-    fun startLocationUpdates() {
-        return mapRepository.startLocationUpdates()
-    }
-
-    fun stopLocationUpdates() {
-        return mapRepository.stopLocationUpdates()
-    }
-
-    fun sendingLocationData(): Boolean {
-        return mapRepository.sendingLocationData()
-    }
+    fun startLocationUpdates() = mapRepository.startLocationUpdates()
+    fun stopLocationUpdates() = mapRepository.stopLocationUpdates()
+    fun sendingLocationData() = mapRepository.sendingLocationData()
+    fun centerOnMe() = mapRepository.centerCurrentLocation()
 
     /**
      * Wysyła email weryfikacyjny do podanego użytkownika
@@ -77,6 +59,4 @@ class HomeViewModel(
                 }
             }
     }
-
-
 }
