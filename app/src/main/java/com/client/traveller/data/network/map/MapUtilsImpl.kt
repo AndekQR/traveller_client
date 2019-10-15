@@ -1,24 +1,31 @@
 package com.client.traveller.data.network.map
 
 import android.content.Context
+import android.graphics.Color
 import android.location.Location
 import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
 import com.client.traveller.R
+import com.client.traveller.data.network.map.directions.DirectionsApiService
+import com.client.traveller.data.network.map.directions.model.Route
+import com.client.traveller.data.network.map.directions.model.TravelMode
+import com.client.traveller.data.network.map.directions.response.Directions
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.ui.util.Coroutines
+import com.client.traveller.ui.util.Coroutines.main
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
+import com.google.maps.android.PolyUtil
 
 /**
  * Klasa do zarządzania mapą w [HomeFragment]
  * @param locationProvider wstrzykiwany przez kodein, używany do pobrania mapy i jej widoku
  */
-class MapUtilsImpl(private val locationProvider: LocationProvider) : MapUtils {
+class MapUtilsImpl(
+    private val locationProvider: LocationProvider,
+    private val directionsApiService: DirectionsApiService
+) : MapUtils {
 
     private var markerOnMap: Marker? = null
     private lateinit var context: Context
@@ -55,13 +62,14 @@ class MapUtilsImpl(private val locationProvider: LocationProvider) : MapUtils {
         return true
     }
 
-    private fun drawMarker(position: LatLng) {
+    private fun drawMarker(position: LatLng, default: Boolean = true) {
         val defaultMarker = MarkerOptions()
             .position(position)
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags))
             .draggable(false)
 
-        this.markerOnMap = locationProvider.mMap?.addMarker(defaultMarker)
+        if (default)
+            this.markerOnMap = locationProvider.mMap?.addMarker(defaultMarker)
     }
 
     override fun onMapClick(position: LatLng) {
@@ -73,8 +81,7 @@ class MapUtilsImpl(private val locationProvider: LocationProvider) : MapUtils {
     }
 
     override fun onMapLongClick(position: LatLng) {
-        Log.e(javaClass.simpleName, "long click")
-        this.markerOnMap?.remove()
+        locationProvider.mMap?.clear()
         this.drawMarker(position)
         this.drawRouteToMarker()
     }
@@ -93,26 +100,58 @@ class MapUtilsImpl(private val locationProvider: LocationProvider) : MapUtils {
         }
     }
 
-    override fun drawRouteToLocation(locations: List<Location>) {
+    private fun getLocationString(location: Location?): String{
+        return "${location?.latitude},${location?.longitude}"
+    }
+    private fun getPositionString(position: LatLng?): String {
+        return "${position?.latitude},${position?.longitude}"
+    }
+    private fun getDefaultPolyline(): PolylineOptions {
+        return PolylineOptions()
+            .width(12F)
+            .color(Color.rgb(124,77,255))
+            .geodesic(true)
+    }
 
+    override fun drawRouteToLocation(origin: String, destination: String, locations: List<String>, mode: TravelMode) {
+        val start = origin.trim().replace(" ", "+")
+        val stop = destination.trim().replace(" ", "+")
+        val waypoints = locations.map { it.trim().replace(" ", "+") }
+
+        main {
+            val result = directionsApiService.getDirectionsWithWaypoints(start, stop, mode.name, waypoints)
+            this.drawRoute(result)
+        }
     }
 
     override fun drawRouteToMarker() {
         if (locationProvider.currentLocation == null)
             return
 
+        val origin: String
+        val destination: String
 
-//        val lineOptions = PolylineOptions()
-//            .add(result.routes.first().)
-//            .add(this.markerOnMap?.position)
-//            .width(12F)
-//            .color(Color.CYAN)
-//            .geodesic(true)
+        try {
+            origin = this.getLocationString(locationProvider.currentLocation)
+            destination = this.getPositionString(this.markerOnMap?.position)
 
-//        locationProvider.mMap?.addPolyline(lineOptions)
+            main {
+                val result = directionsApiService.getDirections(origin, destination)
+                this.drawRoute(result)
+            }
+        } catch (ex: Exception) {
+            Log.e(javaClass.simpleName, ex.message)
+        }
     }
 
-    private fun drawRoute() = Coroutines.main {
-
+    private fun drawRoute(result: Directions)  {
+        if (result.status == "OK") {
+            val lineOptions = this.getDefaultPolyline()
+            val pointList = PolyUtil.decode(result.routes.first().overviewPolyline.points)
+            pointList.forEach {
+                lineOptions.add(it)
+            }
+            locationProvider.mMap?.addPolyline(lineOptions)
+        }
     }
 }

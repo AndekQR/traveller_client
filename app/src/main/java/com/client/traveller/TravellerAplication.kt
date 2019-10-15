@@ -10,6 +10,7 @@ import com.client.traveller.data.network.firebase.firestore.Users
 import com.client.traveller.data.network.firebase.storage.Avatars
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.network.map.MapUtilsImpl
+import com.client.traveller.data.network.map.directions.DirectionsApiService
 
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.provider.LocationProviderImpl
@@ -40,8 +41,9 @@ class TravellerAplication : Application(), KodeinAware {
 
         bind() from provider { LocationServices.getFusedLocationProviderClient(instance<Context>()) }
         bind() from singleton { PreferenceProvider(instance()) }
+        bind() from singleton { DirectionsApiService() }
         bind<LocationProvider>() with singleton { LocationProviderImpl(instance(), instance()) }
-        bind<MapUtils>() with singleton { MapUtilsImpl(instance()) }
+        bind<MapUtils>() with singleton { MapUtilsImpl(instance(), instance()) }
         bind() from singleton { AppDatabase(instance()) }
         bind() from singleton { Users() }
         bind() from provider { Avatars() }
