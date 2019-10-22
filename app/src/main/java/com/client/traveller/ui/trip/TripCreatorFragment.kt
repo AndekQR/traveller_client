@@ -2,9 +2,11 @@ package com.client.traveller.ui.trip
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -16,6 +18,7 @@ import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.ui.util.ScopedFragment
+import com.client.traveller.ui.util.setMargins
 import com.client.traveller.ui.util.showProgressBar
 import kotlinx.android.synthetic.main.fragment_trip_creator.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -31,18 +34,19 @@ import org.threeten.bp.LocalTime
 
 class TripCreatorFragment : ScopedFragment(), KodeinAware {
 
-    private val persons: MutableList<View> = mutableListOf()
-    private val waypoints: MutableList<View> = mutableListOf()
+    private val personForms: MutableList<View> = mutableListOf()
+    private val waypointForms: MutableList<View> = mutableListOf()
 
     private lateinit var tripName: String
     private var tripStartDate: LocalDateTime? = null
     private lateinit var tripStartAddress: String
     private var tripEndDate: LocalDateTime? = null
     private lateinit var tripEndAddress: String
-    private var personsEmailString: List<String> = listOf()
-    private var waypointsString: List<String> = listOf()
+    private var personsEmailString: ArrayList<String> = arrayListOf()
+    private var waypointsString: ArrayList<String> = arrayListOf()
 
     private lateinit var currentUser: User
+    private lateinit var currentTrip: Trip
 
     override val kodein by kodein()
     private val factory: TripViewModelFactory by instance()
@@ -62,32 +66,96 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
             progress_bar.showProgressBar()
             this.newTrip()
         }
-
         trip_start_date.setOnClickListener {
             this.pickDate(trip_start_date)
         }
-
         trip_end_date.setOnClickListener {
             this.pickDate(trip_end_date)
         }
-
-
-        if (persons.isEmpty())
-            this.addPerson()
-        if (waypoints.isEmpty())
-            this.addWaypoint()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         viewModel = ViewModelProvider(this, factory).get(TripViewModel::class.java)
-
         viewModel.getLoggedInUser().observe(viewLifecycleOwner, Observer {
             if (it == null) return@Observer
-            currentUser = it
+            this.currentUser = it
         })
 
+
+        arguments?.let {
+            val navigationArguemnts: Trip? = TripCreatorFragmentArgs.fromBundle(it).trip
+            // jeżeli jest nullem to tworzymy nową wycieczkę
+            if (navigationArguemnts != null) {
+                // blokuje edytowalne pola przed modyfikacją
+                this.setEditTextsDisabled()
+                // wpisuje w pola dane z wycieczki
+                this.insertData(navigationArguemnts)
+            } else {
+                if (personForms.isEmpty())
+                    this.addPerson()
+                if (waypointForms.isEmpty())
+                    this.addWaypoint()
+            }
+        }
+    }
+
+    private fun insertData(trip: Trip) {
+        trip_name.setText(trip.name)
+        trip_start_address.setText(trip.startAddress)
+        trip_end_address.setText(trip.endAddress)
+        trip_start_date.setText(viewModel.formatDateTime(trip.startDate))
+        trip_end_date.setText(viewModel.formatDateTime(trip.endDate))
+        trip.persons?.forEach { personEmail ->
+            this.addPerson(personEmail)
+        }
+        trip.waypoints?.forEach { waypointAddress ->
+            this.addWaypoint(waypointAddress)
+        }
+        viewModel.getCurrentTrip().observe(viewLifecycleOwner, Observer {
+            if (it == null) {
+                add_trip_button.setBackgroundColor(Color.GRAY)
+                add_trip_button.isEnabled = false
+                return@Observer
+            } else {
+                this.currentTrip = it
+                if (this.currentTrip == trip) {
+                    add_trip_button.visibility = View.GONE
+                } else {
+                    if (viewModel.isTripParticipant(trip, currentUser)) {
+                        add_trip_button.text = getString(R.string.choose_trip)
+                    } else {
+                        add_trip_button.text = getString(R.string.send_request_add_to_trip)
+                    }
+                }
+            }
+        })
+
+    }
+
+    private fun setEditTextsDisabled() {
+        this.setDisabled(trip_name)
+        this.setDisabled(trip_start_address)
+        this.setDisabled(trip_end_address)
+        this.setDisabled(trip_start_date)
+        this.setDisabled(trip_end_date)
+        personForms.forEach {
+            this.setDisabled(it)
+        }
+        waypointForms.forEach {
+            this.setDisabled(it)
+        }
+    }
+
+    private fun setDisabled(view: View) {
+        view.isFocusable = false
+        view.isEnabled = false
+    }
+
+    private fun setEnabled(view: View) {
+        view.isFocusable = true
+        view.isEnabled = true
     }
 
     /**
@@ -114,9 +182,9 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
         val trip = Trip(
             name = tripName,
             author = currentUser,
-            start = tripStartDate.toString(),
+            startDate = tripStartDate.toString(),
             startAddress = tripStartAddress,
-            end = tripEndDate.toString(),
+            endDate = tripEndDate.toString(),
             endAddress = tripEndAddress,
             persons = personsEmailString,
             waypoints = waypointsString
@@ -138,7 +206,7 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
                     dialog.dismiss()
                     Navigation.findNavController(this@TripCreatorFragment.view!!)
                         .navigate(R.id.tripListFragment)
-                }.build(fragmentManager, javaClass.simpleName)
+                }.build(parentFragmentManager, javaClass.simpleName)
             return
         }
         Navigation.findNavController(this@TripCreatorFragment.view!!)
@@ -153,47 +221,57 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
         tripName = trip_name.text.toString().trim()
         tripStartAddress = trip_start_address.text.toString().trim()
         tripEndAddress = trip_end_address.text.toString().trim()
-        personsEmailString = persons.map {
-            it.edit_text.text.toString().trim()
-        }
-        personsEmailString = personsEmailString.filter { email: String ->
-            email.isNotBlank()
-        }
-        waypointsString = waypoints.map {
-            it.edit_text.text.toString().trim()
-        }
-        waypointsString = waypointsString.filter {
-            it.isNotBlank()
-        }
+        personForms.mapTo(personsEmailString) { it.edit_text.text.toString().trim() }
+            .filter { it.isNotBlank() }
+        personsEmailString.add(currentUser.email!!) // autor jest też uczestnikiem wycieczki
+        waypointForms.mapTo(waypointsString) { it.edit_text.text.toString().trim() }
+            .filter { it.isNotBlank() }
     }
 
     /**
      * Nowa pole gdzie można wpisać dodatkowy punkt na trasie wycieczki
      */
-    private fun addWaypoint() {
+    private fun addWaypoint(name: String? = null) {
         val form = this.addLocationForm()
         form?.let {
-            form.add_button.setOnClickListener {
-                addWaypoint()
+            if (name != null) {
+                form.edit_text.setText(name)
+                this.removeIconForm(it)
+                this.setDisabled(it.edit_text)
+                it.edit_text.setMargins(context!!, 10, 10, 10, 0)
+                it.setMargins(context!!, 0, 10, 0, 0)
+            } else {
+                form.add_button.setOnClickListener {
+                    addWaypoint()
+                }
+                this.changeToMinusForm(waypointForms)
             }
-            this.changeToMinusForm(waypoints)
-            waypoints.add(form)
+            waypointForms.add(form)
         }
     }
 
     /**
      * Nowa pole do wpisana nowej osoby do wycieczki
      */
-    private fun addPerson() {
+    private fun addPerson(name: String? = null) {
         val form = this.addPersonForm()
         form?.let {
-            // akcja plusa
-            form.add_button.setOnClickListener {
-                addPerson()
+            // ustawia się gdy chcemy podejrzeć dane wycieczki
+            if (name != null) {
+                it.edit_text.setText(name)
+                this.removeIconForm(it)
+                this.setDisabled(it.edit_text)
+                it.edit_text.setMargins(context!!, 10, 10, 10, 0)
+                it.setMargins(context!!, 0, 10, 0, 0)
+            } else {
+                // akcja plusa
+                form.add_button.setOnClickListener {
+                    addPerson()
+                }
+                // akcja minusa
+                this.changeToMinusForm(personForms)
             }
-            // akcja minusa
-            this.changeToMinusForm(persons)
-            persons.add(form)
+            personForms.add(form)
         }
     }
 
@@ -226,6 +304,10 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
                 }
             }
         }
+    }
+
+    private fun removeIconForm(form: View) {
+        form.add_button.setImageBitmap(null)
     }
 
     /**
@@ -271,25 +353,20 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
      * Walidacja danych
      */
     private fun validate(): Boolean {
-
         if (tripEndDate == null || tripStartDate == null || tripEndAddress.isEmpty() || tripStartAddress.isEmpty()
             || tripName.isEmpty()
         )
             return false
-
         if (personsEmailString.isNotEmpty()) {
             personsEmailString.forEach {
                 if (!android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches())
                     return false
             }
         }
-
         if (tripStartDate?.isBefore(LocalDateTime.now())!!)
             return false
-
         if (tripStartDate?.isAfter(tripEndDate)!! || tripEndDate?.isBefore(tripStartDate)!!)
             return false
-
         return true
     }
 

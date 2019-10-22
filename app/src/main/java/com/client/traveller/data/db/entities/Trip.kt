@@ -2,21 +2,27 @@ package com.client.traveller.data.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.Serializable
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
+
+const val CURRENT_TRIP_ID = 0
 
 /**
  * Dane wycieczki tylko w której aktualnie użytkownik uczestniczy
  */
 @Entity
 data class Trip(
-    @PrimaryKey(autoGenerate = true)
-    var id: Long? = null,
     var name: String? = null,
-    var persons: List<String>? = null, // lista uid firebase userow??
-    var start: String? = null, //godzzina data
-    var end: String? = null,
+    var persons: ArrayList<String>? = null, // emaile uczestników
+    var startDate: String? = null, //godzina data
+    var endDate: String? = null,
     var startAddress: String? = null,
     var endAddress: String? = null,
-    var waypoints: List<String>? = null,
+    var waypoints: ArrayList<String>? = null,
     var author: User? = null
-
-)
+): Serializable {
+    @PrimaryKey(autoGenerate = false)
+    var id: Int = CURRENT_TRIP_ID
+}

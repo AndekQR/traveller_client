@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "efd905eed06379cf33e92e863366cf9b",
+    "identityHash": "0f79ca44461e47fa5f0b0dcd2cbdf95c",
     "entities": [
       {
         "tableName": "User",
@@ -56,13 +56,13 @@
       },
       {
         "tableName": "Trip",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT, `persons` TEXT, `start` TEXT, `end` TEXT, `startAddress` TEXT, `endAddress` TEXT, `waypoints` TEXT, `author` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT, `persons` TEXT, `startDate` TEXT, `endDate` TEXT, `startAddress` TEXT, `endAddress` TEXT, `waypoints` TEXT, `author` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "INTEGER",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "name",
@@ -77,14 +77,14 @@
             "notNull": false
           },
           {
-            "fieldPath": "start",
-            "columnName": "start",
+            "fieldPath": "startDate",
+            "columnName": "startDate",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "end",
-            "columnName": "end",
+            "fieldPath": "endDate",
+            "columnName": "endDate",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -117,7 +117,7 @@
           "columnNames": [
             "id"
           ],
-          "autoGenerate": true
+          "autoGenerate": false
         },
         "indices": [],
         "foreignKeys": []
@@ -126,7 +126,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'efd905eed06379cf33e92e863366cf9b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0f79ca44461e47fa5f0b0dcd2cbdf95c')"
     ]
   }
 }

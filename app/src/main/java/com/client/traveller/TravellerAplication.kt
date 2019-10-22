@@ -62,6 +62,7 @@ class TravellerAplication : Application(), KodeinAware {
                 instance(),
                 instance(),
                 instance(),
+                instance(),
                 instance()
             )
         }
@@ -72,7 +73,7 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { AuthViewModelFactory(instance()) }
         bind() from provider { HomeViewModelFactory(instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }
-        bind() from provider { TripViewModelFactory(instance(), instance()) }
+        bind() from provider { TripViewModelFactory(instance(), instance(), instance()) }
 
 
 

@@ -226,10 +226,9 @@ class LocationProviderImpl(
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
-    /**
-     * Android Studio nie wykrywa sprawdzania uprawnień w osobnej metodzie
-     * w rezultacie przy niektórych metodach jest adnotacja @SuppressLint("MissingPermission")
-     */
+
+    // TODO trzeba zwracac tru lub false jeśli lokalizacja nie jest przyznan
+    // w onRequestpermissionresult inicjalizowac
     override fun checkPermissions() {
         if (ActivityCompat.checkSelfPermission(
                 context,

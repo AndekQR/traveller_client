@@ -1,10 +1,13 @@
 package com.client.traveller.data.repository.trip
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.client.traveller.data.db.TripDao
 import com.client.traveller.data.db.entities.Trip
+import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.Trips
+import com.client.traveller.ui.util.Coroutines.io
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.Dispatchers
@@ -54,17 +57,28 @@ class TripRepositoryImpl(
         suspendCoroutine<Void?> { continuation ->
             trips.addNewTrip(trip).addOnCompleteListener {
                 if (!it.isSuccessful) {
-                    Log.e(javaClass.simpleName, it.exception?.message)
                     continuation.resumeWith(Result.failure(it.exception!!))
                     return@addOnCompleteListener
                 } else {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        tripDao.upsert(trip)
+                    io {
+                        this@TripRepositoryImpl.setTripAsActual(trip)
                     }
                     continuation.resumeWith(Result.success(it.result))
                     return@addOnCompleteListener
                 }
             }
         }
+    }
+
+    override suspend  fun setTripAsActual(trip: Trip) {
+        tripDao.upsert(trip)
+    }
+    override fun getCurrentTrip() = tripDao.getCurrentTrip()
+    override fun isTripParticipant(trip: Trip, user: User): Boolean {
+        trip.persons?.forEach {
+            if (it == user.email)
+                return true
+        }
+        return false
     }
 }

@@ -103,6 +103,15 @@
     <string name="chat">Chat</string>
     <string name="nearby">W pobliżu</string>
     <string name="trip">Wycieczka</string>
+    <string name="trip_city">Miejsce:</string>
+    <string name="trip_author">Twórca:</string>
+    <string name="trip_people">Osoby:</string>
+    <string name="trip_distance">Trasa:</string>
+    <string name="trip_waypoints">Przystanki:</string>
+    <string name="not_correct_address">Nieprawidłowy adres</string>
+    <string name="choose_trip">Wybierz wycieczkę</string>
+    <string name="send_request_add_to_trip">Wyślij prośbę o dołączenie</string>
+    <string name="join_trip">Dołącz do wycieczki</string>
 
     <string-array name="intervals">
         <item>"1 sekunda"</item>

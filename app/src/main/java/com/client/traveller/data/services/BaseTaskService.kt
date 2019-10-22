@@ -17,7 +17,6 @@ abstract class BaseTaskService : Service() {
         private const val CHANNEL_ID_DEFAULT = "default"
         internal const val PROGRESS_NOTIFICATION_ID = 0
         internal const val FINISHED_NOTIFICATION_ID = 1
-        private const val TAG = "BaseTaskService"
     }
 
     private var numberTasks = 0
@@ -59,9 +58,9 @@ abstract class BaseTaskService : Service() {
      * Metoda pokazuje notifikacje z paskiem postępu
      */
     protected fun showProgressNotification(
-        caption: String,
-        completedUnits: Long,
-        totalUnits: Long
+        caption: String, //napis w notyfikacji
+        completedUnits: Long, // ile ukończono
+        totalUnits: Long // ile wszystkich
     ) {
         var percentComplete = 0
         if (totalUnits > 0)

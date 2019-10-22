@@ -4,7 +4,7 @@
     <item android:bottom="2dp" android:left="2dp">
         <shape
                 android:id="@+id/listview_background_shape">
-            <solid android:color="@color/colorWhiteDarkMaterial"
+            <solid android:color="@color/colorWhiteLightMaterial"
 
                     />
             <corners

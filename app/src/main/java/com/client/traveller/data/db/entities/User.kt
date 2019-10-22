@@ -2,6 +2,7 @@ package com.client.traveller.data.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 const val CURRENT_USER_ID = 0
 
@@ -13,7 +14,7 @@ data class User(
     var email: String? = null,
     var verified: Boolean = false,
     var image: String? = null
-) {
+): Serializable {
     //lokalne id
     @PrimaryKey(autoGenerate = false)
     var uid: Int = CURRENT_USER_ID

@@ -11,9 +11,12 @@ import com.client.traveller.data.network.map.directions.DirectionsApiService
 import com.client.traveller.data.network.map.directions.model.Route
 import com.client.traveller.data.network.map.directions.model.TravelMode
 import com.client.traveller.data.network.map.directions.response.Directions
+import com.client.traveller.data.network.map.directions.response.Distance
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.ui.util.Coroutines
 import com.client.traveller.ui.util.Coroutines.main
+import com.client.traveller.ui.util.NoCurrentLocationException
+import com.client.traveller.ui.util.format
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.*
 import com.google.maps.android.PolyUtil
@@ -100,12 +103,7 @@ class MapUtilsImpl(
         }
     }
 
-    private fun getLocationString(location: Location?): String{
-        return "${location?.latitude},${location?.longitude}"
-    }
-    private fun getPositionString(position: LatLng?): String {
-        return "${position?.latitude},${position?.longitude}"
-    }
+
     private fun getDefaultPolyline(): PolylineOptions {
         return PolylineOptions()
             .width(12F)
@@ -132,8 +130,8 @@ class MapUtilsImpl(
         val destination: String
 
         try {
-            origin = this.getLocationString(locationProvider.currentLocation)
-            destination = this.getPositionString(this.markerOnMap?.position)
+            origin = locationProvider.currentLocation!!.format()
+            destination = this.markerOnMap?.position!!.format()
 
             main {
                 val result = directionsApiService.getDirections(origin, destination)
@@ -159,14 +157,46 @@ class MapUtilsImpl(
         locationProvider.mMap?.clear()
     }
 
+    /**
+     * Centruje kamerę na aktualnej lokalizacji
+     *
+     * Na początku currentLocation może być nullem
+     */
     override fun centerCurrentLocation() {
-        val currentLocation = LatLng(locationProvider.currentLocation?.latitude!!, locationProvider.currentLocation?.longitude!!)
-        val cameraPosition = CameraPosition.Builder()
-            .target(currentLocation)
-            .zoom(17F)
-            .tilt(50F)
-            .build()
-        val cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition)
-        locationProvider.mMap?.animateCamera(cameraUpdate)
+        var currentLocation: LatLng? = null
+        try {
+            currentLocation = LatLng(locationProvider.currentLocation?.latitude!!, locationProvider.currentLocation?.longitude!!)
+        } catch (ex: NullPointerException) { }
+        currentLocation?.let {
+            val cameraPosition = CameraPosition.Builder()
+                .target(it)
+                .zoom(17F)
+                .tilt(50F)
+                .build()
+            val cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition)
+            locationProvider.mMap?.animateCamera(cameraUpdate)
+        }
+    }
+
+    /**
+     * Zwraca [Distance] trasy podanej w parametrach
+     */
+    override suspend fun getDistance(origin: String, destination: String): Distance? {
+        val result = directionsApiService.getDirections(origin, destination, TravelMode.driving.name)
+        return if (result.status == "OK"){
+            result.routes.first().legs.first().distance
+        } else
+            null
+    }
+
+    /**
+     * Zwraca ostatnią pozycję użytkownika
+     */
+    override fun getCurrentLocation(): Location {
+        val currentLocation = locationProvider.currentLocation
+        if (currentLocation != null)
+            return currentLocation
+        else
+            throw NoCurrentLocationException()
     }
 }

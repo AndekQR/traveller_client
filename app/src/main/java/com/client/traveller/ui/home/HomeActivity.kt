@@ -32,6 +32,7 @@ import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
 import com.client.traveller.ui.util.Coroutines
+import com.client.traveller.ui.util.NoCurrentLocationException
 import com.client.traveller.ui.util.hideLoding
 import com.client.traveller.ui.util.showLoading
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -46,6 +47,8 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.paulrybitskyi.persistentsearchview.PersistentSearchView
+import com.paulrybitskyi.persistentsearchview.adapters.model.SuggestionItem
+import com.paulrybitskyi.persistentsearchview.listeners.OnSuggestionChangeListener
 import com.paulrybitskyi.persistentsearchview.utils.SuggestionCreationUtil
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.nav_header.view.*
@@ -109,15 +112,47 @@ class HomeActivity : AppCompatActivity(),
             else
                 drawer.closeDrawer(Gravity.LEFT)
         }
-
-        searchView.setOnSearchConfirmedListener { searchView, query ->
-            //TODO momżna wybierać pierwszy rezulatat
+        searchView.setOnSuggestionChangeListener(mySuggestionChangeListener)
+        searchView.setOnSearchConfirmedListener { _, query ->
+            try {
+                viewModel.clearMap()
+                viewModel.drawRouteToLocation(destination = query, locations = arrayListOf())
+            } catch (ex: NoCurrentLocationException) {
+                Dialog.Builder()
+                    .addMessage("Brak aktualnej lokalizacji")
+                    .addPositiveButton("ok"){
+                        it.dismiss()
+                    }
+                    .build(supportFragmentManager, javaClass.simpleName)
+            }
         }
         searchView.setOnSearchQueryChangeListener { _, _, newQuery ->
             if (newQuery.isNotEmpty()) {
                 this.searchView.showLoading()
                 performSearch(newQuery)
             }
+        }
+    }
+
+    private val mySuggestionChangeListener = object : OnSuggestionChangeListener {
+        override fun onSuggestionPicked(suggestion: SuggestionItem?) {
+            try {
+                viewModel.clearMap()
+                val destination = suggestion?.itemModel?.text
+                if (destination != null)
+                    viewModel.drawRouteToLocation(destination = destination, locations = arrayListOf())
+            } catch (ex: NoCurrentLocationException) {
+                Dialog.Builder()
+                    .addMessage("Brak aktualnej lokalizacji")
+                    .addPositiveButton("ok"){
+                        it.dismiss()
+                    }
+                    .build(supportFragmentManager, javaClass.simpleName)
+            }
+        }
+
+        override fun onSuggestionRemoved(suggestion: SuggestionItem?) {
+
         }
     }
 
@@ -149,7 +184,6 @@ class HomeActivity : AppCompatActivity(),
 
         val predictionsRequest = FindAutocompletePredictionsRequest.builder()
             .setCountry(telephonyManager.networkCountryIso)
-            .setTypeFilter(TypeFilter.ADDRESS)
             .setSessionToken(token)
             .setQuery(query)
             .build()

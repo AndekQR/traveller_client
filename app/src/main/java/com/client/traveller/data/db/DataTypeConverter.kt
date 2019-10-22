@@ -28,14 +28,14 @@ object DataTypeConverter {
 
     @TypeConverter
     @JvmStatic
-    fun listToJson(value: List<String>?): String? {
+    fun listToJson(value: ArrayList<String>?): String? {
         return Gson().toJson(value)
     }
 
     @TypeConverter
     @JvmStatic
-    fun jsonToList(value: String?): List<String>? {
-        val listType = object : TypeToken<List<Trip>>() {}.type
+    fun jsonToList(value: String?): ArrayList<String>? {
+        val listType = object : TypeToken<ArrayList<String>>() {}.type
         return Gson().fromJson(value, listType)
     }
 

@@ -3,11 +3,13 @@ package com.client.traveller.data.repository.user
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
+import com.client.traveller.data.db.TripDao
 import com.client.traveller.data.db.UserDao
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.auth.*
 import com.client.traveller.data.network.firebase.firestore.Users
 import com.client.traveller.data.network.firebase.storage.Avatars
+import com.client.traveller.ui.util.Coroutines.io
 import com.client.traveller.ui.util.toLocalUser
 import com.facebook.AccessToken
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -22,6 +24,7 @@ import kotlinx.coroutines.launch
 
 class UserRepositoryImpl(
     private val userDao: UserDao,
+    private val tripDao: TripDao,
     private val usersFirestore: Users,
     private val avatars: Avatars,
     private val authNormal: AuthNormal,
@@ -146,7 +149,7 @@ class UserRepositoryImpl(
     }
 
     override fun updateLocalUserDataAsync(user: User) {
-        GlobalScope.launch(Dispatchers.IO) {
+        io {
             userDao.upsert(user)
         }
     }
@@ -231,8 +234,9 @@ class UserRepositoryImpl(
     }
 
     override fun logoutUser(googleSignInClient: GoogleSignInClient) {
-        GlobalScope.launch(Dispatchers.IO) {
+        io {
             userDao.deleteUser()
+            tripDao.deleteCurrentTrip()
         }
         val currentUser = FirebaseAuth.getInstance().currentUser
         currentUser?.let { user ->
@@ -245,7 +249,7 @@ class UserRepositoryImpl(
     }
 
     override fun setEmailVerifiedAsync() {
-        GlobalScope.launch(Dispatchers.IO) {
+        io {
             userDao.setEmailVerified()
             usersFirestore.changeVerifiedStatus(state = true)
         }

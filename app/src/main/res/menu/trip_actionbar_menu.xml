@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/join_trip"
+        android:icon="@drawable/ic_trip_add"
+        android:title="@string/join_trip"
+        app:showAsAction="always" />
+</menu>

@@ -8,11 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.ui.util.ScopedFragment
 import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.Item
+import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.fragment_trip_list.*
 import kotlinx.coroutines.Dispatchers
@@ -26,11 +29,13 @@ import org.kodein.di.generic.instance
 // z prawej strony na dole button + do dodawania wycieczek
 // gdy klikniemy wycieczke to pojawia się button do zaakceptowania -> nim też wracamy do homeActivity i tam powinna być wyświetlona ta wycieczka w drawerze
 // z prawej strony kazego itemu wycieczki 3 kropki (tj. menu) w menu kopiuj link, edytuj wycieczke, udostępnij link-> deep link
-class TripListFragment : ScopedFragment(), KodeinAware {
+class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
 
     override val kodein by kodein()
     private val factory: TripViewModelFactory by instance()
     private lateinit var viewModel: TripViewModel
+
+    private lateinit var groupAdapter: GroupAdapter<GroupieViewHolder>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,8 +47,11 @@ class TripListFragment : ScopedFragment(), KodeinAware {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // jest podawany argument null do TripCreatorFragment spradza czy chemy tworzyć nową wycieczkę
+        // czy przeglądamy już stworzoną ( w tym przypadku jako argument jest podawany trip )
         fab.setOnClickListener {
-            Navigation.findNavController(view).navigate(R.id.tripCreatorFragment)
+            val action = TripListFragmentDirections.actionTripListFragmentToTripCreatorFragment(null)
+            Navigation.findNavController(view).navigate(action)
         }
     }
 
@@ -67,15 +75,15 @@ class TripListFragment : ScopedFragment(), KodeinAware {
 
     private fun List<Trip>.toTripItems(): List<TripListItem> {
         return this.map {
-            TripListItem(it)
+            TripListItem(it, requireContext(), viewModel)
         }
     }
 
     private fun updateTrips(trips: List<Trip>) {
-        val groupAdapter = GroupAdapter<GroupieViewHolder>().apply {
+        groupAdapter = GroupAdapter<GroupieViewHolder>().apply {
             addAll(trips.toTripItems())
         }
-
+        groupAdapter.setOnItemClickListener(this)
         recycler_view?.apply {
             layoutManager = LinearLayoutManager(this@TripListFragment.context)
             adapter = groupAdapter
@@ -86,5 +94,13 @@ class TripListFragment : ScopedFragment(), KodeinAware {
         (activity as? AppCompatActivity)?.supportActionBar?.title = title
 
         (activity as? AppCompatActivity)?.supportActionBar?.subtitle = subtitle
+    }
+
+    override fun onItemClick(item: Item<*>, view: View) {
+        if (item is TripListItem){
+            val action = TripListFragmentDirections.actionTripListFragmentToTripCreatorFragment(item.trip)
+            this.view?.findNavController()?.navigate(action)
+        }
+
     }
 }
