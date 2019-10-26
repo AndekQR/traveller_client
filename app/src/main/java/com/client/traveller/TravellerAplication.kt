@@ -27,6 +27,7 @@ import com.client.traveller.data.repository.user.UserRepository
 import com.client.traveller.data.repository.user.UserRepositoryImpl
 import com.client.traveller.data.services.MyFirebaseMessagingService
 import com.client.traveller.ui.auth.AuthViewModelFactory
+import com.client.traveller.ui.chat.ChatViewModelFactory
 import com.client.traveller.ui.home.HomeViewModelFactory
 import com.client.traveller.ui.settings.SettingsViewModelFactory
 import com.client.traveller.ui.trip.TripViewModelFactory
@@ -82,6 +83,7 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { HomeViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }
         bind() from provider { TripViewModelFactory(instance(), instance(), instance()) }
+        bind() from provider {ChatViewModelFactory(instance(), instance())}
 
 
 

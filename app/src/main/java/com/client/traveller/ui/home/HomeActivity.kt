@@ -28,6 +28,7 @@ import com.client.traveller.data.provider.PlacesClientProvider
 import com.client.traveller.data.services.UploadService
 import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
+import com.client.traveller.ui.chat.ChatActivity
 import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
@@ -58,7 +59,7 @@ import org.kodein.di.generic.instance
 import kotlin.coroutines.suspendCoroutine
 
 class HomeActivity : AppCompatActivity(),
-    KodeinAware, NavigationView.OnNavigationItemSelectedListener, NavController.OnDestinationChangedListener {
+    KodeinAware, NavController.OnDestinationChangedListener{
 
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
@@ -67,6 +68,7 @@ class HomeActivity : AppCompatActivity(),
 
     private lateinit var searchView: PersistentSearchView
     private lateinit var drawer: DrawerLayout
+    private lateinit var navigation: NavigationView
 
     private lateinit var navController: NavController
     private lateinit var bottomNavigation: BottomNavigationView
@@ -87,11 +89,16 @@ class HomeActivity : AppCompatActivity(),
             this.getDynamicLinks()
 
         drawer = drawer_layout
-        searchView = persistentSearchView
+
         bottomNavigation = bottom_navigation
+        bottomNavigation.setOnNavigationItemSelectedListener(onBottomNavigationItemSelected)
         bottomNavigation.selectedItemId = R.id.map
+
+        searchView = persistentSearchView
         initSearchView()
-        navigation_view.setNavigationItemSelectedListener(this)
+
+        this.navigation = navigation_view
+        this.navigation.setNavigationItemSelectedListener(onNavigationItemSelected)
 
         val host = nav_host_fragment_home as NavHostFragment
         this.navController = host.navController
@@ -277,52 +284,64 @@ class HomeActivity : AppCompatActivity(),
 
     }
 
-    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
-        when (menuItem.itemId) {
-            R.id.ustawienia_item -> {
-                val intent = Intent(this, SettingsActivity::class.java)
-                startActivity(intent)
-            }
-            R.id.trips -> {
-                Intent(this, TripActivity::class.java).also {
-                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    it.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    startActivity(it)
+    private val onNavigationItemSelected = NavigationView.OnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.ustawienia_item -> {
+                    val intent = Intent(this@HomeActivity, SettingsActivity::class.java)
+                    startActivity(intent)
                 }
-            }
-            R.id.about -> {
-                Intent(this, AboutActivity::class.java).also {
-                    startActivity(it)
+                R.id.trips -> {
+                    Intent(this@HomeActivity, TripActivity::class.java).also {
+                        it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        it.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        startActivity(it)
+                    }
                 }
-            }
-            R.id.logout -> {
-                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-                val mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+                R.id.about -> {
+                    Intent(this@HomeActivity, AboutActivity::class.java).also {
+                        startActivity(it)
+                    }
+                }
+                R.id.logout -> {
+                    val gso =
+                        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                    val mGoogleSignInClient = GoogleSignIn.getClient(this@HomeActivity, gso)
 
-                viewModel.logoutUser(mGoogleSignInClient)
-                Intent(this, AuthActivity::class.java).also {
-                    it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(it)
+                    viewModel.logoutUser(mGoogleSignInClient)
+                    Intent(this@HomeActivity, AuthActivity::class.java).also {
+                        it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(it)
+                    }
+                }
+                R.id.profile -> {
+                    Navigation.findNavController(this@HomeActivity, R.id.nav_host_fragment_home)
+                        .navigate(R.id.profileFragment)
                 }
             }
-            R.id.profile -> {
-                Navigation.findNavController(this, R.id.nav_host_fragment_home).navigate(R.id.profileFragment)
-            }
+            drawer_layout.closeDrawer(GravityCompat.START)
+            true
+        }
+
+    private val onBottomNavigationItemSelected =  BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        when(item.itemId) {
             R.id.trip -> {
-
             }
             R.id.chat -> {
-
+                Intent(this, ChatActivity::class.java).also {
+                    startActivity(it)
+                }
             }
-            R.id.map -> {
-                Navigation.findNavController(this, R.id.nav_host_fragment_home).navigate(R.id.homeFragment)
-            }
+//            R.id.map -> {
+////                Navigation.findNavController(this, R.id.nav_host_fragment_home).navigate(R.id.homeFragment)
+//                Intent(this, HomeActivity::class.java).also {
+//                    startActivity(it)
+//                }
+//            }
             R.id.nearby -> {
 
             }
         }
-        drawer_layout.closeDrawer(GravityCompat.START)
-        return true
+        true
     }
 
     override fun onDestinationChanged(
@@ -382,6 +401,12 @@ class HomeActivity : AppCompatActivity(),
             .addOnFailureListener {
                 Log.e(javaClass.simpleName, it.localizedMessage)
             }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+
     }
 
     //https://travellersystems.page.link?

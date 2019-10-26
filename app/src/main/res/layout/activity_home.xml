@@ -73,8 +73,6 @@
         app:itemTextColor="@color/colorDark"
         app:itemIconTint="@color/colorDark"
         android:theme="@style/AppTheme.NavigationView"
-
-
         />
 </androidx.drawerlayout.widget.DrawerLayout>
 

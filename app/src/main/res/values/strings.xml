@@ -112,6 +112,9 @@
     <string name="choose_trip">Wybierz wycieczkę</string>
     <string name="send_request_add_to_trip">Wyślij prośbę o dołączenie</string>
     <string name="join_trip">Dołącz do wycieczki</string>
+    <string name="chat_title">Wiadomości</string>
+    <string name="list">Lista</string>
+    <string name="participants">Uczestnicy</string>
 
     <string-array name="intervals">
         <item>"1 sekunda"</item>
