@@ -128,6 +128,7 @@ dependencies {
     implementation 'com.facebook.android:facebook-login:5.8.0'
     implementation 'com.google.firebase:firebase-firestore:21.1.1'
     implementation 'com.google.firebase:firebase-storage:19.1.0'
+    implementation 'com.google.firebase:firebase-messaging:20.0.0'
 
     implementation 'com.google.android.libraries.places:places:2.0.0'
 

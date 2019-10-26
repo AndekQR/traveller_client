@@ -17,11 +17,11 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.about.AboutActivity"></activity>
+        <activity android:name=".ui.about.AboutActivity" />
         <activity
             android:name=".ui.trip.TripActivity"
             android:parentActivityName=".ui.home.HomeActivity"
-            android:theme="@style/AppTheme.StatusBar.Transparent"></activity>
+            android:theme="@style/AppTheme.StatusBar.Transparent" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -84,8 +84,16 @@
             android:name=".data.services.UploadService"
             android:exported="false" />
         <service
-            android:name=".data.services.DownloadService"
-            android:exported="false" />
+            android:name=".data.services.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
     </application>
 
 </manifest>

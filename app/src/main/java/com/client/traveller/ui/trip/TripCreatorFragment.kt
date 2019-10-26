@@ -5,6 +5,7 @@ import android.app.TimePickerDialog
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -52,6 +53,9 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
     private val factory: TripViewModelFactory by instance()
     private lateinit var viewModel: TripViewModel
 
+    // zmienna mówi czy właśnie wyświetlamy wycieckę czy torzymy nową
+    private var tripView: Boolean = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -88,6 +92,7 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
             val navigationArguemnts: Trip? = TripCreatorFragmentArgs.fromBundle(it).trip
             // jeżeli jest nullem to tworzymy nową wycieczkę
             if (navigationArguemnts != null) {
+                tripView = true
                 // blokuje edytowalne pola przed modyfikacją
                 this.setEditTextsDisabled()
                 // wpisuje w pola dane z wycieczki
@@ -368,6 +373,18 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
         if (tripStartDate?.isAfter(tripEndDate)!! || tripEndDate?.isBefore(tripStartDate)!!)
             return false
         return true
+    }
+
+    /**
+     * Akcja po naciśnięciu przycisku "dodaj do wycieczki" w action bar
+     */
+    // TODO trzeba zrobić powiadomienie do twórcy o tym że ktoś chce dołączyć do wycieczki
+    fun jointTripButtonClick() {
+        if (this.tripView){
+
+        } else {
+
+        }
     }
 
 }

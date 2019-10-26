@@ -103,7 +103,7 @@ class LoginFragment : Fragment(), KodeinAware {
                         .addPositiveButton("Ok") { dialog ->
                             dialog.dismiss()
                         }
-                        .build(fragmentManager, javaClass.simpleName)
+                        .build(parentFragmentManager, javaClass.simpleName)
                 }
 
                 override fun onCancel() {
@@ -125,7 +125,7 @@ class LoginFragment : Fragment(), KodeinAware {
                                     .addPositiveButton("Ok") { dialog ->
                                         dialog.dismiss()
                                     }
-                                    .build(fragmentManager, javaClass.simpleName)
+                                    .build(parentFragmentManager, javaClass.simpleName)
                             } else {
                                 val bundle = Bundle()
                                 bundle.putString(FirebaseAnalytics.Param.METHOD, "facebook")
@@ -139,13 +139,12 @@ class LoginFragment : Fragment(), KodeinAware {
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        Log.e(javaClass.simpleName, requestCode.toString())
         if (requestCode == RC_SIGN_IN) {
             this.handleGoogleLogin(data)
         }
 
         callbackManagerFacebook.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     /**
@@ -210,7 +209,7 @@ class LoginFragment : Fragment(), KodeinAware {
                     .addPositiveButton("ok") { dialog ->
                         dialog.dismiss()
                     }
-                    .build(fragmentManager, javaClass.simpleName)
+                    .build(parentFragmentManager, javaClass.simpleName)
             } else {
                 val bundle = Bundle()
                 bundle.putString(FirebaseAnalytics.Param.METHOD, "Normal")

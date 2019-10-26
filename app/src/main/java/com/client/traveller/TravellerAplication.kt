@@ -4,9 +4,11 @@ import android.app.Application
 import android.content.Context
 import com.client.traveller.data.db.AppDatabase
 import com.client.traveller.data.network.firebase.auth.*
+import com.client.traveller.data.network.firebase.firestore.Tokens
 import com.client.traveller.data.network.firebase.firestore.Trips
 
 import com.client.traveller.data.network.firebase.firestore.Users
+import com.client.traveller.data.network.firebase.messaging.CloudMessaging
 import com.client.traveller.data.network.firebase.storage.Avatars
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.network.map.MapUtilsImpl
@@ -17,10 +19,13 @@ import com.client.traveller.data.provider.LocationProviderImpl
 import com.client.traveller.data.provider.PreferenceProvider
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.map.MapRepositoryImpl
+import com.client.traveller.data.repository.message.CloudMessagingRepository
+import com.client.traveller.data.repository.message.CloudMessagingRepositoryImpl
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.trip.TripRepositoryImpl
 import com.client.traveller.data.repository.user.UserRepository
 import com.client.traveller.data.repository.user.UserRepositoryImpl
+import com.client.traveller.data.services.MyFirebaseMessagingService
 import com.client.traveller.ui.auth.AuthViewModelFactory
 import com.client.traveller.ui.home.HomeViewModelFactory
 import com.client.traveller.ui.settings.SettingsViewModelFactory
@@ -47,6 +52,8 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from singleton { AppDatabase(instance()) }
         bind() from singleton { Users() }
         bind() from provider { Avatars() }
+        bind() from provider { Tokens() }
+        bind() from provider { CloudMessaging() }
         bind() from provider { AuthNormal() }
         bind() from provider { AuthGoogle() }
         bind() from provider { AuthFacebook() }
@@ -70,10 +77,12 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { Trips() }
         bind() from singleton { instance<AppDatabase>().tripDao() }
         bind<TripRepository>() with singleton { TripRepositoryImpl(instance(), instance()) }
+        bind<CloudMessagingRepository>() with singleton { CloudMessagingRepositoryImpl(instance(), instance()) }
         bind() from provider { AuthViewModelFactory(instance()) }
-        bind() from provider { HomeViewModelFactory(instance(), instance()) }
+        bind() from provider { HomeViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }
         bind() from provider { TripViewModelFactory(instance(), instance(), instance()) }
+
 
 
 

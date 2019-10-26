@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -24,6 +25,7 @@ class TripActivity : AppCompatActivity(), KodeinAware, NavController.OnDestinati
 
     private var joinTripItem: MenuItem? = null
     private lateinit var navController: NavController
+    private lateinit var navHostFragment: NavHostFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +37,8 @@ class TripActivity : AppCompatActivity(), KodeinAware, NavController.OnDestinati
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
 
-        val host = nav_host_fragment_trip as NavHostFragment
-        this.navController = host.navController
+        this.navHostFragment = nav_host_fragment_trip as NavHostFragment
+        this.navController = this.navHostFragment.navController
         this.navController.addOnDestinationChangedListener(this)
     }
 
@@ -49,7 +51,9 @@ class TripActivity : AppCompatActivity(), KodeinAware, NavController.OnDestinati
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.join_trip -> {
-
+            val creatorFragment: Fragment? = this.navHostFragment.childFragmentManager.fragments.first()
+            if (creatorFragment != null && creatorFragment is TripCreatorFragment)
+                creatorFragment.jointTripButtonClick()
             true
         }
         else -> {

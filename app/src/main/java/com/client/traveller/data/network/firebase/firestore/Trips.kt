@@ -20,7 +20,7 @@ class Trips {
     }
 
     fun addNewTrip(trip: Trip): Task<Void> {
-        return this.getTripsCollection().document(getDocumentName(trip)).set(trip)
+        return this.getTripsCollection().document(this.getDocumentName(trip)).set(trip)
     }
 
     // nazwa to: nazwa_wycieczki_firebaseUidAuthor

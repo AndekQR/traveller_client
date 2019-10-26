@@ -1,10 +1,10 @@
 package com.client.traveller.data.network.firebase.storage
 
+import com.client.traveller.data.db.entities.User
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
-//TODO trzeba sprawdzic dodawanie zdjec z serwisow spolecznosciowych do storage
-// z google dodaja się zle, a z facebook w ogóle
+// TODO zdjęcie z serwisów społcznościowych dodaje się w słabej rozdzielczości
 class Avatars {
 
     companion object {

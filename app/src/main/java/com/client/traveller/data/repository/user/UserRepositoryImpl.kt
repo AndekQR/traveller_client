@@ -18,6 +18,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -47,7 +48,7 @@ class UserRepositoryImpl(
 
         this.updateLocalUserDataAsync(user)
 
-        GlobalScope.launch(Dispatchers.IO) {
+        io {
 
             //funkcje firebase gwarantują przynajmniej jedno prawidłowe wykonanie
             ////wykonuje się to gdy użytkownik jest już alogowany
@@ -84,18 +85,6 @@ class UserRepositoryImpl(
                     function.invoke(it.isSuccessful, it.exception)
                 }
             }
-
-
-        // TODO może lepiej tak:
-//        val value = suspendCoroutine<AuthResult?> { continuation ->
-//            authNormal.login(username, password).addOnCompleteListener {
-//                if (it.isSuccessful) {
-//                    this.updateLocalUserDataAsync(it.result?.user?.toLocalUser()!!)
-//                } else {
-//                    continuation.resume(it.result)
-//                }
-//            }
-//        }
     }
 
 
@@ -148,10 +137,15 @@ class UserRepositoryImpl(
         }
     }
 
+    /**
+     * Pobranie danych o użytkowniku z firestore
+     */
+    // TODO mogło popsuć avatary
     override fun updateLocalUserDataAsync(user: User) {
-        io {
-            userDao.upsert(user)
-        }
+            usersFirestore.getUser(user.idUserFirebase!!).addOnSuccessListener {snapshot ->
+                val userFirestore = snapshot.toObject(User::class.java)
+                userFirestore?.let { io {userDao.upsert(it)} }
+            }
     }
 
     override fun createUserEmailPassword(
