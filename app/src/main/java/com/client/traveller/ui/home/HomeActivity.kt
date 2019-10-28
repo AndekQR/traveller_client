@@ -10,7 +10,6 @@ import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.Gravity
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -40,9 +39,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
-import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
-import com.google.android.material.bottomnavigation.BottomNavigationMenu
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -59,7 +56,7 @@ import org.kodein.di.generic.instance
 import kotlin.coroutines.suspendCoroutine
 
 class HomeActivity : AppCompatActivity(),
-    KodeinAware, NavController.OnDestinationChangedListener{
+    KodeinAware, NavController.OnDestinationChangedListener {
 
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
@@ -104,6 +101,12 @@ class HomeActivity : AppCompatActivity(),
         this.navController = host.navController
         this.navController.addOnDestinationChangedListener(this)
 
+        when (intent.extras?.getString("frag")) {
+            "profile" -> Navigation.findNavController(
+                this,
+                R.id.nav_host_fragment_home
+            ).navigate(R.id.profileFragment)
+        }
     }
 
     /**
@@ -127,7 +130,7 @@ class HomeActivity : AppCompatActivity(),
             } catch (ex: NoCurrentLocationException) {
                 Dialog.Builder()
                     .addMessage("Brak aktualnej lokalizacji")
-                    .addPositiveButton("ok"){
+                    .addPositiveButton("ok") {
                         it.dismiss()
                     }
                     .build(supportFragmentManager, javaClass.simpleName)
@@ -147,11 +150,14 @@ class HomeActivity : AppCompatActivity(),
                 viewModel.clearMap()
                 val destination = suggestion?.itemModel?.text
                 if (destination != null)
-                    viewModel.drawRouteToLocation(destination = destination, locations = arrayListOf())
+                    viewModel.drawRouteToLocation(
+                        destination = destination,
+                        locations = arrayListOf()
+                    )
             } catch (ex: NoCurrentLocationException) {
                 Dialog.Builder()
                     .addMessage("Brak aktualnej lokalizacji")
-                    .addPositiveButton("ok"){
+                    .addPositiveButton("ok") {
                         it.dismiss()
                     }
                     .build(supportFragmentManager, javaClass.simpleName)
@@ -281,68 +287,69 @@ class HomeActivity : AppCompatActivity(),
         if (viewModel.sendingLocationData()) {
             viewModel.startLocationUpdates()
         }
-
     }
 
     private val onNavigationItemSelected = NavigationView.OnNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.ustawienia_item -> {
-                    val intent = Intent(this@HomeActivity, SettingsActivity::class.java)
-                    startActivity(intent)
-                }
-                R.id.trips -> {
-                    Intent(this@HomeActivity, TripActivity::class.java).also {
-                        it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        it.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                        startActivity(it)
-                    }
-                }
-                R.id.about -> {
-                    Intent(this@HomeActivity, AboutActivity::class.java).also {
-                        startActivity(it)
-                    }
-                }
-                R.id.logout -> {
-                    val gso =
-                        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-                    val mGoogleSignInClient = GoogleSignIn.getClient(this@HomeActivity, gso)
-
-                    viewModel.logoutUser(mGoogleSignInClient)
-                    Intent(this@HomeActivity, AuthActivity::class.java).also {
-                        it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(it)
-                    }
-                }
-                R.id.profile -> {
-                    Navigation.findNavController(this@HomeActivity, R.id.nav_host_fragment_home)
-                        .navigate(R.id.profileFragment)
-                }
+        when (item.itemId) {
+            R.id.ustawienia_item -> {
+                val intent = Intent(this@HomeActivity, SettingsActivity::class.java)
+                startActivity(intent)
             }
-            drawer_layout.closeDrawer(GravityCompat.START)
-            true
-        }
-
-    private val onBottomNavigationItemSelected =  BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        when(item.itemId) {
-            R.id.trip -> {
-            }
-            R.id.chat -> {
-                Intent(this, ChatActivity::class.java).also {
+            R.id.trips -> {
+                Intent(this@HomeActivity, TripActivity::class.java).also {
+                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    it.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     startActivity(it)
                 }
             }
+            R.id.about -> {
+                Intent(this@HomeActivity, AboutActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
+            R.id.logout -> {
+                val gso =
+                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                val mGoogleSignInClient = GoogleSignIn.getClient(this@HomeActivity, gso)
+
+                viewModel.logoutUser(mGoogleSignInClient)
+                Intent(this@HomeActivity, AuthActivity::class.java).also {
+                    it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(it)
+                }
+            }
+            R.id.profile -> {
+                Navigation.findNavController(this@HomeActivity, R.id.nav_host_fragment_home)
+                    .navigate(R.id.profileFragment)
+            }
+        }
+        drawer_layout.closeDrawer(GravityCompat.START)
+        true
+    }
+
+    private val onBottomNavigationItemSelected =
+        BottomNavigationView.OnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.trip -> {
+                }
+                R.id.chat -> {
+                    Intent(this, ChatActivity::class.java).also {
+                        startActivity(it)
+                        this.finish()
+                    }
+                }
 //            R.id.map -> {
 ////                Navigation.findNavController(this, R.id.nav_host_fragment_home).navigate(R.id.homeFragment)
 //                Intent(this, HomeActivity::class.java).also {
 //                    startActivity(it)
 //                }
 //            }
-            R.id.nearby -> {
+                R.id.nearby -> {
 
+                }
             }
+            true
         }
-        true
-    }
 
     override fun onDestinationChanged(
         controller: NavController,
@@ -354,7 +361,7 @@ class HomeActivity : AppCompatActivity(),
         else
             this.searchView.visibility = View.GONE
 
-        if(destination.id == R.id.profileFragment)
+        if (destination.id == R.id.profileFragment)
             this.bottomNavigation.visibility = View.GONE
         else
             this.bottomNavigation.visibility = View.VISIBLE
@@ -403,11 +410,6 @@ class HomeActivity : AppCompatActivity(),
             }
     }
 
-    override fun onStop() {
-        super.onStop()
-
-
-    }
 
     //https://travellersystems.page.link?
 // link=https://traveller-249409.firebaseapp.com/__/auth/action?

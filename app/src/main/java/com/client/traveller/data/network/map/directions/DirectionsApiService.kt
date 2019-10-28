@@ -18,7 +18,7 @@ interface DirectionsApiService {
         @Query("origin") origin: String,
         @Query("destination") destination: String,
         @Query("mode") mode: String = TravelMode.driving.name,
-        @Query("units") units : String = "metric"
+        @Query("units") units: String = "metric"
     ): Directions
 
     @GET("directions/json")
@@ -27,7 +27,7 @@ interface DirectionsApiService {
         @Query("destination") destination: String,
         @Query("mode") mode: String = TravelMode.driving.name,
         @Query("waypoints") waypoints: List<String>,
-        @Query("units") units : String = "metric"
+        @Query("units") units: String = "metric"
     ): Directions
 
 

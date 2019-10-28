@@ -17,21 +17,25 @@ class TripViewModel(
     private val mapRepository: MapRepository
 ) : ViewModel() {
 
+    internal var currentUser: LiveData<User> = userRepository.getUser()
+    internal var currentTrip: LiveData<Trip> = tripRepository.getCurrentTrip()
+
+    var selectedItem: TripListItem? = null
+
     suspend fun getAllTrips(): LiveData<List<Trip>> {
         return tripRepository.getAllTrips()
     }
-
-    fun getLoggedInUser(): LiveData<User> {
-        return userRepository.getUser()
-    }
-    fun getCurrentTrip() = tripRepository.getCurrentTrip()
 
     suspend fun addTrip(trip: Trip): Void? {
         return tripRepository.newTrip(trip)
     }
 
     // TODO trzeba dodać waypointy do wyznaczania długości
-    suspend fun tripDistance(origin: String, destination: String, mode: TravelMode = TravelMode.driving): Distance? {
+    suspend fun tripDistance(
+        origin: String,
+        destination: String,
+        mode: TravelMode = TravelMode.driving
+    ): Distance? {
         return mapRepository.getDistance(origin, destination, mode)
     }
 
@@ -43,6 +47,9 @@ class TripViewModel(
     }
 
     fun isTripParticipant(trip: Trip, user: User) = tripRepository.isTripParticipant(trip, user)
+    suspend fun setTripAsActual(trip: Trip) = tripRepository.setTripAsActual(trip)
+    fun updateTripPersons(tripToUpdate: Trip, emails: List<String>) =
+        tripRepository.updateTripPersons(tripToUpdate, emails)
 
 
 }

@@ -8,12 +8,10 @@ import android.view.View
 import android.widget.RelativeLayout
 import com.client.traveller.R
 import com.client.traveller.data.network.map.directions.DirectionsApiService
-import com.client.traveller.data.network.map.directions.model.Route
 import com.client.traveller.data.network.map.directions.model.TravelMode
 import com.client.traveller.data.network.map.directions.response.Directions
 import com.client.traveller.data.network.map.directions.response.Distance
 import com.client.traveller.data.provider.LocationProvider
-import com.client.traveller.ui.util.Coroutines
 import com.client.traveller.ui.util.Coroutines.main
 import com.client.traveller.ui.util.NoCurrentLocationException
 import com.client.traveller.ui.util.format
@@ -107,17 +105,23 @@ class MapUtilsImpl(
     private fun getDefaultPolyline(): PolylineOptions {
         return PolylineOptions()
             .width(12F)
-            .color(Color.rgb(124,77,255))
+            .color(Color.rgb(124, 77, 255))
             .geodesic(true)
     }
 
-    override fun drawRouteToLocation(origin: String, destination: String, locations: List<String>, mode: TravelMode) {
+    override fun drawRouteToLocation(
+        origin: String,
+        destination: String,
+        locations: List<String>,
+        mode: TravelMode
+    ) {
         val start = origin.trim().replace(" ", "+")
         val stop = destination.trim().replace(" ", "+")
         val waypoints = locations.map { it.trim().replace(" ", "+") }
 
         main {
-            val result = directionsApiService.getDirectionsWithWaypoints(start, stop, mode.name, waypoints)
+            val result =
+                directionsApiService.getDirectionsWithWaypoints(start, stop, mode.name, waypoints)
             this.drawRoute(result)
         }
     }
@@ -142,7 +146,7 @@ class MapUtilsImpl(
         }
     }
 
-    private fun drawRoute(result: Directions)  {
+    private fun drawRoute(result: Directions) {
         if (result.status == "OK") {
             val lineOptions = this.getDefaultPolyline()
             val pointList = PolyUtil.decode(result.routes.first().overviewPolyline.points)
@@ -165,8 +169,12 @@ class MapUtilsImpl(
     override fun centerCurrentLocation() {
         var currentLocation: LatLng? = null
         try {
-            currentLocation = LatLng(locationProvider.currentLocation?.latitude!!, locationProvider.currentLocation?.longitude!!)
-        } catch (ex: NullPointerException) { }
+            currentLocation = LatLng(
+                locationProvider.currentLocation?.latitude!!,
+                locationProvider.currentLocation?.longitude!!
+            )
+        } catch (ex: NullPointerException) {
+        }
         currentLocation?.let {
             val cameraPosition = CameraPosition.Builder()
                 .target(it)
@@ -182,8 +190,9 @@ class MapUtilsImpl(
      * Zwraca [Distance] trasy podanej w parametrach
      */
     override suspend fun getDistance(origin: String, destination: String): Distance? {
-        val result = directionsApiService.getDirections(origin, destination, TravelMode.driving.name)
-        return if (result.status == "OK"){
+        val result =
+            directionsApiService.getDirections(origin, destination, TravelMode.driving.name)
+        return if (result.status == "OK") {
             result.routes.first().legs.first().distance
         } else
             null

@@ -22,6 +22,7 @@
     </style>
 
 
+<!--    styl dla własnego actionbar -->
     <style name="DarkActionBar" parent="Theme.AppCompat.DayNight.DarkActionBar" />
 
     <style name="Divider">

@@ -1,7 +1,6 @@
 package com.client.traveller.ui.util
 
 import android.content.Context
-import android.location.Location
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup

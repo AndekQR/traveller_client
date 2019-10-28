@@ -80,7 +80,7 @@
     <string name="apply">Zatwierdź</string>
     <string name="update_profile_success">Dane zostały zaktualizowane</string>
     <string name="profile_update_failure">Aktualizacja profile zakończyła się niepowodzeniem</string>
-    <string name="something_went_wrong">Coś poszło nie tak</string>
+    <string name="something_went_wrong">Coś poszło nie tak, spróbuj ponownie</string>
     <string name="Invalid_data">Niepoprawne dane</string>
     <string name="not_all_permissions_granted">Wymagane uprawnienia nie zostały przyznane. Aplikacja może działać w niewłaściwy sposób.</string>
     <string name="warning">Ostrzeżenie!</string>
@@ -88,9 +88,9 @@
     <string name="title_trips_list">Wycieczki</string>
     <string name="trip_name">Nazwa wycieczki</string>
     <string name="trip_start_address">Adres początkowy wycieczki</string>
-    <string name="trip_end_address">Adres końcoey wycieczki</string>
+    <string name="trip_end_address">Adres końcowy wycieczki</string>
     <string name="trip_start_date">Data początku wycieczki</string>
-    <string name="trip_end_date">Data końcawycieczki</string>
+    <string name="trip_end_date">Data końca wycieczki</string>
     <string name="person_hint">e-email osoby</string>
     <string name="waypoint_hint">Przystanek</string>
     <string name="add_trip_text_button">Dodaj</string>
@@ -115,6 +115,7 @@
     <string name="chat_title">Wiadomości</string>
     <string name="list">Lista</string>
     <string name="participants">Uczestnicy</string>
+    <string name="click_back_again_to_exit">Please click BACK again to exit</string>
 
     <string-array name="intervals">
         <item>"1 sekunda"</item>

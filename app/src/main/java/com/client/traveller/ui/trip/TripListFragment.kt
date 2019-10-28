@@ -12,6 +12,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
+import com.client.traveller.data.db.entities.User
 import com.client.traveller.ui.util.ScopedFragment
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
@@ -36,6 +37,8 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
     private lateinit var viewModel: TripViewModel
 
     private lateinit var groupAdapter: GroupAdapter<GroupieViewHolder>
+    private var currentTrip: Trip? = null
+    private lateinit var currentUser: User
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,7 +53,8 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
         // jest podawany argument null do TripCreatorFragment spradza czy chemy tworzyć nową wycieczkę
         // czy przeglądamy już stworzoną ( w tym przypadku jako argument jest podawany trip )
         fab.setOnClickListener {
-            val action = TripListFragmentDirections.actionTripListFragmentToTripCreatorFragment(null)
+            val action =
+                TripListFragmentDirections.actionTripListFragmentToTripCreatorFragment(null, 0)
             Navigation.findNavController(view).navigate(action)
         }
     }
@@ -58,9 +62,29 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel = ViewModelProvider(this, factory).get(TripViewModel::class.java)
+        viewModel = ViewModelProvider(activity!!, factory).get(TripViewModel::class.java)
 
-        this.bindUI()
+        viewModel.currentUser.observe(viewLifecycleOwner, Observer {
+            if (it == null) return@Observer
+
+            this.currentUser = it
+        })
+
+        // currentTrip za późno zostaje aktualizowany
+        // a bindUI musi mieć tą wartość więc zostaje wywołany wewnątrz
+        // TODO trzeba porawić
+        viewModel.currentTrip.observe(viewLifecycleOwner, Observer {
+            this.currentTrip = it
+            this.bindUI()
+        })
+//        this.bindUI()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        // bo jesteśmy na liście, item nie jest kliknięty
+        viewModel.selectedItem = null
     }
 
     private fun bindUI() = launch(Dispatchers.Main) {
@@ -73,15 +97,17 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
 
     }
 
+    // TODO currentTrip na początku jest nullem
     private fun List<Trip>.toTripItems(): List<TripListItem> {
         return this.map {
-            TripListItem(it, requireContext(), viewModel)
+            TripListItem(it, currentTrip, requireContext(), viewModel, currentUser)
         }
     }
 
     private fun updateTrips(trips: List<Trip>) {
+        val tripItems = trips.toTripItems()
         groupAdapter = GroupAdapter<GroupieViewHolder>().apply {
-            addAll(trips.toTripItems())
+            addAll(tripItems)
         }
         groupAdapter.setOnItemClickListener(this)
         recycler_view?.apply {
@@ -90,6 +116,7 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
         }
     }
 
+
     private fun updateHeader(title: String, subtitle: String?) {
         (activity as? AppCompatActivity)?.supportActionBar?.title = title
 
@@ -97,8 +124,12 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
     }
 
     override fun onItemClick(item: Item<*>, view: View) {
-        if (item is TripListItem){
-            val action = TripListFragmentDirections.actionTripListFragmentToTripCreatorFragment(item.trip)
+        if (item is TripListItem) {
+            viewModel.selectedItem = item
+            val action = TripListFragmentDirections.actionTripListFragmentToTripCreatorFragment(
+                item.trip,
+                view.id
+            )
             this.view?.findNavController()?.navigate(action)
         }
 

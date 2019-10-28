@@ -2,10 +2,10 @@ package com.client.traveller.ui.chat
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.FragmentStatePagerAdapter
 
-class ViewPagerAdapter(fragmentManager: FragmentManager):  FragmentStatePagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+class ViewPagerAdapter(fragmentManager: FragmentManager) :
+    FragmentStatePagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     private var fragmentList = arrayOf<Fragment>()
     private var fragmentsTitlesList = arrayOf<String>()
@@ -22,7 +22,7 @@ class ViewPagerAdapter(fragmentManager: FragmentManager):  FragmentStatePagerAda
         return fragmentsTitlesList[position]
     }
 
-    fun addFragment(fragment: Fragment, title:String){
+    fun addFragment(fragment: Fragment, title: String) {
         fragmentList += fragment
         fragmentsTitlesList += title
     }

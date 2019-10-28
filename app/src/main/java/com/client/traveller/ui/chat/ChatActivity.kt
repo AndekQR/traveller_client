@@ -2,19 +2,20 @@ package com.client.traveller.ui.chat
 
 import android.content.Intent
 import android.content.res.Configuration
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.Navigation
 import androidx.viewpager.widget.ViewPager
 import com.client.traveller.R
 import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
+import com.client.traveller.ui.chat.messeages.ChatFragment
+import com.client.traveller.ui.chat.usersList.TripUsersFragment
 import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
@@ -24,15 +25,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import kotlinx.android.synthetic.main.activity_chat.*
-
-import kotlinx.android.synthetic.main.activity_chat.drawer_layout
-import kotlinx.android.synthetic.main.activity_chat.navigation_view
-
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-class ChatActivity : AppCompatActivity(), KodeinAware{
+class ChatActivity : AppCompatActivity(), KodeinAware {
 
     override val kodein by kodein()
     private val factory: ChatViewModelFactory by instance()
@@ -63,7 +60,13 @@ class ChatActivity : AppCompatActivity(), KodeinAware{
         this.toolBar = toolbar
         this.setSupportActionBar(this.toolBar)
         this.supportActionBar?.title = getString(R.string.chat_title)
-        this.mDrawerToggle = ActionBarDrawerToggle(this, this.drawerLayout, this.toolBar, R.string.open_drawer, R.string.close_drawer)
+        this.mDrawerToggle = ActionBarDrawerToggle(
+            this,
+            this.drawerLayout,
+            this.toolBar,
+            R.string.open_drawer,
+            R.string.close_drawer
+        )
         this.drawerLayout.addDrawerListener(mDrawerToggle)
         this.mDrawerToggle.syncState()
         this.mDrawerToggle.isDrawerIndicatorEnabled = true
@@ -116,44 +119,43 @@ class ChatActivity : AppCompatActivity(), KodeinAware{
                 }
             }
             R.id.profile -> {
-                Navigation.findNavController(this, R.id.nav_host_fragment_home)
-                    .navigate(R.id.profileFragment)
+                Intent(this, HomeActivity::class.java).also {
+                    it.putExtra("frag", "profile")
+                    startActivity(it)
+                    this.finish()
+                }
             }
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         true
     }
-    private val onBottomNavigationItemSelected =  BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        when(item.itemId) {
-            R.id.trip -> {
-            }
-//            R.id.chat -> {
-//                Intent(this, ChatActivity::class.java).also {
-//                    startActivity(it)
-//                }
-//            }
-            R.id.map -> {
-//                Navigation.findNavController(this, R.id.nav_host_fragment_home).navigate(R.id.homeFragment)
-                Intent(this, HomeActivity::class.java).also {
-                    startActivity(it)
+    private val onBottomNavigationItemSelected =
+        BottomNavigationView.OnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.trip -> {
+                }
+                R.id.map -> {
+                    Intent(this, HomeActivity::class.java).also {
+                        startActivity(it)
+                        this.finish()
+                    }
+                }
+                R.id.nearby -> {
+
                 }
             }
-            R.id.nearby -> {
-
-            }
+            true
         }
-        true
-    }
 
     override fun onBackPressed() {
-
-     if (doubleBack) {
+        if (doubleBack) {
             super.onBackPressed()
             return
         }
 
         this.doubleBack = true
-        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.click_back_again_to_exit), Toast.LENGTH_SHORT)
+            .show()
         Handler().postDelayed({ doubleBack = false }, 2000)
     }
 
@@ -167,4 +169,6 @@ class ChatActivity : AppCompatActivity(), KodeinAware{
         super.onConfigurationChanged(newConfig)
         this.mDrawerToggle.onConfigurationChanged(newConfig)
     }
+
+
 }

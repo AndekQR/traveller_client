@@ -36,4 +36,5 @@ interface UserRepository {
     fun updateLocalUserDataAsync(user: User)
     fun updateAvatar(user: User, imageUri: String)
 
+    suspend fun getUsersByEmails(emails: ArrayList<String>): List<User>
 }

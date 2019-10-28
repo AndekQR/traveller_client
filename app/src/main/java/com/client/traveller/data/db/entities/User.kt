@@ -14,7 +14,7 @@ data class User(
     var email: String? = null,
     var verified: Boolean = false,
     var image: String? = null
-): Serializable {
+) : Serializable {
     //lokalne id
     @PrimaryKey(autoGenerate = false)
     var uid: Int = CURRENT_USER_ID

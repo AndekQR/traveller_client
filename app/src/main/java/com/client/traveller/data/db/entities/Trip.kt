@@ -3,9 +3,6 @@ package com.client.traveller.data.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.io.Serializable
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 const val CURRENT_TRIP_ID = 0
 
@@ -22,7 +19,7 @@ data class Trip(
     var endAddress: String? = null,
     var waypoints: ArrayList<String>? = null,
     var author: User? = null
-): Serializable {
+) : Serializable {
     @PrimaryKey(autoGenerate = false)
     var id: Int = CURRENT_TRIP_ID
 }

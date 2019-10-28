@@ -18,10 +18,9 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.suspendCoroutine
 
 class UserRepositoryImpl(
     private val userDao: UserDao,
@@ -34,6 +33,8 @@ class UserRepositoryImpl(
     private val authUtils: AuthUtils,
     private val authProvider: AuthProvider
 ) : UserRepository {
+
+    private val currentUserLiveData: LiveData<User> = this.userDao.getUser()
 
     /**
      * W tle
@@ -97,7 +98,7 @@ class UserRepositoryImpl(
                 if (it.isSuccessful) {
                     val user = it.result?.user
                     user?.let {
-                        usersFirestore.getUser(user.uid).addOnCompleteListener {
+                        usersFirestore.getUserByUid(user.uid).addOnCompleteListener {
                             if (!it.result?.exists()!!) {
                                 // createUser
                                 this.registerUser(user.toLocalUser(), function)
@@ -121,7 +122,7 @@ class UserRepositoryImpl(
             if (it.isSuccessful) {
                 val user = it.result?.user
                 user?.let {
-                    usersFirestore.getUser(user.uid).addOnCompleteListener {
+                    usersFirestore.getUserByUid(user.uid).addOnCompleteListener {
                         if (!it.result?.exists()!!) {
                             // createUser
                             this.registerUser(user.toLocalUser(), function)
@@ -142,10 +143,10 @@ class UserRepositoryImpl(
      */
     // TODO mogło popsuć avatary
     override fun updateLocalUserDataAsync(user: User) {
-            usersFirestore.getUser(user.idUserFirebase!!).addOnSuccessListener {snapshot ->
-                val userFirestore = snapshot.toObject(User::class.java)
-                userFirestore?.let { io {userDao.upsert(it)} }
-            }
+        usersFirestore.getUserByUid(user.idUserFirebase!!).addOnSuccessListener { snapshot ->
+            val userFirestore = snapshot.toObject(User::class.java)
+            userFirestore?.let { io { userDao.upsert(it) } }
+        }
     }
 
     override fun createUserEmailPassword(
@@ -224,7 +225,7 @@ class UserRepositoryImpl(
     }
 
     override fun getUser(): LiveData<User> {
-        return userDao.getUser()
+        return this.currentUserLiveData
     }
 
     override fun logoutUser(googleSignInClient: GoogleSignInClient) {
@@ -246,6 +247,36 @@ class UserRepositoryImpl(
         io {
             userDao.setEmailVerified()
             usersFirestore.changeVerifiedStatus(state = true)
+        }
+    }
+
+    /**
+     * Metoda zwraca wszystkich userow których emaile pasują do podanych jako parametr
+     * w ostatniej iteracji pętli jeśli zakończy się prawdłowo wartość jest zwracana
+     *
+     * @param emails lista email szukanych userów
+     */
+    override suspend fun getUsersByEmails(emails: ArrayList<String>) = withContext(Dispatchers.IO) {
+        suspendCoroutine<List<User>> { continution ->
+            val users = mutableListOf<User>()
+            for ((index, value) in emails.withIndex()) {
+                if (index == emails.size - 1) {
+                    usersFirestore.getUserByEmail(value).get().addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val user = task.result?.first()?.toObject(User::class.java)
+                            if (user != null) users.add(user)
+                            continution.resumeWith(Result.success(users))
+                        }
+                    }
+                } else {
+                    usersFirestore.getUserByEmail(value).get().addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val user = task.result?.first()?.toObject(User::class.java)
+                            if (user != null) users.add(user)
+                        }
+                    }
+                }
+            }
         }
     }
 }

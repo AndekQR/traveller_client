@@ -2,7 +2,6 @@ package com.client.traveller.data.db
 
 import android.net.Uri
 import androidx.room.TypeConverter
-import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

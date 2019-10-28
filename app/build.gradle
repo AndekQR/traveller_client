@@ -133,4 +133,7 @@ dependencies {
     implementation 'com.google.android.libraries.places:places:2.0.0'
 
     implementation 'androidx.fragment:fragment-ktx:1.2.0-beta02'
+
+    // wyśitlanie okrągłych obrazów
+    implementation 'de.hdodenhof:circleimageview:3.0.1'
 }

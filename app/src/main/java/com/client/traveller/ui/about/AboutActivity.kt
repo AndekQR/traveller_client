@@ -1,7 +1,7 @@
 package com.client.traveller.ui.about
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.client.traveller.R
 
 class AboutActivity : AppCompatActivity() {

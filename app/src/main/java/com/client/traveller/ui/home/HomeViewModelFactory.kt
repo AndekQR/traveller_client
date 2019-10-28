@@ -2,7 +2,6 @@ package com.client.traveller.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.message.CloudMessagingRepository
 import com.client.traveller.data.repository.user.UserRepository

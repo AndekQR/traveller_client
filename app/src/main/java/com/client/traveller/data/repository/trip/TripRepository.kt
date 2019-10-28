@@ -11,4 +11,5 @@ interface TripRepository {
     fun getCurrentTrip(): LiveData<Trip>
     suspend fun setTripAsActual(trip: Trip)
     fun isTripParticipant(trip: Trip, user: User): Boolean
+    fun updateTripPersons(trip: Trip, emails: List<String>)
 }

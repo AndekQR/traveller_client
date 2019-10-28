@@ -18,6 +18,9 @@
             app:argType="com.client.traveller.data.db.entities.Trip"
             app:nullable="true"
             android:defaultValue="@null" />
+        <argument
+            android:name="item_view_id"
+            app:argType="integer" />
     </fragment>
     <fragment
             android:id="@+id/tripListFragment"
@@ -25,7 +28,7 @@
             android:label="fragment_trip_list"
             tools:layout="@layout/fragment_trip_list" >
         <action
-                android:id="@+id/action_tripListFragment_to_tripCreatorFragment"
-                app:destination="@id/tripCreatorFragment" />
+            android:id="@+id/action_tripListFragment_to_tripCreatorFragment"
+            app:destination="@id/tripCreatorFragment" />
     </fragment>
 </navigation>

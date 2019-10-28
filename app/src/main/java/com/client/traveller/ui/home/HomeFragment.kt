@@ -6,21 +6,15 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.LinearInterpolator
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.R
 import com.client.traveller.ui.util.ScopedFragment
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.android.synthetic.main.fragment_home.view.*
-import kotlinx.coroutines.launch
+import kotlinx.android.synthetic.main.fragment_home.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
-import android.widget.LinearLayout
-import kotlinx.android.synthetic.main.fragment_home.*
 
 
 class HomeFragment : ScopedFragment(), KodeinAware {
@@ -47,13 +41,13 @@ class HomeFragment : ScopedFragment(), KodeinAware {
 
         // inicjalizacja mapy oraz jej funkcji
 
-            // childFragmentManager służy do zarządzania fragmentami w tym fagmencie
-            // a fragmentManager do zarządzania fragmentami które są związane z activity tego fragmentu
-            (childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?)?.let {
-                activity?.let { activity ->
-                    viewModel.initMap(it, activity, savedInstanceState)
-                }
+        // childFragmentManager służy do zarządzania fragmentami w tym fagmencie
+        // a fragmentManager do zarządzania fragmentami które są związane z activity tego fragmentu
+        (childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?)?.let {
+            activity?.let { activity ->
+                viewModel.initMap(it, activity, savedInstanceState)
             }
+        }
 
     }
 

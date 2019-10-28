@@ -7,8 +7,12 @@ import com.client.traveller.data.network.map.directions.model.TravelMode
 import com.client.traveller.data.network.map.directions.response.Distance
 import com.google.android.gms.maps.SupportMapFragment
 
-interface MapRepository{
-    fun initializeMap(mapFragment: SupportMapFragment, context: Context, savedInstanceState: Bundle?)
+interface MapRepository {
+    fun initializeMap(
+        mapFragment: SupportMapFragment,
+        context: Context,
+        savedInstanceState: Bundle?
+    )
 
     fun startLocationUpdates()
     fun stopLocationUpdates()
@@ -20,6 +24,11 @@ interface MapRepository{
     fun clearMap()
 
     fun drawRouteMarker()
-    fun drawRouteToLocation(origin: String, destination: String, locations: List<String>, mode: TravelMode)
+    fun drawRouteToLocation(
+        origin: String,
+        destination: String,
+        locations: List<String>,
+        mode: TravelMode
+    )
 
 }

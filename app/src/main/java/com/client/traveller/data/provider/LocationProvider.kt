@@ -22,7 +22,13 @@ interface LocationProvider : OnMapReadyCallback,
     val mMap: GoogleMap?
     val mapFragment: SupportMapFragment?
 
-    fun init(mapFragment: SupportMapFragment, context: Context, savedInstanceState: Bundle?, function: () -> Unit)
+    fun init(
+        mapFragment: SupportMapFragment,
+        context: Context,
+        savedInstanceState: Bundle?,
+        function: () -> Unit
+    )
+
     fun startLocationUpdates()
     fun stopLocationUpdates()
     fun sendingLocationData(): Boolean

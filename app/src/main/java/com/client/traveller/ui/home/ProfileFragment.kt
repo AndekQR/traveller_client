@@ -25,7 +25,6 @@ import com.client.traveller.ui.util.ScopedFragment
 import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.showProgressBar
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.launch
@@ -135,7 +134,7 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
         progress_bar.hideProgressBar()
         Dialog.Builder()
             .addMessage(getString(R.string.changes_in_minutes))
-            .addPositiveButton("ok"){
+            .addPositiveButton("ok") {
                 it.dismiss()
             }
             .build(fragmentManager, javaClass.simpleName)

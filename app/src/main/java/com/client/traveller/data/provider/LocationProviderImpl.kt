@@ -12,8 +12,6 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import com.client.traveller.data.network.map.MapUtils
-import com.client.traveller.data.network.map.MapUtilsImpl
 import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.util.Coroutines
 import com.google.android.gms.common.api.ApiException
@@ -24,9 +22,6 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 
@@ -125,7 +120,7 @@ class LocationProviderImpl(
         settingsClient = LocationServices.getSettingsClient(context)
         locationSettingsRequest = builder.build()
 
-       mapFragment.getMapAsync(this)
+        mapFragment.getMapAsync(this)
     }
 
     /**

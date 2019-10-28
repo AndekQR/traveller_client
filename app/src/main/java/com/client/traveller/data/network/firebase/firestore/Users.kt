@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 
 /**
@@ -25,8 +26,12 @@ class Users {
         return this.getUsersCollection().document(user.idUserFirebase!!).set(user)
     }
 
-    fun getUser(uid: String): Task<DocumentSnapshot> {
+    fun getUserByUid(uid: String): Task<DocumentSnapshot> {
         return this.getUsersCollection().document(uid).get()
+    }
+
+    fun getUserByEmail(email: String): Query {
+        return this.getUsersCollection().whereEqualTo("email", email)
     }
 
     fun updateUsername(uid: String, username: String): Task<Void> {

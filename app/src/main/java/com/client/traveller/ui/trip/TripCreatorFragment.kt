@@ -2,12 +2,9 @@ package com.client.traveller.ui.trip
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -19,6 +16,7 @@ import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.ui.util.ScopedFragment
+import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.setMargins
 import com.client.traveller.ui.util.showProgressBar
 import kotlinx.android.synthetic.main.fragment_trip_creator.*
@@ -55,6 +53,8 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
 
     // zmienna mówi czy właśnie wyświetlamy wycieckę czy torzymy nową
     private var tripView: Boolean = false
+    private var viewedTripViewId: Int? = null
+    private var viewedTrip: Trip? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -81,18 +81,28 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel = ViewModelProvider(this, factory).get(TripViewModel::class.java)
-        viewModel.getLoggedInUser().observe(viewLifecycleOwner, Observer {
+        viewModel = ViewModelProvider(activity!!, factory).get(TripViewModel::class.java)
+        viewModel.currentUser.observe(viewLifecycleOwner, Observer {
             if (it == null) return@Observer
             this.currentUser = it
+            this.checkIsItTripView()
         })
+    }
 
-
+    /**
+     * Klasa sprawdza czy została uruchomiona do tworzenia nowej wycieczki
+     * czy do wyświetlenia już istniejącej
+     *
+     */
+    private fun checkIsItTripView() {
         arguments?.let {
             val navigationArguemnts: Trip? = TripCreatorFragmentArgs.fromBundle(it).trip
             // jeżeli jest nullem to tworzymy nową wycieczkę
             if (navigationArguemnts != null) {
                 tripView = true
+                this.viewedTripViewId = TripCreatorFragmentArgs.fromBundle(it).itemViewId
+                this.viewedTrip = navigationArguemnts
+//                if (this.isParticipant()) callback.makeJoinTripButtonInvisible()
                 // blokuje edytowalne pola przed modyfikacją
                 this.setEditTextsDisabled()
                 // wpisuje w pola dane z wycieczki
@@ -118,20 +128,26 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
         trip.waypoints?.forEach { waypointAddress ->
             this.addWaypoint(waypointAddress)
         }
-        viewModel.getCurrentTrip().observe(viewLifecycleOwner, Observer {
-            if (it == null) {
-                add_trip_button.setBackgroundColor(Color.GRAY)
-                add_trip_button.isEnabled = false
-                return@Observer
-            } else {
+        viewModel.currentTrip.observe(viewLifecycleOwner, Observer {
+            if (it != null) {
                 this.currentTrip = it
                 if (this.currentTrip == trip) {
                     add_trip_button.visibility = View.GONE
                 } else {
                     if (viewModel.isTripParticipant(trip, currentUser)) {
                         add_trip_button.text = getString(R.string.choose_trip)
+                        add_trip_button.setOnClickListener {
+                            this.jointTripButtonClick()
+                        }
                     } else {
-                        add_trip_button.text = getString(R.string.send_request_add_to_trip)
+                        add_trip_button.visibility = View.GONE
+                    }
+                }
+            } else {
+                if (viewModel.isTripParticipant(trip, currentUser)) {
+                    add_trip_button.text = getString(R.string.choose_trip)
+                    add_trip_button.setOnClickListener {
+                        this.jointTripButtonClick()
                     }
                 }
             }
@@ -181,9 +197,10 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
                 getString(R.string.something_went_wrong),
                 Toast.LENGTH_SHORT
             ).show()
+            progress_bar.hideProgressBar()
             return@launch
         }
-
+        personsEmailString.add(currentUser.email!!) // autor jest też uczestnikiem wycieczki
         val trip = Trip(
             name = tripName,
             author = currentUser,
@@ -227,10 +244,9 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
         tripStartAddress = trip_start_address.text.toString().trim()
         tripEndAddress = trip_end_address.text.toString().trim()
         personForms.mapTo(personsEmailString) { it.edit_text.text.toString().trim() }
-            .filter { it.isNotBlank() }
-        personsEmailString.add(currentUser.email!!) // autor jest też uczestnikiem wycieczki
+        personsEmailString.filterTo(personsEmailString) { it.isNotBlank() }
         waypointForms.mapTo(waypointsString) { it.edit_text.text.toString().trim() }
-            .filter { it.isNotBlank() }
+        waypointsString.filterTo(waypointsString) { it.isNotBlank() }
     }
 
     /**
@@ -364,7 +380,7 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
             return false
         if (personsEmailString.isNotEmpty()) {
             personsEmailString.forEach {
-                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches())
+                if (it.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches())
                     return false
             }
         }
@@ -378,12 +394,19 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
     /**
      * Akcja po naciśnięciu przycisku "dodaj do wycieczki" w action bar
      */
-    // TODO trzeba zrobić powiadomienie do twórcy o tym że ktoś chce dołączyć do wycieczki
+    // TODO trzeba zrobić powiadomienie do twórcy o tym że ktoś chce dołączyć do wycieczki i wszystko inne
+    // Dla osoby w wycieczce ten przycsk nie powinien się pokazywać
     fun jointTripButtonClick() {
-        if (this.tripView){
-
-        } else {
-
+        if (this.tripView) {
+            viewedTripViewId?.let { viewId ->
+                // dodanie email osoby do tej wycieczki
+                this.viewedTrip?.let {
+                    launch(Dispatchers.IO) {
+                        viewModel.updateTripPersons(it, listOf(currentUser.email!!))
+                        viewModel.setTripAsActual(it)
+                    }
+                }
+            }
         }
     }
 

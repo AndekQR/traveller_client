@@ -19,4 +19,7 @@ interface TripDao {
 
     @Query("DELETE FROM trip WHERE id=$CURRENT_TRIP_ID")
     fun deleteCurrentTrip()
+
+    @Query("SELECT persons FROM trip WHERE id=$CURRENT_TRIP_ID")
+    fun getCurrentTripPersonsEmail(): LiveData<List<String>>
 }

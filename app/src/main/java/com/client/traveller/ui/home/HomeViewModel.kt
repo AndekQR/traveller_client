@@ -3,15 +3,12 @@ package com.client.traveller.ui.home
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.map.directions.model.TravelMode
-import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.message.CloudMessagingRepository
 import com.client.traveller.data.repository.user.UserRepository
-import com.client.traveller.ui.util.Coroutines
 import com.client.traveller.ui.util.Coroutines.io
 import com.client.traveller.ui.util.format
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -29,7 +26,8 @@ class HomeViewModel(
     }
 
     fun getLoggedInUser() = userRepository.getUser()
-    fun logoutUser(mGoogleSignInClient: GoogleSignInClient) = userRepository.logoutUser(mGoogleSignInClient)
+    fun logoutUser(mGoogleSignInClient: GoogleSignInClient) =
+        userRepository.logoutUser(mGoogleSignInClient)
 
     fun setEmailVerified() {
         io {
@@ -50,9 +48,15 @@ class HomeViewModel(
     fun stopLocationUpdates() = mapRepository.stopLocationUpdates()
     fun sendingLocationData() = mapRepository.sendingLocationData()
     fun centerOnMe() = mapRepository.centerCurrentLocation()
-    fun drawRouteToLocation(origin: String = mapRepository.getCurrentLocation().format(), destination: String, locations: List<String>, mode: TravelMode = TravelMode.driving){
+    fun drawRouteToLocation(
+        origin: String = mapRepository.getCurrentLocation().format(),
+        destination: String,
+        locations: List<String>,
+        mode: TravelMode = TravelMode.driving
+    ) {
         mapRepository.drawRouteToLocation(origin, destination, locations, mode)
     }
+
     fun clearMap() = mapRepository.clearMap()
 
 

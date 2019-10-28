@@ -1,6 +1,5 @@
 package com.client.traveller.data.network.firebase.storage
 
-import com.client.traveller.data.db.entities.User
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 

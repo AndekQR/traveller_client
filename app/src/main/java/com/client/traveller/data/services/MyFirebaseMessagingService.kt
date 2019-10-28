@@ -6,7 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 
-class MyFirebaseMessagingService: FirebaseMessagingService() {
+class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         Log.e(javaClass.simpleName, token)
@@ -16,7 +16,8 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     private fun saveToken(token: String) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         currentUser?.let {
-            FirebaseFirestore.getInstance().collection(Tokens.COLLECTION_NAME).document(it.email!!).set(token)
+            FirebaseFirestore.getInstance().collection(Tokens.COLLECTION_NAME).document(it.email!!)
+                .set(token)
         }
     }
 }

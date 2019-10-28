@@ -1,19 +1,18 @@
 package com.client.traveller
 
+
 import android.app.Application
 import android.content.Context
 import com.client.traveller.data.db.AppDatabase
 import com.client.traveller.data.network.firebase.auth.*
 import com.client.traveller.data.network.firebase.firestore.Tokens
 import com.client.traveller.data.network.firebase.firestore.Trips
-
 import com.client.traveller.data.network.firebase.firestore.Users
 import com.client.traveller.data.network.firebase.messaging.CloudMessaging
 import com.client.traveller.data.network.firebase.storage.Avatars
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.network.map.MapUtilsImpl
 import com.client.traveller.data.network.map.directions.DirectionsApiService
-
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.provider.LocationProviderImpl
 import com.client.traveller.data.provider.PreferenceProvider
@@ -25,7 +24,6 @@ import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.trip.TripRepositoryImpl
 import com.client.traveller.data.repository.user.UserRepository
 import com.client.traveller.data.repository.user.UserRepositoryImpl
-import com.client.traveller.data.services.MyFirebaseMessagingService
 import com.client.traveller.ui.auth.AuthViewModelFactory
 import com.client.traveller.ui.chat.ChatViewModelFactory
 import com.client.traveller.ui.home.HomeViewModelFactory
@@ -33,12 +31,13 @@ import com.client.traveller.ui.settings.SettingsViewModelFactory
 import com.client.traveller.ui.trip.TripViewModelFactory
 import com.google.android.gms.location.LocationServices
 import com.jakewharton.threetenabp.AndroidThreeTen
-
-
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.androidXModule
-import org.kodein.di.generic.*
+import org.kodein.di.generic.bind
+import org.kodein.di.generic.instance
+import org.kodein.di.generic.provider
+import org.kodein.di.generic.singleton
 
 class TravellerAplication : Application(), KodeinAware {
 
@@ -77,15 +76,24 @@ class TravellerAplication : Application(), KodeinAware {
         bind<MapRepository>() with singleton { MapRepositoryImpl(instance(), instance()) }
         bind() from provider { Trips() }
         bind() from singleton { instance<AppDatabase>().tripDao() }
-        bind<TripRepository>() with singleton { TripRepositoryImpl(instance(), instance()) }
-        bind<CloudMessagingRepository>() with singleton { CloudMessagingRepositoryImpl(instance(), instance()) }
+        bind<TripRepository>() with singleton {
+            TripRepositoryImpl(
+                instance(),
+                instance(),
+                instance()
+            )
+        }
+        bind<CloudMessagingRepository>() with singleton {
+            CloudMessagingRepositoryImpl(
+                instance(),
+                instance()
+            )
+        }
         bind() from provider { AuthViewModelFactory(instance()) }
         bind() from provider { HomeViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }
         bind() from provider { TripViewModelFactory(instance(), instance(), instance()) }
-        bind() from provider {ChatViewModelFactory(instance(), instance())}
-
-
+        bind() from provider { ChatViewModelFactory(instance(), instance(), instance()) }
 
 
     }
