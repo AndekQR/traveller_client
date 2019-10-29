@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 
@@ -16,7 +17,7 @@ import com.client.traveller.data.db.entities.User
  */
 
 @Database(
-    entities = [User::class, Trip::class],
+    entities = [User::class, Trip::class, Messeage::class],
     version = 1,
     exportSchema = true
 )
@@ -27,6 +28,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
     abstract fun tripDao(): TripDao
+    abstract fun messeageDao(): MesseageDao
 
     companion object {
         @Volatile

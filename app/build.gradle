@@ -136,4 +136,7 @@ dependencies {
 
     // wyśitlanie okrągłych obrazów
     implementation 'de.hdodenhof:circleimageview:3.0.1'
+
+    // auto resize edit text
+    implementation 'com.github.ViksaaSkool:AutoFitEditText:53238e2d29'
 }

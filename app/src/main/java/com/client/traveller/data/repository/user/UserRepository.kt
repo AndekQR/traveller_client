@@ -37,4 +37,5 @@ interface UserRepository {
     fun updateAvatar(user: User, imageUri: String)
 
     suspend fun getUsersByEmails(emails: ArrayList<String>): List<User>
+    suspend fun getUserByFirestoreId(id: String): User
 }

@@ -8,13 +8,22 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <!--    tools:replace="android:allowBackup"    dla biblioteki autoFitEditText-->
+
     <application
+        tools:replace="android:allowBackup"
         android:name=".TravellerAplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity
+            android:name=".ui.chat.messeage.MesseageActivity"
+            android:theme="@style/AppTheme.StatusBar.Transparent"
+            android:parentActivityName=".ui.chat.ChatActivity"
+            android:windowSoftInputMode="adjustResize"
+            />
         <activity
             android:name=".ui.chat.ChatActivity"
             android:theme="@style/AppTheme.StatusBar.Transparent" />

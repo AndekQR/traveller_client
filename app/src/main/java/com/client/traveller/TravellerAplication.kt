@@ -26,6 +26,7 @@ import com.client.traveller.data.repository.user.UserRepository
 import com.client.traveller.data.repository.user.UserRepositoryImpl
 import com.client.traveller.ui.auth.AuthViewModelFactory
 import com.client.traveller.ui.chat.ChatViewModelFactory
+import com.client.traveller.ui.chat.messeage.MesseageViewModelFactory
 import com.client.traveller.ui.home.HomeViewModelFactory
 import com.client.traveller.ui.settings.SettingsViewModelFactory
 import com.client.traveller.ui.trip.TripViewModelFactory
@@ -83,6 +84,7 @@ class TravellerAplication : Application(), KodeinAware {
                 instance()
             )
         }
+        bind() from singleton { instance<AppDatabase>().messeageDao() }
         bind<CloudMessagingRepository>() with singleton {
             CloudMessagingRepositoryImpl(
                 instance(),
@@ -94,6 +96,7 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { SettingsViewModelFactory(instance()) }
         bind() from provider { TripViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { ChatViewModelFactory(instance(), instance(), instance()) }
+        bind() from provider { MesseageViewModelFactory(instance(), instance()) }
 
 
     }
@@ -101,13 +104,6 @@ class TravellerAplication : Application(), KodeinAware {
     override fun onCreate() {
         super.onCreate()
 
-        myContext = this
         AndroidThreeTen.init(this)
     }
-
-    companion object {
-        private var myContext: Context? = null
-        fun getContext() = myContext
-    }
-
 }

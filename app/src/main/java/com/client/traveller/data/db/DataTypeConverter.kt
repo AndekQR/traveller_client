@@ -5,7 +5,9 @@ import androidx.room.TypeConverter
 import com.client.traveller.data.db.entities.User
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import org.threeten.bp.Instant
 import org.threeten.bp.LocalDateTime
+import org.threeten.bp.ZoneId
 import org.threeten.bp.format.DateTimeFormatter
 
 object DataTypeConverter {
@@ -63,5 +65,18 @@ object DataTypeConverter {
     @JvmStatic
     fun userToJson(value: User?): String? {
         return Gson().toJson(value)
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun localDateTimeToLong(value: LocalDateTime): Long {
+        val zdt = value.atZone(ZoneId.of("Europe/Warsaw"))
+        return zdt.toInstant().toEpochMilli()
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun longToLocalDateTime(value: Long): LocalDateTime {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("Europe/Warsaw"))
     }
 }

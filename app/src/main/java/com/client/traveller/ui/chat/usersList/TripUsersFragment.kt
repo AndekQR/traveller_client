@@ -1,5 +1,6 @@
 package com.client.traveller.ui.chat.usersList
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.ui.chat.ChatViewModel
 import com.client.traveller.ui.chat.ChatViewModelFactory
+import com.client.traveller.ui.chat.messeage.MesseageActivity
 import com.client.traveller.ui.util.ScopedFragment
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
@@ -93,7 +95,10 @@ class TripUsersFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
 
     override fun onItemClick(item: Item<*>, view: View) {
         if (item is ItemUsersListChat) {
-
+            Intent(context, MesseageActivity::class.java).also {
+                it.putExtra("userId", item.user.idUserFirebase)
+                startActivity(it)
+            }
         }
     }
 }

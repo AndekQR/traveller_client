@@ -14,7 +14,7 @@ import androidx.viewpager.widget.ViewPager
 import com.client.traveller.R
 import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
-import com.client.traveller.ui.chat.messeages.ChatFragment
+import com.client.traveller.ui.chat.messeagesList.ChatListFragment
 import com.client.traveller.ui.chat.usersList.TripUsersFragment
 import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.settings.SettingsActivity
@@ -77,7 +77,7 @@ class ChatActivity : AppCompatActivity(), KodeinAware {
         this.viewPager = view_pager
         this.tabLayout = tab_layout
         this.viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
-        this.viewPagerAdapter.addFragment(ChatFragment(), getString(R.string.list))
+        this.viewPagerAdapter.addFragment(ChatListFragment(), getString(R.string.list))
         this.viewPagerAdapter.addFragment(TripUsersFragment(), getString(R.string.participants))
         this.viewPager.adapter = this.viewPagerAdapter
         this.tabLayout.setupWithViewPager(this.viewPager)

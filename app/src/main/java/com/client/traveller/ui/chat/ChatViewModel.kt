@@ -19,11 +19,16 @@ class ChatViewModel(
     internal val usersTrip: LiveData<List<User>> = _usersTrip
     internal val currentTrip = tripRepository.getCurrentTrip()
 
+    internal var selectedUser: User? = null
+//    internal var selectedMesseage: Messeage? = null
+
     fun logoutUser(mGoogleSignInClient: GoogleSignInClient) =
         userRepository.logoutUser(mGoogleSignInClient)
 
     suspend fun refreshUsers(emails: ArrayList<String>?) {
-        if (emails != null)
-            _usersTrip.value = userRepository.getUsersByEmails(emails)
+        if (emails != null) {
+            val filteredEmails = ArrayList(emails.filter { it.isNotBlank() })
+            _usersTrip.value = userRepository.getUsersByEmails(filteredEmails)
+        }
     }
 }

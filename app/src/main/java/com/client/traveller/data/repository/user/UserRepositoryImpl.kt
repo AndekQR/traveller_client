@@ -263,19 +263,38 @@ class UserRepositoryImpl(
                 if (index == emails.size - 1) {
                     usersFirestore.getUserByEmail(value).get().addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            val user = task.result?.first()?.toObject(User::class.java)
-                            if (user != null) users.add(user)
+                            var user: User? = null
+                            try {
+                                user = task.result?.first()?.toObject(User::class.java)
+                            } catch (ex: Exception) {
+                                if (ex is NoSuchElementException) Log.e(javaClass.simpleName, "no such element")
+                            }
+                            user?.let { users.add(it) }
                             continution.resumeWith(Result.success(users))
                         }
                     }
                 } else {
                     usersFirestore.getUserByEmail(value).get().addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            val user = task.result?.first()?.toObject(User::class.java)
-                            if (user != null) users.add(user)
+                            var user: User? = null
+                            try {
+                                user = task.result?.first()?.toObject(User::class.java)
+                            } catch (ex: Exception) {
+                                if (ex is NoSuchElementException) Log.e(javaClass.simpleName, "no such element")
+                            }
+                            user?.let { users.add(it) }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    override suspend fun getUserByFirestoreId(id: String) = withContext(Dispatchers.IO){
+        suspendCoroutine<User> {continuation ->
+            usersFirestore.getUserByUid(id).addOnSuccessListener {
+                val user = it.toObject(User::class.java)
+                user?.let {userNotNull -> continuation.resumeWith(Result.success(userNotNull)) }
             }
         }
     }

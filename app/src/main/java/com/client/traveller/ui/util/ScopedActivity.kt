@@ -1,13 +1,13 @@
 package com.client.traveller.ui.util
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
 
-abstract class ScopedFragment : Fragment(), CoroutineScope {
+abstract class ScopedAppActivity: AppCompatActivity(), CoroutineScope {
 
     protected lateinit var job: Job
     override val coroutineContext: CoroutineContext
