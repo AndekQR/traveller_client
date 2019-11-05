@@ -5,6 +5,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.threeten.bp.Instant
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.ZoneId
 import kotlin.coroutines.suspendCoroutine
 import com.google.firebase.firestore.DocumentSnapshot as DocumentSnapshot1
 
@@ -15,5 +18,14 @@ fun Location.format(): String {
 
 fun LatLng.format(): String {
     return "${this.latitude},${this.longitude}"
+}
+
+fun LocalDateTime.toLong(): Long {
+    val zdt = this.atZone(ZoneId.of("Europe/Warsaw"))
+    return zdt.toInstant().toEpochMilli()
+}
+
+fun Long.toLocalDateTime(): LocalDateTime {
+    return LocalDateTime.ofInstant(Instant.ofEpochMilli(this), ZoneId.of("Europe/Warsaw"))
 }
 

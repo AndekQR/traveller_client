@@ -18,7 +18,8 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-
+// TODO trzeba sprawdzać czywycieczka o tej samej nazwie już istnieje i pytać czy nadpisać
+// TODO przy wyświetlaniu wycieczki wyświetla się pole 'email osoby' trzeba usunąć
 class TripActivity : AppCompatActivity(), KodeinAware, NavController.OnDestinationChangedListener {
 
     override val kodein by kodein()

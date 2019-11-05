@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.client.traveller.data.db.entities.ChatRoomModel
 import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
@@ -17,7 +18,7 @@ import com.client.traveller.data.db.entities.User
  */
 
 @Database(
-    entities = [User::class, Trip::class, Messeage::class],
+    entities = [User::class, Trip::class, Messeage::class, ChatRoomModel::class],
     version = 1,
     exportSchema = true
 )

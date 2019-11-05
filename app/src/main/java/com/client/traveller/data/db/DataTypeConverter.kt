@@ -2,6 +2,7 @@ package com.client.traveller.data.db
 
 import android.net.Uri
 import androidx.room.TypeConverter
+import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.db.entities.User
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -42,6 +43,19 @@ object DataTypeConverter {
 
     @TypeConverter
     @JvmStatic
+    fun userListToJson(value: ArrayList<User>): String? {
+        return Gson().toJson(value)
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun jsonToUsersList(value: String?): ArrayList<User> {
+        val listType = object : TypeToken<ArrayList<User>>() {}.type
+        return Gson().fromJson(value, listType)
+    }
+
+    @TypeConverter
+    @JvmStatic
     fun stringToDate(value: String?): LocalDateTime? {
         if (value == null)
             return null
@@ -69,14 +83,15 @@ object DataTypeConverter {
 
     @TypeConverter
     @JvmStatic
-    fun localDateTimeToLong(value: LocalDateTime): Long {
-        val zdt = value.atZone(ZoneId.of("Europe/Warsaw"))
-        return zdt.toInstant().toEpochMilli()
+    fun messeageListToJson(value: ArrayList<Messeage>): String? {
+        return Gson().toJson(value)
     }
 
     @TypeConverter
     @JvmStatic
-    fun longToLocalDateTime(value: Long): LocalDateTime {
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("Europe/Warsaw"))
+    fun jsonToMesseageList(value: String?): ArrayList<Messeage> {
+        val listType = object : TypeToken<ArrayList<Messeage>>() {}.type
+        return Gson().fromJson(value, listType)
     }
+
 }

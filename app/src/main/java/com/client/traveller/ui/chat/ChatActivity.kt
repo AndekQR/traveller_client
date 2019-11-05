@@ -10,11 +10,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
-import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import com.client.traveller.R
 import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
-import com.client.traveller.ui.chat.messeagesList.ChatListFragment
+import com.client.traveller.ui.chat.chatList.ChatListFragment
 import com.client.traveller.ui.chat.usersList.TripUsersFragment
 import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.settings.SettingsActivity
@@ -24,6 +24,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_chat.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -36,7 +37,7 @@ class ChatActivity : AppCompatActivity(), KodeinAware {
     private lateinit var viewModel: ChatViewModel
     private var doubleBack = false
 
-    private lateinit var viewPager: ViewPager
+    private lateinit var viewPager: ViewPager2
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPagerAdapter: ViewPagerAdapter
     private lateinit var bottomNavigation: BottomNavigationView
@@ -76,11 +77,17 @@ class ChatActivity : AppCompatActivity(), KodeinAware {
         // inicjalizacja zakładek
         this.viewPager = view_pager
         this.tabLayout = tab_layout
-        this.viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
-        this.viewPagerAdapter.addFragment(ChatListFragment(), getString(R.string.list))
-        this.viewPagerAdapter.addFragment(TripUsersFragment(), getString(R.string.participants))
+        this.viewPagerAdapter = ViewPagerAdapter(this)
+        this.viewPagerAdapter.addFragment(ChatListFragment())
+        this.viewPagerAdapter.addFragment(TripUsersFragment())
         this.viewPager.adapter = this.viewPagerAdapter
-        this.tabLayout.setupWithViewPager(this.viewPager)
+//        this.tabLayout.setupWithViewPager(this.viewPager)
+        TabLayoutMediator(tabLayout, viewPager){tab, position ->
+            when(position){
+                0 -> tab.text = getString(R.string.list)
+                1 -> tab.text = getString(R.string.participants)
+            }
+        }.attach()
 
         // inicjalizacja dolengo paska nwigacji
         this.bottomNavigation = bottom_navigation

@@ -1,29 +1,26 @@
 package com.client.traveller.ui.chat
 
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.viewpager2.adapter.FragmentStateAdapter
 
-class ViewPagerAdapter(fragmentManager: FragmentManager) :
-    FragmentStatePagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+class ViewPagerAdapter(fa: FragmentActivity) :
+    FragmentStateAdapter(fa) {
 
     private var fragmentList = arrayOf<Fragment>()
-    private var fragmentsTitlesList = arrayOf<String>()
 
-    override fun getItem(position: Int): Fragment {
-        return fragmentList[position]
-    }
-
-    override fun getCount(): Int {
+    override fun getItemCount(): Int {
         return fragmentList.size
     }
 
-    override fun getPageTitle(position: Int): CharSequence? {
-        return fragmentsTitlesList[position]
+    override fun createFragment(position: Int): Fragment {
+        return fragmentList[position]
     }
 
-    fun addFragment(fragment: Fragment, title: String) {
+    fun addFragment(fragment: Fragment) {
         fragmentList += fragment
-        fragmentsTitlesList += title
     }
 }

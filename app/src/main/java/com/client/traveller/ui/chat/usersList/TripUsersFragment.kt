@@ -62,7 +62,6 @@ class TripUsersFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
     }
 
     private fun bindUI() {
-
         viewModel.currentTrip.observe(viewLifecycleOwner, Observer { trip ->
             if (trip == null) return@Observer
             this.currentTrip = trip

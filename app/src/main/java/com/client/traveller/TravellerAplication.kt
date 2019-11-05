@@ -5,9 +5,7 @@ import android.app.Application
 import android.content.Context
 import com.client.traveller.data.db.AppDatabase
 import com.client.traveller.data.network.firebase.auth.*
-import com.client.traveller.data.network.firebase.firestore.Tokens
-import com.client.traveller.data.network.firebase.firestore.Trips
-import com.client.traveller.data.network.firebase.firestore.Users
+import com.client.traveller.data.network.firebase.firestore.*
 import com.client.traveller.data.network.firebase.messaging.CloudMessaging
 import com.client.traveller.data.network.firebase.storage.Avatars
 import com.client.traveller.data.network.map.MapUtils
@@ -60,6 +58,7 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { AuthFacebook() }
         bind() from provider { AuthUtils() }
         bind() from provider { AuthProvider() }
+        bind() from provider { Chats()}
         bind() from singleton { instance<AppDatabase>().userDao() }
         bind<UserRepository>() with singleton {
             UserRepositoryImpl(
@@ -84,9 +83,13 @@ class TravellerAplication : Application(), KodeinAware {
                 instance()
             )
         }
+        bind() from provider { Messeages() }
         bind() from singleton { instance<AppDatabase>().messeageDao() }
         bind<CloudMessagingRepository>() with singleton {
             CloudMessagingRepositoryImpl(
+                instance(),
+                instance(),
+                instance(),
                 instance(),
                 instance()
             )

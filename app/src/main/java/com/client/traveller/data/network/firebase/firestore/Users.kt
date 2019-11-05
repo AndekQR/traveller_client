@@ -15,47 +15,48 @@ import com.google.firebase.firestore.Query
 class Users {
 
     companion object {
-        private const val COLLECTION_NAME = "users"
+        const val COLLECTION_NAME = "users"
     }
 
     private fun getUsersCollection(): CollectionReference {
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME)
     }
 
+
     fun createUser(user: User): Task<Void> {
-        return this.getUsersCollection().document(user.idUserFirebase!!).set(user)
+        return getUsersCollection().document(user.idUserFirebase!!).set(user)
     }
 
     fun getUserByUid(uid: String): Task<DocumentSnapshot> {
-        return this.getUsersCollection().document(uid).get()
+        return getUsersCollection().document(uid).get()
     }
 
     fun getUserByEmail(email: String): Query {
-        return this.getUsersCollection().whereEqualTo("email", email)
+        return getUsersCollection().whereEqualTo("email", email)
     }
 
     fun updateUsername(uid: String, username: String): Task<Void> {
-        return this.getUsersCollection().document(uid).update("displayName", username)
+        return getUsersCollection().document(uid).update("displayName", username)
     }
 
     fun deleteUser(uid: String): Task<Void> {
-        return this.getUsersCollection().document(uid).delete()
+        return getUsersCollection().document(uid).delete()
     }
 
     fun updateImage(uid: String, uri: String): Task<Void> {
-        return this.getUsersCollection().document(uid).update("image", uri)
+        return getUsersCollection().document(uid).update("image", uri)
     }
 
     fun updateEmail(uid: String, email: String): Task<Void> {
-        return this.getUsersCollection().document(uid).update("email", email)
+        return getUsersCollection().document(uid).update("email", email)
     }
 
     fun changeVerifiedStatus(uid: String? = null, state: Boolean): Task<Void>? {
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
         if (uid == null && currentUserUid != null) {
-            return this.getUsersCollection().document(currentUserUid).update("verified", state)
+            return getUsersCollection().document(currentUserUid).update("verified", state)
         } else if (uid != null) {
-            return this.getUsersCollection().document(uid).update("verified", state)
+            return getUsersCollection().document(uid).update("verified", state)
         }
         return null
     }

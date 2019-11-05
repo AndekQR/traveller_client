@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0a9082b51f5c0959bf50101002017179",
+    "identityHash": "b08e1c52ad5acf519fe1c294ac06d4cb",
     "entities": [
       {
         "tableName": "User",
@@ -124,7 +124,7 @@
       },
       {
         "tableName": "Messeage",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `sender` TEXT, `receiver` TEXT, `messeage` TEXT, `sendDate` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `uid` TEXT, `senderIdFirebase` TEXT, `messeage` TEXT, `sendDate` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
@@ -133,14 +133,14 @@
             "notNull": false
           },
           {
-            "fieldPath": "sender",
-            "columnName": "sender",
+            "fieldPath": "uid",
+            "columnName": "uid",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "receiver",
-            "columnName": "receiver",
+            "fieldPath": "senderIdFirebase",
+            "columnName": "senderIdFirebase",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -153,6 +153,38 @@
           {
             "fieldPath": "sendDate",
             "columnName": "sendDate",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ChatRoomModel",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `participants` TEXT, `messeages` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "participants",
+            "columnName": "participants",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "messeages",
+            "columnName": "messeages",
             "affinity": "TEXT",
             "notNull": false
           }
@@ -170,7 +202,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0a9082b51f5c0959bf50101002017179')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b08e1c52ad5acf519fe1c294ac06d4cb')"
     ]
   }
 }

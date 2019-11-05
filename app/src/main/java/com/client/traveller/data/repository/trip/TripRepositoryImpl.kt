@@ -33,7 +33,6 @@ class TripRepositoryImpl(
         this.trips.getAllTrips()
             .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
                 exception?.let {
-                    Log.e(javaClass.simpleName, exception.message)
                     return@EventListener
                 }
 
