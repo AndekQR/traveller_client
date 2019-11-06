@@ -2,6 +2,7 @@ package com.client.traveller.ui.chat.chatList
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -96,6 +97,16 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener{
                 it.putExtra("tripUid", this.currentTrip.uid)
                 startActivity(it)
             }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        try {
+            this.viewModel.usersChatsRemoveLiveDataObserver(currentUser.idUserFirebase!!, currentTrip.uid!!)
+        } catch (ex: NullPointerException) {
+            Log.e(javaClass.simpleName, "userChats observer still running")
         }
     }
 }

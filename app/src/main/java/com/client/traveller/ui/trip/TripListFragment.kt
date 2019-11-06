@@ -70,9 +70,6 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
             this.currentUser = it
         })
 
-        // currentTrip za późno zostaje aktualizowany
-        // a bindUI musi mieć tą wartość więc zostaje wywołany wewnątrz
-        // TODO trzeba porawić
         viewModel.currentTrip.observe(viewLifecycleOwner, Observer {
             this.currentTrip = it
             this.bindUI()
@@ -90,7 +87,7 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
     private fun bindUI() = launch(Dispatchers.Main) {
         updateHeader(getString(R.string.title_trips_list), null)
 
-        viewModel.getAllTrips().observe(this@TripListFragment, Observer { trips: List<Trip>? ->
+        viewModel.allTrips.observe(this@TripListFragment, Observer { trips: List<Trip>? ->
             if (trips == null) return@Observer
             updateTrips(trips)
         })

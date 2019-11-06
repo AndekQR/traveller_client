@@ -28,20 +28,8 @@ class Messeages {
         this.getCollectionReference(chatUid).document(Date().time.toString()).set(messeage)
     }
 
-   fun getUserMesseagesAsSender(chatUid: String, idFirebase: String): Query {
-       return this.getCollectionReference(chatUid).whereEqualTo("senderIdFirebase", idFirebase)
-   }
-
-    fun getUserMesseagesAsReceiver(chatUid: String, idFirebase: String): Query {
-        return this.getCollectionReference(chatUid).whereArrayContains("receiversIdFirebase", idFirebase)
-    }
-
-    /**
-     * @param from id firebase użytownika wysyłająego wiadomość
-     * @param to lista id firebase użytkownika oddbierającego wiadomość
-     */
-    fun getMesseages(chatUid: String, from: String, to: ArrayList<String>): Query {
-        return this.getCollectionReference(chatUid).whereEqualTo("senderIdFirebase", from).whereArrayContains("receiversIdFirebase", to)
+    fun getMesseages(chatUid: String): CollectionReference {
+        return this.getCollectionReference(chatUid)
     }
 
 }

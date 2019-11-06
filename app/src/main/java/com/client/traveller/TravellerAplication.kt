@@ -16,8 +16,8 @@ import com.client.traveller.data.provider.LocationProviderImpl
 import com.client.traveller.data.provider.PreferenceProvider
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.map.MapRepositoryImpl
-import com.client.traveller.data.repository.message.CloudMessagingRepository
-import com.client.traveller.data.repository.message.CloudMessagingRepositoryImpl
+import com.client.traveller.data.repository.message.MessagingRepository
+import com.client.traveller.data.repository.message.MessagingRepositoryImpl
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.trip.TripRepositoryImpl
 import com.client.traveller.data.repository.user.UserRepository
@@ -85,8 +85,8 @@ class TravellerAplication : Application(), KodeinAware {
         }
         bind() from provider { Messeages() }
         bind() from singleton { instance<AppDatabase>().messeageDao() }
-        bind<CloudMessagingRepository>() with singleton {
-            CloudMessagingRepositoryImpl(
+        bind<MessagingRepository>() with singleton {
+            MessagingRepositoryImpl(
                 instance(),
                 instance(),
                 instance(),

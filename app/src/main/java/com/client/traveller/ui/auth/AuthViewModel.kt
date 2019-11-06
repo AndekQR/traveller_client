@@ -1,8 +1,7 @@
 package com.client.traveller.ui.auth
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.repository.user.UserRepository
 import com.facebook.AccessToken
@@ -10,14 +9,29 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class AuthViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
 
-    fun getLoggedInUser(): LiveData<User> {
-        return userRepository.getUser()
+    private var _currentUser: MutableLiveData<User> = MutableLiveData()
+    val currentUser: LiveData<User>
+        get() = _currentUser
+    private lateinit var currentUserObserver: Observer<User>
+
+    init {
+        this.initLiveData()
+    }
+
+    private fun initLiveData() = viewModelScope.launch(Dispatchers.Main) {
+        currentUserObserver = Observer { user ->
+            if (user == null) return@Observer
+            _currentUser.value = user
+        }
+        userRepository.getUser().observeForever(currentUserObserver)
     }
 
     fun loginJustLocalGoogle(
@@ -122,5 +136,14 @@ class AuthViewModel(
         userRepository.updateProfile(user, profileChangeRequest, function)
     }
 
+    private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {
+        userRepository.getUser().removeObserver(currentUserObserver)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+
+        this.removeObservers()
+    }
 
 }

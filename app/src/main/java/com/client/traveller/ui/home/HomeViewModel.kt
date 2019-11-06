@@ -3,29 +3,44 @@ package com.client.traveller.ui.home
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.map.directions.model.TravelMode
 import com.client.traveller.data.repository.map.MapRepository
-import com.client.traveller.data.repository.message.CloudMessagingRepository
+import com.client.traveller.data.repository.message.MessagingRepository
 import com.client.traveller.data.repository.user.UserRepository
 import com.client.traveller.ui.util.Coroutines.io
 import com.client.traveller.ui.util.format
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val userRepository: UserRepository,
     private val mapRepository: MapRepository,
-    private val cloudMessagingRepository: CloudMessagingRepository
+    private val messagingRepository: MessagingRepository
 ) : ViewModel() {
 
+    private var _currentUser: MutableLiveData<User> = MutableLiveData()
+    val currentUser: LiveData<User>
+        get() = _currentUser
+    private lateinit var currentUserObserver: Observer<User>
+
     init {
-        this.cloudMessagingRepository.refreshToken()
+        this.messagingRepository.refreshToken()
+        this.initLiveData()
     }
 
-    fun getLoggedInUser() = userRepository.getUser()
+    private fun initLiveData() = viewModelScope.launch(Dispatchers.Main) {
+        currentUserObserver = Observer { user ->
+            if (user == null) return@Observer
+            _currentUser.value = user
+        }
+        userRepository.getUser().observeForever(currentUserObserver)
+    }
+
     fun logoutUser(mGoogleSignInClient: GoogleSignInClient) =
         userRepository.logoutUser(mGoogleSignInClient)
 
@@ -75,5 +90,15 @@ class HomeViewModel(
                     Log.e(javaClass.simpleName, exception?.localizedMessage)
                 }
             }
+    }
+
+    private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {
+        userRepository.getUser().removeObserver(currentUserObserver)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+
+        this.removeObservers()
     }
 }

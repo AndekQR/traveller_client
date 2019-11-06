@@ -94,7 +94,7 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
             ViewModelProvider(this, factory).get(HomeViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
-        viewModel.getLoggedInUser().observe(viewLifecycleOwner, Observer { user ->
+        viewModel.currentUser.observe(viewLifecycleOwner, Observer { user ->
             if (user != null) {
                 this.currentUser = user
                 this.updateProfileViewData()

@@ -1,68 +1,89 @@
 package com.client.traveller.ui.chat
 
-import androidx.collection.ArraySet
-import androidx.collection.arraySetOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.client.traveller.data.db.entities.Messeage
+import androidx.lifecycle.*
+import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
-import com.client.traveller.data.repository.message.CloudMessagingRepository
+import com.client.traveller.data.repository.message.MessagingRepository
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.user.UserRepository
-import com.client.traveller.ui.util.CombinedLiveData
-import com.client.traveller.ui.util.lazyDeferred
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ChatViewModel(
     private val userRepository: UserRepository,
-    private val cloudMessagingRepository: CloudMessagingRepository,
+    private val messagingRepository: MessagingRepository,
     private val tripRepository: TripRepository
 ) : ViewModel() {
 
-    // wszystkie wycieczki pobierane z firestore
-    private val _usersTrip = MutableLiveData<List<User>>()
-    internal val usersTrip: LiveData<List<User>> = _usersTrip
+    private var _currentUser: MutableLiveData<User> = MutableLiveData()
+    val currentUser: LiveData<User>
+        get() = _currentUser
+    private lateinit var currentUserObserver: Observer<User>
 
-    // aktualna wycieczka użytkownika
-    internal val currentTrip = tripRepository.getCurrentTrip()
-    internal val currentUser = userRepository.getUser()
+    private var _currentTrip: MutableLiveData<Trip> = MutableLiveData()
+    val currentTrip: LiveData<Trip>
+        get() = _currentTrip
+    private lateinit var currentTripObserver: Observer<Trip>
 
-    // zawiera liste z wiadomościami użytkownika, zarówno jako wysylający jak i odbierający
-    internal var currentUserMesseages = MediatorLiveData<List<Messeage>>()
-
-    internal lateinit var currentUserChats: LiveData<List<ChatFirestoreModel>>
-
-    private val combine = fun(data1: List<Messeage>?, data2: List<Messeage>?): List<Messeage> {
-        val result: Set<Messeage> = ArraySet(data1) + ArraySet(data2)
-        return result.toList()
-    }
+    private var _currentUserChats: MutableLiveData<List<ChatFirestoreModel>> = MutableLiveData()
+    val currentUserChats: LiveData<List<ChatFirestoreModel>>
+        get() = _currentUserChats
+    // Obserwator jest usuwany w ChatListFragment bo potrzebne są parametry
+    private lateinit var currentUserChatsObserver: Observer<List<ChatFirestoreModel>>
 
     init {
-
-        this.currentUserMesseages = CombinedLiveData(
-            cloudMessagingRepository.getCurrentUserMesseagesAsReceiver(),
-            cloudMessagingRepository.getCurrentUserMesseagesAsSender(),
-            combine
-        )
+        this.initLiveData()
     }
 
-    // TODO gdy ktoś napisze do mnie do chat się nie zaktualizuje?
+    private fun initLiveData() = viewModelScope.launch(Dispatchers.Main) {
+        currentUserObserver = Observer { user ->
+            if (user == null) return@Observer
+            _currentUser.value = user
+        }
+        userRepository.getUser().observeForever(currentUserObserver)
+
+        currentTripObserver = Observer { trip ->
+            if (trip == null) return@Observer
+            _currentTrip.value = trip
+        }
+        tripRepository.getCurrentTrip().observeForever(currentTripObserver)
+    }
+
     fun initUsersChats(userId: String, tripUid: String) {
-        this.currentUserChats = this.cloudMessagingRepository.getUsersChats(userId, tripUid)
+        currentUserChatsObserver = Observer { chats ->
+            if (chats == null) return@Observer
+            _currentUserChats.value = chats
+        }
+       this.messagingRepository.getUsersChats(userId, tripUid).observeForever(currentUserChatsObserver)
+    }
+
+    fun usersChatsRemoveLiveDataObserver(userId: String, tripUid: String) {
+        this.messagingRepository.getUsersChats(userId, tripUid).removeObserver(currentUserChatsObserver)
     }
 
     fun logoutUser(mGoogleSignInClient: GoogleSignInClient) =
         userRepository.logoutUser(mGoogleSignInClient)
 
-    suspend fun refreshUsers(emails: ArrayList<String>?) {
+    suspend fun getUsersByEmails(emails: ArrayList<String>?): List<User>? {
         if (emails != null) {
             val filteredEmails = ArrayList(emails.filter { it.isNotBlank() })
-            _usersTrip.value = userRepository.getUsersByEmails(filteredEmails)
+            return this.userRepository.getUsersByEmails(filteredEmails)
         }
+        return null
     }
 
      suspend fun getUsersById(ids: ArrayList<String>) = this.userRepository.getUsersByIds(ids)
+
+    private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {
+        userRepository.getUser().removeObserver(currentUserObserver)
+        tripRepository.getCurrentTrip().removeObserver(currentTripObserver)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+
+        this.removeObservers()
+    }
 }

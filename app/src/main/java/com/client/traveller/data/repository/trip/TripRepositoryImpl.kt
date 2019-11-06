@@ -1,6 +1,5 @@
 package com.client.traveller.data.repository.trip
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.client.traveller.data.db.TripDao
@@ -22,14 +21,13 @@ class TripRepositoryImpl(
 ) : TripRepository {
 
     private val tripList: MutableLiveData<List<Trip>> = MutableLiveData()
-    private val currentTrip: LiveData<Trip>
+    private val currentTrip: LiveData<Trip> = this.tripDao.getCurrentTrip()
 
     /**
      * Dodanie obserwatora do wycieczek w firestore
      * Przy każdej modyfkikacji tychdanych zostanie zaktualizowany [tripList]
      */
     init {
-        this.currentTrip = this.tripDao.getCurrentTrip()
         this.trips.getAllTrips()
             .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
                 exception?.let {
@@ -62,7 +60,7 @@ class TripRepositoryImpl(
                     return@addOnCompleteListener
                 } else {
                     io {
-                        this@TripRepositoryImpl.setTripAsActual(trip)
+                        this@TripRepositoryImpl.saveTripToLocalDB(trip)
                     }
                     continuation.resumeWith(Result.success(it.result))
                     return@addOnCompleteListener
@@ -71,7 +69,7 @@ class TripRepositoryImpl(
         }
     }
 
-    override suspend fun setTripAsActual(trip: Trip) {
+    override suspend fun saveTripToLocalDB(trip: Trip) {
         tripDao.upsert(trip)
     }
 

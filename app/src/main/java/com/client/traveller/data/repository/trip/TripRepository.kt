@@ -9,7 +9,7 @@ interface TripRepository {
     suspend fun getAllTrips(): MutableLiveData<List<Trip>>
     suspend fun newTrip(trip: Trip): Void?
     fun getCurrentTrip(): LiveData<Trip>
-    suspend fun setTripAsActual(trip: Trip)
+    suspend fun saveTripToLocalDB(trip: Trip)
     fun isTripParticipant(trip: Trip, user: User): Boolean
     fun updateTripPersons(trip: Trip, emails: List<String>)
 }

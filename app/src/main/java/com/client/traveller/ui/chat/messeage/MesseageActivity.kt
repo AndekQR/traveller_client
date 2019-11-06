@@ -84,7 +84,7 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
     }
 
     private fun prepareMesseage(): Messeage {
-        val messeageText = messeageEditText.text.toString()
+        val messeageText = messeageEditText.text.toString().trim()
         return Messeage(senderIdFirebase = currentUser.idUserFirebase, messeage = messeageText, sendDate = LocalDateTime.now().toLong(), uid = randomUid())
     }
 

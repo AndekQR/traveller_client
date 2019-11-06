@@ -22,8 +22,8 @@ class ItemMesseage(
 
     override fun getLayout(): Int {
         return when(this.getMesseageType()){
-            MSG_TYPE_LEFT -> R.layout.chat_item_left
-            else -> R.layout.chat_item_right
+            MSG_TYPE_LEFT -> R.layout.messeage_item_left
+            else -> R.layout.messeage_item_right
         }
     }
 

@@ -20,36 +20,25 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class CloudMessagingRepositoryImpl(
+class MessagingRepositoryImpl(
     private val tokens: Tokens,
     private val cloudMessaging: CloudMessaging,
     private val messeages: Messeages,
     private val users: Users,
     private val chats: Chats
-) : CloudMessagingRepository {
+) : MessagingRepository {
 
     private var currentUser: FirebaseUser? = null
 
-    private var usersChatsInitialized = false
     private val _usersChats = MutableLiveData<List<ChatFirestoreModel>>()
     private val usersChats: LiveData<List<ChatFirestoreModel>>
         get() = _usersChats
 
-    private val _userMesseagesAsSender = MutableLiveData<List<Messeage>>()
-    private val userMesseagesAsSender: LiveData<List<Messeage>>
-        get() = _userMesseagesAsSender
+    private val _chatMesseages = MutableLiveData<List<Messeage>>()
+    private val chatMesseages: LiveData<List<Messeage>>
+        get() = _chatMesseages
 
-    private val _userMesseagesAsReceiver = MutableLiveData<List<Messeage>>()
-    private val userMesseagesAsReceiver: LiveData<List<Messeage>>
-        get() = _userMesseagesAsReceiver
 
-    init {
-        this.currentUser = FirebaseAuth.getInstance().currentUser
-        this.currentUser?.let {
-            //            this.initializeCurrentUserMesseagesAsSender()
-//            this.initializeCurrentUserMesseagesAsReceiver()
-        }
-    }
 
     override fun refreshToken() {
         io {
@@ -61,40 +50,8 @@ class CloudMessagingRepositoryImpl(
     override fun saveMesseage(chatUid: String, messeage: Messeage) =
         this.messeages.saveMesseage(chatUid, messeage)
 
-//    private fun initializeCurrentUserMesseagesAsSender() {
-//        this.messeages.getUserMesseagesAsSender(currentUser?.uid!!)
-//            .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
-//                exception?.let {
-//                    return@EventListener
-//                }
-//
-//                val messeages = mutableListOf<Messeage>()
-//                querySnapshot?.forEach { doc ->
-//                    val messeage = doc.toObject(Messeage::class.java)
-//                    messeages.add(messeage)
-//                }
-//                this._userMesseagesAsSender.value = messeages
-//            })
-//    }
-//
-//    private fun initializeCurrentUserMesseagesAsReceiver() {
-//        this.messeages.getUserMesseagesAsReceiver(currentUser?.uid!!)
-//            .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
-//                exception?.let {
-//                    return@EventListener
-//                }
-//
-//                val messeages = mutableListOf<Messeage>()
-//                querySnapshot?.forEach { doc ->
-//                    val messeage = doc.toObject(Messeage::class.java)
-//                    messeages.add(messeage)
-//                }
-//                this._userMesseagesAsReceiver.value = messeages
-//            })
-//    }
 
-    override fun getCurrentUserMesseagesAsSender() = this.userMesseagesAsSender
-    override fun getCurrentUserMesseagesAsReceiver() = this.userMesseagesAsReceiver
+
 
     override suspend fun createChat(participants: ArrayList<String>, tripUid: String): Boolean {
         val participantsMap = participants.map {
@@ -131,12 +88,13 @@ class CloudMessagingRepositoryImpl(
             }
         }
 
+    /**
+     * pobiera chaty danego użytkownika w obrębie danej wycieczki
+     */
     override fun getUsersChats(
         userId: String,
         tripUid: String
     ): LiveData<List<ChatFirestoreModel>> {
-        if (usersChatsInitialized) return usersChats
-
         this.chats.getUserAllChats(userId, tripUid)
             .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
                 exception?.let {
@@ -150,7 +108,6 @@ class CloudMessagingRepositoryImpl(
                 }
                 _usersChats.value = chats
             })
-        this.usersChatsInitialized = true
         return usersChats
     }
 
@@ -167,4 +124,8 @@ class CloudMessagingRepositoryImpl(
         }
     }
 
+    override fun getMesseages(chatUid: String): LiveData<List<Messeage>> {
+        val asd: LiveData<List<Messeage>> = MutableLiveData(listOf(Messeage()))
+        return asd
+    }
 }

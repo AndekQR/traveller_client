@@ -48,7 +48,7 @@ class TripUsersFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
 
         pull_to_refresh_layout.setOnRefreshListener {
             launch(Dispatchers.Main) {
-                viewModel.refreshUsers(currentTrip.persons)
+                viewModel.getUsersByEmails(currentTrip.persons)
                 pull_to_refresh_layout.isRefreshing = false
             }
         }
@@ -66,11 +66,8 @@ class TripUsersFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
             if (trip == null) return@Observer
             this.currentTrip = trip
             launch(Dispatchers.Main) {
-                viewModel.refreshUsers(trip.persons)
-                viewModel.usersTrip.observe(viewLifecycleOwner, Observer {
-                    if (it == null) return@Observer
-                    updateUsersList(it)
-                })
+                val users = viewModel.getUsersByEmails(trip.persons)
+                users?.let { updateUsersList(it) }
             }
         })
     }
