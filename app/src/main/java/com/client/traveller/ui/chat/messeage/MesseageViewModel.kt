@@ -8,7 +8,6 @@ import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
 import com.client.traveller.data.repository.message.CloudMessagingRepository
 import com.client.traveller.data.repository.user.UserRepository
-import java.util.NoSuchElementException
 import kotlin.Exception
 
 class MesseageViewModel(
@@ -16,28 +15,49 @@ class MesseageViewModel(
     private val cloudMessagingRepository: CloudMessagingRepository
 ) : ViewModel() {
 
-    // TODO trzeba zapisywać wartości do lokalnej bazy i firestore
+    // TODO trzeba zapisywać wartości do lokalnej bazy
     // gdy użytkownik wybierze usera z listy userów tu będzie id tego usera
     // w przypadku wiadomości tak samo
     internal var userId: String? = null
     internal var chatId: String? = null
+    internal var tripUid: String? = null
 
     internal val currentUser = userRepository.getUser()
+
+    // uczestnicy danego chatu (razem z aktualnym użytkownikiem)
     internal val chatParticipants = mutableSetOf<User>()
 
+    /**
+     * Gdy wchodzimy w tą aktywność to przekazujemy albo userId albo chatID
+     * Na podstawie jednej z tych wartości jest ustalane czy użytkownik wybrał użytkownika z listy użytkowników
+     * czy wiadomość z listy wiadomości
+     * Pobiera również uid wycieczki (bo wiadomości są w obrębie danej wycieczki)
+     * To zadanie należy do tej metody
+     *
+     * @param intent dane przekazane tej aktywności podczas jej uruchamiania
+     */
     suspend fun setIdentifier(intent: Intent) {
         val userId = intent.extras!!.getString("userId")
         val chatId = intent.extras!!.getString("chatId")
+        this.tripUid = intent.extras!!.getString("tripUid")
+
         if (userId != null) {
             this.userId = userId
             val clickedUser = getUserByFirestoreId(userId)
-            clickedUser.email?.let { addChatParticipant(it) }
+            clickedUser.email?.let { addChatParticipantLocal(it) }
 
-        } else if (chatId != null)
+        } else if (chatId != null) {
             this.chatId = chatId
+            val clickedChat = findChatByUid(this.chatId!!)
+            this.addChatParticipantLocal(clickedChat.participantsUid?.keys)
+        }
     }
 
-    suspend fun addChatParticipant(email: String?) {
+    /**
+     * Metoda dodaje użytkownika powiązanego z danym emailem do chatu do
+     * aktualnego chatu
+     */
+    suspend fun addChatParticipantLocal(email: String?) {
         if (email == null) return
         val user = userRepository.getUsersByEmails(arrayListOf(email))
         user.forEach {
@@ -45,6 +65,16 @@ class MesseageViewModel(
         }
     }
 
+    private suspend fun addChatParticipantLocal(uids: Set<String>?) {
+        uids?.forEach {
+            val user = userRepository.getUserByFirestoreId(it)
+            this.chatParticipants.add(user)
+        }
+    }
+
+    /**
+     * zwraca listę uidFirebase uczestników aktualnego chatu
+     */
     fun getChatParticipantsUid(): ArrayList<String> {
         val uidParticipants = arrayListOf<String>()
         this.chatParticipants.mapTo(uidParticipants){
@@ -58,13 +88,13 @@ class MesseageViewModel(
 
     suspend fun findChat(participants: ArrayList<String>): ChatFirestoreModel? {
         return try {
-            cloudMessagingRepository.findChat(participants)
+            cloudMessagingRepository.findChat(participants, tripUid!!)
         } catch (ex: Exception) {
             Log.e(javaClass.simpleName, "catch")
-            val result = cloudMessagingRepository.createChat(participants)
+            val result = cloudMessagingRepository.createChat(participants, this.tripUid!!)
             if (result) {
                 try {
-                    cloudMessagingRepository.findChat(participants)
+                    cloudMessagingRepository.findChat(participants, this.tripUid!!)
                 }catch (ex: Exception){
                     throw ex
                 }
@@ -73,5 +103,7 @@ class MesseageViewModel(
             }
         }
     }
+
+    suspend fun findChatByUid(uid: String) = this.cloudMessagingRepository.findChatByUid(uid)
 
 }

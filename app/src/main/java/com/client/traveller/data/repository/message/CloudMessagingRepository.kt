@@ -12,6 +12,8 @@ interface CloudMessagingRepository {
     fun saveMesseage(chatUid: String, messeage: Messeage)
     fun getCurrentUserMesseagesAsSender(): LiveData<List<Messeage>>
     fun getCurrentUserMesseagesAsReceiver(): LiveData<List<Messeage>>
-    suspend fun findChat(participants: ArrayList<String>): ChatFirestoreModel
-    suspend fun createChat(participants: ArrayList<String>): Boolean
+    suspend fun findChat(participants: ArrayList<String>, tripUid: String): ChatFirestoreModel
+    suspend fun createChat(participants: ArrayList<String>, tripUid: String): Boolean
+    fun getUsersChats(userId: String, tripUid: String): LiveData<List<ChatFirestoreModel>>
+    suspend fun findChatByUid(uid: String): ChatFirestoreModel
 }

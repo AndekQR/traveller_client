@@ -29,3 +29,10 @@ fun Long.toLocalDateTime(): LocalDateTime {
     return LocalDateTime.ofInstant(Instant.ofEpochMilli(this), ZoneId.of("Europe/Warsaw"))
 }
 
+fun randomUid(): String {
+    val allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz"
+    return (1..35)
+        .map { allowedChars.random() }
+        .joinToString("")
+}
+

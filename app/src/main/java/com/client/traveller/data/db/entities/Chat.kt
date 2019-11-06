@@ -9,6 +9,7 @@ data class ChatRoomModel(
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null,
     var participants: ArrayList<String>? = null,
-    var messeages: ArrayList<Messeage>? = null
+    var messeages: ArrayList<Messeage>? = null,
+    var uid: String? = null
 ): Serializable
 

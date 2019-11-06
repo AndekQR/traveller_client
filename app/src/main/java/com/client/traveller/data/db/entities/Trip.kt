@@ -18,8 +18,12 @@ data class Trip(
     var startAddress: String? = null,
     var endAddress: String? = null,
     var waypoints: ArrayList<String>? = null,
-    var author: User? = null
+    var author: User? = null,
+    var uid: String? = null
 ) : Serializable {
+
     @PrimaryKey(autoGenerate = false)
     var id: Int = CURRENT_TRIP_ID
+
+
 }

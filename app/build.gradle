@@ -139,4 +139,6 @@ dependencies {
 
     // auto resize edit text
     implementation 'com.github.ViksaaSkool:AutoFitEditText:53238e2d29'
+    // multi image view
+    implementation 'com.github.stfalcon:multiimageview:0.1'
 }

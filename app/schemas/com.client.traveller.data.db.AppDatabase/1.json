@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b08e1c52ad5acf519fe1c294ac06d4cb",
+    "identityHash": "e0faffa2109494d0e254786eb1b13407",
     "entities": [
       {
         "tableName": "User",
@@ -56,7 +56,7 @@
       },
       {
         "tableName": "Trip",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT, `persons` TEXT, `startDate` TEXT, `endDate` TEXT, `startAddress` TEXT, `endAddress` TEXT, `waypoints` TEXT, `author` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT, `persons` TEXT, `startDate` TEXT, `endDate` TEXT, `startAddress` TEXT, `endAddress` TEXT, `waypoints` TEXT, `author` TEXT, `uid` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -109,6 +109,12 @@
           {
             "fieldPath": "author",
             "columnName": "author",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "uid",
+            "columnName": "uid",
             "affinity": "TEXT",
             "notNull": false
           }
@@ -168,7 +174,7 @@
       },
       {
         "tableName": "ChatRoomModel",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `participants` TEXT, `messeages` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `participants` TEXT, `messeages` TEXT, `uid` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -187,6 +193,12 @@
             "columnName": "messeages",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "uid",
+            "columnName": "uid",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -202,7 +214,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b08e1c52ad5acf519fe1c294ac06d4cb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e0faffa2109494d0e254786eb1b13407')"
     ]
   }
 }

@@ -9,16 +9,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.collection.ArraySet
+import androidx.collection.arraySetOf
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
-import com.client.traveller.ui.util.ScopedFragment
-import com.client.traveller.ui.util.hideProgressBar
-import com.client.traveller.ui.util.setMargins
-import com.client.traveller.ui.util.showProgressBar
+import com.client.traveller.ui.util.*
 import kotlinx.android.synthetic.main.fragment_trip_creator.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.trip_creator_edit_form.view.*
@@ -41,8 +40,8 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
     private lateinit var tripStartAddress: String
     private var tripEndDate: LocalDateTime? = null
     private lateinit var tripEndAddress: String
-    private var personsEmailString: ArrayList<String> = arrayListOf()
-    private var waypointsString: ArrayList<String> = arrayListOf()
+    private var personsEmailString: ArraySet<String> = arraySetOf()
+    private var waypointsString: ArraySet<String> = arraySetOf()
 
     private lateinit var currentUser: User
     private lateinit var currentTrip: Trip
@@ -201,6 +200,7 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
             return@launch
         }
         personsEmailString.add(currentUser.email!!) // autor jest też uczestnikiem wycieczki
+
         val trip = Trip(
             name = tripName,
             author = currentUser,
@@ -208,8 +208,9 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
             startAddress = tripStartAddress,
             endDate = tripEndDate.toString(),
             endAddress = tripEndAddress,
-            persons = personsEmailString,
-            waypoints = waypointsString
+            persons = ArrayList(personsEmailString),
+            waypoints = ArrayList(waypointsString),
+            uid = randomUid()
         )
         this@TripCreatorFragment.addTripShowResult(trip)
     }
@@ -244,9 +245,13 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
         tripStartAddress = trip_start_address.text.toString().trim()
         tripEndAddress = trip_end_address.text.toString().trim()
         personForms.mapTo(personsEmailString) { it.edit_text.text.toString().trim() }
-        personsEmailString.filterTo(personsEmailString) { it.isNotBlank() }
+        val _personsEmailString = personsEmailString.toList()
+        personsEmailString.clear()
+        _personsEmailString.filterTo(personsEmailString) { it.isNotBlank() }
         waypointForms.mapTo(waypointsString) { it.edit_text.text.toString().trim() }
-        waypointsString.filterTo(waypointsString) { it.isNotBlank() }
+        val _waypointsString = this.waypointsString.toList()
+        waypointsString.clear()
+        _waypointsString.filterTo(waypointsString) { it.isNotBlank() }
     }
 
     /**

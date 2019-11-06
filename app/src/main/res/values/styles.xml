@@ -23,7 +23,10 @@
 
 
 <!--    styl dla własnego actionbar -->
-    <style name="DarkActionBar" parent="Theme.AppCompat.DayNight.DarkActionBar" />
+    <style name="DarkActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+
+    </style>
+
 
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>

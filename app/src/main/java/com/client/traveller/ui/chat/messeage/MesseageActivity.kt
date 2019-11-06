@@ -1,6 +1,7 @@
 package com.client.traveller.ui.chat.messeage
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import androidx.appcompat.widget.Toolbar
@@ -14,6 +15,7 @@ import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
 import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.util.ScopedAppActivity
+import com.client.traveller.ui.util.randomUid
 import com.client.traveller.ui.util.toLong
 import kotlinx.android.synthetic.main.activity_messeage.*
 import kotlinx.coroutines.Dispatchers
@@ -49,12 +51,13 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
         this.initializeView()
 
         launch(Dispatchers.Main) {
+            Log.e(javaClass.simpleName, viewModel.chatParticipants.size.toString())
             viewModel.setIdentifier(intent)
-            this@MesseageActivity.viewModel.addChatParticipant(this@MesseageActivity.currentUser.email)
-            if (viewModel.chatParticipants.size > 1){
-                title = viewModel.chatParticipants.first().displayName + ", ..."
-            } else if (viewModel.chatParticipants.size == 1) {
-                supportActionBar?.title = viewModel.chatParticipants.first().displayName
+            this@MesseageActivity.viewModel.addChatParticipantLocal(this@MesseageActivity.currentUser.email)
+            when {
+                viewModel.chatParticipants.size > 1 -> supportActionBar?.title = viewModel.chatParticipants.first().displayName + ", ..."
+                viewModel.chatParticipants.size == 1 -> supportActionBar?.title = viewModel.chatParticipants.first().displayName
+                else -> supportActionBar?.title = "no"
             }
         }
 
@@ -82,7 +85,7 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
 
     private fun prepareMesseage(): Messeage {
         val messeageText = messeageEditText.text.toString()
-        return Messeage(senderIdFirebase = currentUser.idUserFirebase, messeage = messeageText, sendDate = LocalDateTime.now().toLong())
+        return Messeage(senderIdFirebase = currentUser.idUserFirebase, messeage = messeageText, sendDate = LocalDateTime.now().toLong(), uid = randomUid())
     }
 
     private fun initializeView() {

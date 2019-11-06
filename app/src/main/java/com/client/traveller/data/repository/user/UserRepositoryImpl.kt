@@ -298,4 +298,48 @@ class UserRepositoryImpl(
             }
         }
     }
+
+    override suspend fun getUsersByIds(ids: ArrayList<String>) = withContext(Dispatchers.IO) {
+        suspendCoroutine<List<User>> { continution ->
+            val users = mutableListOf<User>()
+            for ((index, value) in ids.withIndex()) {
+                if (index == ids.size - 1) {
+                    usersFirestore.getUserByUid(value).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            var user: User? = null
+                            try {
+                                user = task.result?.toObject(User::class.java)
+                            } catch (ex: Exception) {
+                                if (ex is NoSuchElementException) Log.e(javaClass.simpleName, "no such element")
+                            }
+                            user?.let { users.add(it) }
+                            continution.resumeWith(Result.success(users))
+                        }
+                    }
+                } else {
+                    usersFirestore.getUserByUid(value).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            var user: User? = null
+                            try {
+                                user = task.result?.toObject(User::class.java)
+                            } catch (ex: Exception) {
+                                if (ex is NoSuchElementException) Log.e(javaClass.simpleName, "no such element")
+                            }
+                            user?.let { users.add(it) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun getUserName(uid: String) = withContext(Dispatchers.IO){
+        suspendCoroutine<String> {continuation ->
+            usersFirestore.getUserByUid(uid).addOnSuccessListener {
+                val name = it.getString("displayName")
+                name?.let { s -> continuation.resumeWith(Result.success(s)) }
+            }
+        }
+
+    }
 }

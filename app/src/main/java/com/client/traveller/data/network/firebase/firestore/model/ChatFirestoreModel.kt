@@ -8,7 +8,8 @@ data class ChatFirestoreModel(
     var id: Int? = null,
     var participantsUid: Map<String, Boolean>? = null,
     var participantsNumber: Int? = null,
-    var uid: String? = null
+    var uid: String? = null,
+    var tripUid: String? = null
 ): Serializable {
     init {
         this.uid = this.randomUid()

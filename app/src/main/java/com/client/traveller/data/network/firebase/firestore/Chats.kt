@@ -22,15 +22,29 @@ class Chats {
      *
      * @param participants lista uidFirebase uczestników szukanego chatu, muszą być wszyscy
      */
-    fun getChatByParticipants(participants: ArrayList<String>): Query {
-        var result = this.getCollectionReference().whereEqualTo("participantsNumber", participants.size)
+    fun getChatByParticipantsFiltrSize(participants: ArrayList<String>, tripUid: String): Query {
+        var result = this.getCollectionReference().whereEqualTo("participantsNumber", participants.size).whereEqualTo("tripUid", tripUid)
         for (i in 0 until participants.size) {
             result = result.whereEqualTo("participantsUid.${participants[i]}", true)
         }
         return result
     }
 
+    /**
+     * Zwraca wszystkie czaty podanego usera w podanej wycieczce
+     *
+     * @param userId idFirebase użytkownika
+     * @param tripUid uid wycieczki
+     */
+    fun getUserAllChats(userId: String, tripUid: String): Query {
+        return this.getCollectionReference().whereEqualTo("tripUid", tripUid).whereEqualTo("participantsUid.$userId", true)
+    }
+
     fun addChat(chat: ChatFirestoreModel): Task<Void> {
         return this.getCollectionReference().document(chat.uid!!).set(chat)
+    }
+
+    fun getChatByUid(uid: String): Query {
+        return this.getCollectionReference().whereEqualTo("uid", uid)
     }
 }
