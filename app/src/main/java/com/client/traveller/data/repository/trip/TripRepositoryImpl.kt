@@ -16,18 +16,23 @@ import kotlin.coroutines.suspendCoroutine
 
 class TripRepositoryImpl(
     private val trips: Trips,
-    private val tripDao: TripDao,
-    private val users: Users
+    private val tripDao: TripDao
 ) : TripRepository {
 
     private val tripList: MutableLiveData<List<Trip>> = MutableLiveData()
     private val currentTrip: LiveData<Trip> = this.tripDao.getCurrentTrip()
 
+
+    init {
+        this.initAllTrips()
+        this.initCurrentTripUpdates()
+    }
+
     /**
      * Dodanie obserwatora do wycieczek w firestore
      * Przy każdej modyfkikacji tychdanych zostanie zaktualizowany [tripList]
      */
-    init {
+    private fun initAllTrips() {
         this.trips.getAllTrips()
             .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
                 exception?.let {
@@ -43,6 +48,20 @@ class TripRepositoryImpl(
             })
     }
 
+    /**
+     * aktualizcja lokalnej currentTrip gdy inny użytkownik wyśle do firestore zmiany do tej wycieczki
+     */
+    private fun initCurrentTripUpdates() = io {
+        val currentTrip = this.tripDao.getCurrentTripNonLive()
+        trips.getTrip(currentTrip.uid!!).addSnapshotListener(EventListener<QuerySnapshot> {querySnapshot, excetion ->
+            excetion?.let { return@EventListener }
+
+            val updatedCurrentTrip = querySnapshot?.first()?.toObject(Trip::class.java)
+            updatedCurrentTrip?.let {
+                io{tripDao.upsert(it)}
+            }
+        })
+    }
 
     override suspend fun getAllTrips() = this.tripList
 
@@ -59,9 +78,7 @@ class TripRepositoryImpl(
                     continuation.resumeWith(Result.failure(it.exception!!))
                     return@addOnCompleteListener
                 } else {
-                    io {
-                        this@TripRepositoryImpl.saveTripToLocalDB(trip)
-                    }
+                    this@TripRepositoryImpl.saveTripToLocalDB(trip)
                     continuation.resumeWith(Result.success(it.result))
                     return@addOnCompleteListener
                 }
@@ -69,8 +86,9 @@ class TripRepositoryImpl(
         }
     }
 
-    override suspend fun saveTripToLocalDB(trip: Trip) {
-        tripDao.upsert(trip)
+    override fun saveTripToLocalDB(trip: Trip)= io {
+        this.tripDao.upsert(trip)
+        this.initCurrentTripUpdates()
     }
 
     override fun getCurrentTrip() = this.currentTrip

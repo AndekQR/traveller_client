@@ -15,21 +15,24 @@ import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
 import com.client.traveller.ui.chat.ChatViewModel
 import com.client.traveller.ui.chat.ChatViewModelFactory
-import com.client.traveller.ui.chat.messeage.MesseageActivity
+import com.client.traveller.ui.chat.messeages.MesseageActivity
 import com.client.traveller.ui.util.ScopedFragment
 import com.client.traveller.ui.util.hideProgressBar
+import com.client.traveller.ui.util.showProgressBar
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
 import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.fragment_chat_list.*
 import kotlinx.android.synthetic.main.progress_bar.*
-import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
+import java.util.*
+import kotlin.collections.ArrayList
 
-class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener{
+class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
 
     override val kodein by kodein()
     private val factory: ChatViewModelFactory by instance()
@@ -38,6 +41,8 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener{
     private lateinit var currentTrip: Trip
     private lateinit var currentUser: User
     private lateinit var groupAdapter: GroupAdapter<GroupieViewHolder>
+
+    private var mapChatParticipants = mutableMapOf<ChatFirestoreModel, List<User>>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,7 +59,7 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener{
         this.viewModel.currentTrip.observe(viewLifecycleOwner, Observer { trip ->
             if (trip == null) return@Observer
             this.currentTrip = trip
-            this.viewModel.currentUser.observe(viewLifecycleOwner, Observer {user ->
+            this.viewModel.currentUser.observe(viewLifecycleOwner, Observer { user ->
                 if (user == null) return@Observer
                 this.currentUser = user
                 this.bindUI()
@@ -64,14 +69,44 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener{
 
     private fun bindUI() {
         this.viewModel.initUsersChats(currentUser.idUserFirebase!!, currentTrip.uid!!)
-        this.viewModel.currentUserChats.observe(viewLifecycleOwner, Observer {chats ->
+        this.viewModel.currentUserChats.observe(viewLifecycleOwner, Observer { chats ->
             if (chats == null) return@Observer
-            progress_bar.hideProgressBar()
-            this.updateChatsList(chats)
+            progress_bar.showProgressBar()
+            launch {
+                chats.forEach { chat ->
+                    val participants = viewModel.getUsersById(ArrayList(chat.participantsUid?.keys!!))
+                    this@ChatListFragment.mapChatParticipants[chat] = participants
+                }
+                updateChatsList(this@ChatListFragment.mapChatParticipants)
+            }
+
         })
+        viewModel.searchQuery.observe(viewLifecycleOwner, Observer { filtr ->
+            launch {
+                if (filtr.isEmpty()) {
+                    this@ChatListFragment.updateChatsList(this@ChatListFragment.mapChatParticipants)
+                    return@launch
+                } else if (this@ChatListFragment.mapChatParticipants.isNotEmpty()) {
+                    progress_bar.showProgressBar()
+                    val newChatsList = mutableMapOf<ChatFirestoreModel, List<User>>()
+                    this@ChatListFragment.mapChatParticipants.forEach { entry ->
+                        val chatParticipants = entry.value
+                        chatParticipants.forEach { user ->
+                            if (user.displayName?.toLowerCase(Locale.ROOT)?.contains(filtr.toLowerCase(Locale.ROOT))!!) {
+                                newChatsList[entry.key] = entry.value
+                                return@forEach
+                            }
+                        }
+                    }
+                    this@ChatListFragment.updateChatsList(newChatsList)
+                }
+            }
+        })
+
     }
 
-    private fun updateChatsList(chats: List<ChatFirestoreModel>) {
+    private fun updateChatsList(chats: Map<ChatFirestoreModel, List<User>>) {
+        progress_bar.hideProgressBar()
         this.groupAdapter = GroupAdapter<GroupieViewHolder>().apply {
             addAll(chats.toChatItem())
         }
@@ -82,11 +117,9 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener{
         }
     }
 
-    private fun List<ChatFirestoreModel>.toChatItem(): List<ItemChatList> {
+    private fun Map<ChatFirestoreModel, List<User>>.toChatItem(): List<ItemChatList> {
         return this.map {
-            val usersIds = ArrayList(it.participantsUid?.keys?.toMutableList()!!)
-            val users = async { viewModel.getUsersById(usersIds) }
-            ItemChatList(it, users)
+            ItemChatList(it.key, it.value)
         }
     }
 
@@ -104,7 +137,10 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener{
         super.onStop()
 
         try {
-            this.viewModel.usersChatsRemoveLiveDataObserver(currentUser.idUserFirebase!!, currentTrip.uid!!)
+            this.viewModel.usersChatsRemoveLiveDataObserver(
+                currentUser.idUserFirebase!!,
+                currentTrip.uid!!
+            )
         } catch (ex: NullPointerException) {
             Log.e(javaClass.simpleName, "userChats observer still running")
         }

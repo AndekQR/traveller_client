@@ -34,6 +34,7 @@ class TripViewModel(
     private lateinit var allTripsObserver: Observer<List<Trip>>
 
     var selectedItem: TripListItem? = null
+    val searchQuery: MutableLiveData<String> = MutableLiveData()
 
     init {
         this.initLiveData()

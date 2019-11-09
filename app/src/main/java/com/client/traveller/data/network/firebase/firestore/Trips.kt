@@ -2,10 +2,7 @@ package com.client.traveller.data.network.firebase.firestore
 
 import com.client.traveller.data.db.entities.Trip
 import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.*
 
 class Trips {
 
@@ -25,8 +22,8 @@ class Trips {
         return this.getTripsCollection().document(this.getDocumentName(trip)).set(trip)
     }
 
-    fun getTrip(trip: Trip): Task<DocumentSnapshot> {
-        return this.getTripsCollection().document(this.getDocumentName(trip)).get()
+    fun getTrip(uid: String): Query {
+        return this.getTripsCollection().whereEqualTo("uid", uid)
     }
 
     fun updateTripPersons(oldTrip: Trip, emails: ArrayList<String>): Task<Void> {

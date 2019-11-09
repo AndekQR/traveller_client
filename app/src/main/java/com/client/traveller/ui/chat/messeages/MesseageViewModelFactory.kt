@@ -1,4 +1,4 @@
-package com.client.traveller.ui.chat.messeage
+package com.client.traveller.ui.chat.messeages
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

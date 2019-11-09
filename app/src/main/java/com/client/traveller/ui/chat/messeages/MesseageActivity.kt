@@ -1,12 +1,12 @@
-package com.client.traveller.ui.chat.messeage
+package com.client.traveller.ui.chat.messeages
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.autofit.et.lib.AutoFitEditText
 import com.client.traveller.R
@@ -14,16 +14,18 @@ import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
 import com.client.traveller.ui.dialog.Dialog
-import com.client.traveller.ui.util.ScopedAppActivity
-import com.client.traveller.ui.util.randomUid
-import com.client.traveller.ui.util.toLong
+import com.client.traveller.ui.util.*
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.activity_messeage.*
+import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import org.threeten.bp.LocalDateTime
+
 
 class MesseageActivity : ScopedAppActivity(), KodeinAware {
 
@@ -35,6 +37,7 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
     private lateinit var sendButton: ImageButton
     private lateinit var messeageEditText: AutoFitEditText
     private lateinit var recyclerView: RecyclerView
+    private lateinit var groupAdapter: GroupAdapter<GroupieViewHolder>
 
     private lateinit var currentUser: User
 
@@ -45,21 +48,28 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
         viewModel = ViewModelProvider(this, factory).get(MesseageViewModel::class.java)
         this.viewModel.currentUser.observe(this, Observer {
             if (it == null) return@Observer
+            progress_bar.showProgressBar()
             this.currentUser = it
+            launch(Dispatchers.Main) {
+                viewModel.setIdentifier(intent)
+                this@MesseageActivity.viewModel.addChatParticipantLocal(this@MesseageActivity.currentUser.email)
+                if (this@MesseageActivity.viewModel.chatId == null) viewModel.chatId = viewModel.findChat(viewModel.getChatParticipantsUid())?.uid
+                when {
+                    viewModel.chatParticipants.size > 1 -> supportActionBar?.title =
+                        viewModel.chatParticipants.first().displayName + ", " + viewModel.chatParticipants.elementAt(
+                            1
+                        ).displayName
+                    viewModel.chatParticipants.size == 1 -> supportActionBar?.title =
+                        viewModel.chatParticipants.first().displayName
+                    else -> supportActionBar?.title = "no"
+                }
+                viewModel.initChatMesseages()
+                progress_bar.hideProgressBar()
+            }
         })
 
         this.initializeView()
 
-        launch(Dispatchers.Main) {
-            Log.e(javaClass.simpleName, viewModel.chatParticipants.size.toString())
-            viewModel.setIdentifier(intent)
-            this@MesseageActivity.viewModel.addChatParticipantLocal(this@MesseageActivity.currentUser.email)
-            when {
-                viewModel.chatParticipants.size > 1 -> supportActionBar?.title = viewModel.chatParticipants.first().displayName + ", ..."
-                viewModel.chatParticipants.size == 1 -> supportActionBar?.title = viewModel.chatParticipants.first().displayName
-                else -> supportActionBar?.title = "no"
-            }
-        }
 
         this.sendButton.setOnClickListener(onSendButtonClick)
     }
@@ -70,11 +80,11 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
             messeageEditText.setText("")
             var chat: ChatFirestoreModel? = null
             try {
-              chat = viewModel.findChat(participants = viewModel.getChatParticipantsUid())
+                chat = viewModel.findChat(participants = viewModel.getChatParticipantsUid())
             } catch (ex: Exception) {
                 Dialog.Builder()
                     .addMessage(getString(R.string.something_went_wrong))
-                    .addPositiveButton("ok"){
+                    .addPositiveButton("ok") {
                         it.dismiss()
                     }
                     .build(supportFragmentManager, javaClass.simpleName)
@@ -85,7 +95,12 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
 
     private fun prepareMesseage(): Messeage {
         val messeageText = messeageEditText.text.toString().trim()
-        return Messeage(senderIdFirebase = currentUser.idUserFirebase, messeage = messeageText, sendDate = LocalDateTime.now().toLong(), uid = randomUid())
+        return Messeage(
+            senderIdFirebase = currentUser.idUserFirebase,
+            messeage = messeageText,
+            sendDate = LocalDateTime.now().toLong(),
+            uid = randomUid()
+        )
     }
 
     private fun initializeView() {
@@ -99,9 +114,43 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
         this.recyclerView = recycler_view
         this.messeageEditText = messeage
         this.sendButton = send_button
+
+        this.viewModel.chatMesseages.observe(this, Observer { messeages ->
+            if (messeages == null) return@Observer
+            this.updateMesseages(messeages)
+        })
+    }
+
+    private val recyclerViewOnLayoutChange =
+        View.OnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
+            if (bottom < oldBottom) {
+                this.recyclerView.postDelayed(
+                    { this.recyclerView.smoothScrollToPosition(this.recyclerView.adapter?.itemCount!! - 1) },
+                    100
+                )
+            }
+        }
+
+    private fun updateMesseages(messeages: List<Messeage>) {
+        this.groupAdapter = GroupAdapter<GroupieViewHolder>().apply {
+            addAll(messeages.toMesseageItem())
+        }
+        this.recyclerView.apply {
+            layoutManager = LinearLayoutManager(this@MesseageActivity)
+            adapter = groupAdapter
+            addOnLayoutChangeListener(recyclerViewOnLayoutChange)
+            smoothScrollToPosition(messeages.size - 1)
+        }
+    }
+
+    private fun List<Messeage>.toMesseageItem(): List<ItemMesseage> {
+        return this.map {
+            ItemMesseage(it, currentUser, viewModel.chatParticipants)
+        }
     }
 
     private fun clearData() {
+        viewModel.removeChatMesseagesObserver()
         viewModel.userId = null
         viewModel.chatId = null
         viewModel.chatParticipants.removeAll { true }

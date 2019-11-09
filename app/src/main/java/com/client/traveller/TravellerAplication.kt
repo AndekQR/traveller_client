@@ -24,7 +24,7 @@ import com.client.traveller.data.repository.user.UserRepository
 import com.client.traveller.data.repository.user.UserRepositoryImpl
 import com.client.traveller.ui.auth.AuthViewModelFactory
 import com.client.traveller.ui.chat.ChatViewModelFactory
-import com.client.traveller.ui.chat.messeage.MesseageViewModelFactory
+import com.client.traveller.ui.chat.messeages.MesseageViewModelFactory
 import com.client.traveller.ui.home.HomeViewModelFactory
 import com.client.traveller.ui.settings.SettingsViewModelFactory
 import com.client.traveller.ui.trip.TripViewModelFactory
@@ -78,7 +78,6 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from singleton { instance<AppDatabase>().tripDao() }
         bind<TripRepository>() with singleton {
             TripRepositoryImpl(
-                instance(),
                 instance(),
                 instance()
             )

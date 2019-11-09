@@ -13,18 +13,22 @@ import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.ui.chat.ChatViewModel
 import com.client.traveller.ui.chat.ChatViewModelFactory
-import com.client.traveller.ui.chat.messeage.MesseageActivity
+import com.client.traveller.ui.chat.messeages.MesseageActivity
 import com.client.traveller.ui.util.ScopedFragment
+import com.client.traveller.ui.util.hideProgressBar
+import com.client.traveller.ui.util.showProgressBar
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
 import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.fragment_trip_users.*
+import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
+import java.util.*
 
 class TripUsersFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
 
@@ -34,6 +38,7 @@ class TripUsersFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
 
     private lateinit var groupAdapter: GroupAdapter<GroupieViewHolder>
     private lateinit var currentTrip: Trip
+    private var allParticipants = listOf<User>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,17 +46,6 @@ class TripUsersFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_trip_users, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        pull_to_refresh_layout.setOnRefreshListener {
-            launch(Dispatchers.Main) {
-                viewModel.getUsersByEmails(currentTrip.persons)
-                pull_to_refresh_layout.isRefreshing = false
-            }
-        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -64,10 +58,33 @@ class TripUsersFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
     private fun bindUI() {
         viewModel.currentTrip.observe(viewLifecycleOwner, Observer { trip ->
             if (trip == null) return@Observer
+            progress_bar.showProgressBar()
             this.currentTrip = trip
             launch(Dispatchers.Main) {
                 val users = viewModel.getUsersByEmails(trip.persons)
-                users?.let { updateUsersList(it) }
+                users?.let {
+                    this@TripUsersFragment.allParticipants = it
+                    updateUsersList(it)
+                    progress_bar.hideProgressBar()
+                }
+            }
+        })
+        this.viewModel.searchQuery.observe(viewLifecycleOwner, Observer {filtr ->
+            launch {
+                progress_bar.showProgressBar()
+                if (filtr.isEmpty() && this@TripUsersFragment.allParticipants.isNotEmpty()){
+                    this@TripUsersFragment.updateUsersList(this@TripUsersFragment.allParticipants)
+                    progress_bar.hideProgressBar()
+                    return@launch
+                } else if (this@TripUsersFragment.allParticipants.isNotEmpty()) {
+                    val newParticipantsList = mutableListOf<User>()
+                    this@TripUsersFragment.allParticipants.forEach { participant ->
+                        val result = participant.displayName?.toLowerCase(Locale.ROOT)?.contains(filtr.toLowerCase(Locale.ROOT))
+                        if (result != null && result) newParticipantsList.add(participant)
+                    }
+                    this@TripUsersFragment.updateUsersList(newParticipantsList)
+                    progress_bar.hideProgressBar()
+                }
             }
         })
     }

@@ -11,8 +11,8 @@
             android:label="fragment_trip_creator"
             tools:layout="@layout/fragment_trip_creator" >
         <action
-                android:id="@+id/action_tripCreatorFragment_to_tripListFragment"
-                app:destination="@id/tripListFragment" />
+            android:id="@+id/action_tripCreatorFragment_to_tripListFragment"
+            app:destination="@id/tripListFragment" />
         <argument
             android:name="trip"
             app:argType="com.client.traveller.data.db.entities.Trip"

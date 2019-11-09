@@ -19,7 +19,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".ui.chat.messeage.MesseageActivity"
+            android:name=".ui.chat.messeages.MesseageActivity"
             android:theme="@style/AppTheme.StatusBar.Transparent"
             android:parentActivityName=".ui.chat.ChatActivity"
             android:windowSoftInputMode="adjustResize"

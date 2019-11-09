@@ -22,4 +22,7 @@ interface TripDao {
 
     @Query("SELECT persons FROM trip WHERE id=$CURRENT_TRIP_ID")
     fun getCurrentTripPersonsEmail(): LiveData<List<String>>
+
+    @Query("SELECT * FROM trip WHERE trip.id=$CURRENT_TRIP_ID")
+    fun getCurrentTripNonLive(): Trip
 }

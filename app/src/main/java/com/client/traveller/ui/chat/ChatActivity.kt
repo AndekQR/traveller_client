@@ -4,9 +4,11 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
+import android.view.Menu
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
@@ -45,6 +47,8 @@ class ChatActivity : AppCompatActivity(), KodeinAware {
     private lateinit var navigationView: NavigationView
     private lateinit var toolBar: androidx.appcompat.widget.Toolbar
     private lateinit var mDrawerToggle: ActionBarDrawerToggle
+
+    private lateinit var searchView: SearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +98,24 @@ class ChatActivity : AppCompatActivity(), KodeinAware {
         this.bottomNavigation.selectedItemId = R.id.chat
         this.bottomNavigation.setOnNavigationItemSelectedListener(onBottomNavigationItemSelected)
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.search_menu, menu)
+        val menuItem = menu?.findItem(R.id.search_menu)
+        this.searchView = menuItem?.actionView as SearchView
+        this.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                this@ChatActivity.viewModel.searchQuery.value = newText
+                return true
+            }
+        })
+
+        return super.onCreateOptionsMenu(menu)
     }
 
     private val onNavigationItemSelected = NavigationView.OnNavigationItemSelectedListener { item ->

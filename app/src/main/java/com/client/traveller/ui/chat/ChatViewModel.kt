@@ -33,6 +33,8 @@ class ChatViewModel(
     // Obserwator jest usuwany w ChatListFragment bo potrzebne są parametry
     private lateinit var currentUserChatsObserver: Observer<List<ChatFirestoreModel>>
 
+    val searchQuery: MutableLiveData<String> = MutableLiveData()
+
     init {
         this.initLiveData()
     }

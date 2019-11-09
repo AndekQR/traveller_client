@@ -11,8 +11,6 @@ import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreM
 import com.client.traveller.data.network.firebase.messaging.CloudMessaging
 import com.client.traveller.ui.util.Coroutines.io
 import com.client.traveller.ui.util.randomUid
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.Dispatchers
@@ -28,8 +26,6 @@ class MessagingRepositoryImpl(
     private val chats: Chats
 ) : MessagingRepository {
 
-    private var currentUser: FirebaseUser? = null
-
     private val _usersChats = MutableLiveData<List<ChatFirestoreModel>>()
     private val usersChats: LiveData<List<ChatFirestoreModel>>
         get() = _usersChats
@@ -37,8 +33,6 @@ class MessagingRepositoryImpl(
     private val _chatMesseages = MutableLiveData<List<Messeage>>()
     private val chatMesseages: LiveData<List<Messeage>>
         get() = _chatMesseages
-
-
 
     override fun refreshToken() {
         io {
@@ -51,8 +45,9 @@ class MessagingRepositoryImpl(
         this.messeages.saveMesseage(chatUid, messeage)
 
 
-
-
+    /**
+     * @param participants to idFirebase uczestników tworzonej wycieczki
+     */
     override suspend fun createChat(participants: ArrayList<String>, tripUid: String): Boolean {
         val participantsMap = participants.map {
             it to true
@@ -124,8 +119,17 @@ class MessagingRepositoryImpl(
         }
     }
 
-    override fun getMesseages(chatUid: String): LiveData<List<Messeage>> {
-        val asd: LiveData<List<Messeage>> = MutableLiveData(listOf(Messeage()))
-        return asd
+    override fun initMesseages(chatUid: String): LiveData<List<Messeage>> {
+        this.messeages.getMesseages(chatUid).addSnapshotListener(EventListener<QuerySnapshot> {querySnapshot, exception ->
+            exception?.let { return@EventListener }
+
+            val messeages = mutableListOf<Messeage>()
+            querySnapshot?.forEach {doc ->
+                val messeage = doc?.toObject(Messeage::class.java)
+                messeage?.let { messeages.add(messeage) }
+            }
+            this._chatMesseages.value = messeages
+        })
+        return this.chatMesseages
     }
 }

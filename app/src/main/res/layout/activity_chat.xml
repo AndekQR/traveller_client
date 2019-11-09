@@ -27,6 +27,8 @@
                 android:layout_height="wrap_content"
                 android:background="@color/colorPrimary" />
 
+
+
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tab_layout"
                 android:layout_width="match_parent"
@@ -77,5 +79,7 @@
         app:itemIconTint="@color/colorDark"
         app:itemTextColor="@color/colorDark"
         app:menu="@menu/drawer_menu" />
+
+
 
 </androidx.drawerlayout.widget.DrawerLayout>

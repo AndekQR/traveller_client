@@ -1,4 +1,4 @@
-package com.client.traveller.ui.chat.messeage
+package com.client.traveller.ui.chat.messeages
 
 import android.content.Intent
 import android.util.Log
@@ -22,12 +22,18 @@ class MesseageViewModel(
     // w przypadku wiadomości tak samo
     internal var userId: String? = null
     internal var chatId: String? = null
-    internal var tripUid: String? = null
+    // tripUid jest zawsze podawane do tej aktywności
+    private var tripUid: String? = null
 
     private var _currentUser: MutableLiveData<User> = MutableLiveData()
     val currentUser: LiveData<User>
         get() = _currentUser
     private lateinit var currentUserObserver: Observer<User>
+
+    private val _chatMesseages = MutableLiveData<List<Messeage>>()
+    val chatMesseages: LiveData<List<Messeage>>
+        get() = _chatMesseages
+    private lateinit var chatMesseagesObserver: Observer<List<Messeage>>
 
     // uczestnicy danego chatu (razem z aktualnym użytkownikiem)
     internal val chatParticipants = mutableSetOf<User>()
@@ -49,7 +55,6 @@ class MesseageViewModel(
      * Na podstawie jednej z tych wartości jest ustalane czy użytkownik wybrał użytkownika z listy użytkowników
      * czy wiadomość z listy wiadomości
      * Pobiera również uid wycieczki (bo wiadomości są w obrębie danej wycieczki)
-     * To zadanie należy do tej metody
      *
      * @param intent dane przekazane tej aktywności podczas jej uruchamiania
      */
@@ -122,6 +127,24 @@ class MesseageViewModel(
     }
 
     suspend fun findChatByUid(uid: String) = this.messagingRepository.findChatByUid(uid)
+
+
+
+    fun initChatMesseages() {
+        this.chatMesseagesObserver = Observer {messeages ->
+            if (messeages == null) return@Observer
+            this._chatMesseages.value = messeages
+        }
+        try {
+            this.messagingRepository.initMesseages(this.chatId!!).observeForever(this.chatMesseagesObserver)
+        } catch (ex: NullPointerException) {
+            Log.e(javaClass.simpleName, "Wiadomości nie zostały zainicjalizowane, tripUid == null")
+        }
+    }
+
+    fun removeChatMesseagesObserver() {
+        this.messagingRepository.initMesseages(this.chatId!!).observeForever(this.chatMesseagesObserver)
+    }
 
     private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {
         userRepository.getUser().removeObserver(currentUserObserver)

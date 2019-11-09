@@ -10,7 +10,7 @@ interface MessagingRepository {
 
     fun refreshToken()
     fun saveMesseage(chatUid: String, messeage: Messeage)
-    fun getMesseages(chatUid: String): LiveData<List<Messeage>>
+    fun initMesseages(chatUid: String): LiveData<List<Messeage>>
     suspend fun findChat(participants: ArrayList<String>, tripUid: String): ChatFirestoreModel
     suspend fun createChat(participants: ArrayList<String>, tripUid: String): Boolean
     fun getUsersChats(userId: String, tripUid: String): LiveData<List<ChatFirestoreModel>>

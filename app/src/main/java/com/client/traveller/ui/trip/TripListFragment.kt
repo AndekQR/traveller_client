@@ -14,16 +14,20 @@ import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.ui.util.ScopedFragment
+import com.client.traveller.ui.util.hideProgressBar
+import com.client.traveller.ui.util.showProgressBar
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
 import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.fragment_trip_list.*
+import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
+import java.util.*
 
 
 // TODO lista wyceczek
@@ -38,6 +42,7 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
 
     private lateinit var groupAdapter: GroupAdapter<GroupieViewHolder>
     private var currentTrip: Trip? = null
+    private var allTrips: List<Trip> = listOf()
     private lateinit var currentUser: User
 
     override fun onCreateView(
@@ -85,16 +90,32 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
     }
 
     private fun bindUI() = launch(Dispatchers.Main) {
+        progress_bar.showProgressBar()
         updateHeader(getString(R.string.title_trips_list), null)
 
         viewModel.allTrips.observe(this@TripListFragment, Observer { trips: List<Trip>? ->
             if (trips == null) return@Observer
-            updateTrips(trips)
+            this@TripListFragment.allTrips = trips
+            updateTrips(this@TripListFragment.allTrips)
+            progress_bar.hideProgressBar()
         })
-
+        this@TripListFragment.viewModel.searchQuery.observe(viewLifecycleOwner, Observer { filtr ->
+            val newAllTripsList = mutableListOf<Trip>()
+            if (filtr.isEmpty() && this@TripListFragment.allTrips.isNotEmpty()) {
+                this@TripListFragment.updateTrips(this@TripListFragment.allTrips)
+                progress_bar.hideProgressBar()
+                return@Observer
+            } else if (this@TripListFragment.allTrips.isNotEmpty()) {
+                this@TripListFragment.allTrips.forEach { trip ->
+                    if (trip.name?.toLowerCase(Locale.ROOT)?.contains(filtr.toLowerCase(Locale.ROOT))!!)
+                        newAllTripsList.add(trip)
+                }
+                this@TripListFragment.updateTrips(newAllTripsList)
+                progress_bar.hideProgressBar()
+            }
+        })
     }
 
-    // TODO currentTrip na początku jest nullem
     private fun List<Trip>.toTripItems(): List<TripListItem> {
         return this.map {
             TripListItem(it, currentTrip, requireContext(), viewModel, currentUser)

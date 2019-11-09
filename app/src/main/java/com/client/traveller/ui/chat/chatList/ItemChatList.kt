@@ -23,7 +23,7 @@ import java.net.URL
 
 class ItemChatList(
     val chat: ChatFirestoreModel,
-    private val users: Deferred<List<User>>
+    private val users: List<User>
 ) : Item() {
 
 
@@ -36,8 +36,9 @@ class ItemChatList(
 
     private fun GroupieViewHolder.updateAvatar() = main{
         val multiImageView = multi_image_view as MultiImageView
+        multiImageView.clear()
         multiImageView.shape = MultiImageView.Shape.CIRCLE
-        val participants = users.await()
+        val participants = users
         participants.forEach{user ->
             val bitmap = getBitmapFromUrl(user.image!!)
             bitmap?.let { multiImageView.addImage(it) }
@@ -45,7 +46,7 @@ class ItemChatList(
     }
 
     private fun GroupieViewHolder.updateText() = main {
-        val participants = users.await()
+        val participants = users
         val text: StringBuilder = StringBuilder()
         for(i in participants.indices) {
             if (i == participants.lastIndex)
