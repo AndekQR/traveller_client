@@ -12,4 +12,4 @@ data class Messeage(
     var senderIdFirebase: String? = null,
     var messeage: String? = null,
     var sendDate: Long? = null
-): Serializable
+) : Serializable

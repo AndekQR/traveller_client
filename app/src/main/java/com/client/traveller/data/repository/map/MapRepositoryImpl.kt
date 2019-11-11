@@ -32,12 +32,14 @@ class MapRepositoryImpl(
     override fun stopLocationUpdates() = locationProvider.stopLocationUpdates()
     override fun sendingLocationData() = locationProvider.sendingLocationData()
     override fun centerCurrentLocation() = mapUtils.centerCurrentLocation()
+
     override suspend fun getDistance(
         origin: String,
         destination: String,
+        waypoints: ArrayList<String>?,
         mode: TravelMode
     ): Distance? {
-        return mapUtils.getDistance(origin, destination)
+        return mapUtils.getDistance(origin, destination, waypoints)
     }
 
     override fun drawRouteMarker() = mapUtils.drawRouteToMarker()

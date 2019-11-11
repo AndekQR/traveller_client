@@ -267,7 +267,10 @@ class UserRepositoryImpl(
                             try {
                                 user = task.result?.first()?.toObject(User::class.java)
                             } catch (ex: Exception) {
-                                if (ex is NoSuchElementException) Log.e(javaClass.simpleName, "no such element")
+                                if (ex is NoSuchElementException) Log.e(
+                                    javaClass.simpleName,
+                                    "no such element"
+                                )
                             }
                             user?.let { users.add(it) }
                             continution.resumeWith(Result.success(users))
@@ -280,7 +283,10 @@ class UserRepositoryImpl(
                             try {
                                 user = task.result?.first()?.toObject(User::class.java)
                             } catch (ex: Exception) {
-                                if (ex is NoSuchElementException) Log.e(javaClass.simpleName, "no such element")
+                                if (ex is NoSuchElementException) Log.e(
+                                    javaClass.simpleName,
+                                    "no such element"
+                                )
                             }
                             user?.let { users.add(it) }
                         }
@@ -290,11 +296,11 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun getUserByFirestoreId(id: String) = withContext(Dispatchers.IO){
-        suspendCoroutine<User> {continuation ->
+    override suspend fun getUserByFirestoreId(id: String) = withContext(Dispatchers.IO) {
+        suspendCoroutine<User> { continuation ->
             usersFirestore.getUserByUid(id).addOnSuccessListener {
                 val user = it.toObject(User::class.java)
-                user?.let {userNotNull -> continuation.resumeWith(Result.success(userNotNull)) }
+                user?.let { userNotNull -> continuation.resumeWith(Result.success(userNotNull)) }
             }
         }
     }
@@ -310,7 +316,10 @@ class UserRepositoryImpl(
                             try {
                                 user = task.result?.toObject(User::class.java)
                             } catch (ex: Exception) {
-                                if (ex is NoSuchElementException) Log.e(javaClass.simpleName, "no such element")
+                                if (ex is NoSuchElementException) Log.e(
+                                    javaClass.simpleName,
+                                    "no such element"
+                                )
                             }
                             user?.let { users.add(it) }
                             continution.resumeWith(Result.success(users))
@@ -323,7 +332,10 @@ class UserRepositoryImpl(
                             try {
                                 user = task.result?.toObject(User::class.java)
                             } catch (ex: Exception) {
-                                if (ex is NoSuchElementException) Log.e(javaClass.simpleName, "no such element")
+                                if (ex is NoSuchElementException) Log.e(
+                                    javaClass.simpleName,
+                                    "no such element"
+                                )
                             }
                             user?.let { users.add(it) }
                         }
@@ -333,8 +345,8 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun getUserName(uid: String) = withContext(Dispatchers.IO){
-        suspendCoroutine<String> {continuation ->
+    override suspend fun getUserName(uid: String) = withContext(Dispatchers.IO) {
+        suspendCoroutine<String> { continuation ->
             usersFirestore.getUserByUid(uid).addOnSuccessListener {
                 val name = it.getString("displayName")
                 name?.let { s -> continuation.resumeWith(Result.success(s)) }

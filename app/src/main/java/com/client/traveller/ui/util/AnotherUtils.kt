@@ -2,14 +2,9 @@ package com.client.traveller.ui.util
 
 import android.location.Location
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.tasks.Task
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.threeten.bp.Instant
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneId
-import kotlin.coroutines.suspendCoroutine
-import com.google.firebase.firestore.DocumentSnapshot as DocumentSnapshot1
 
 
 fun Location.format(): String {

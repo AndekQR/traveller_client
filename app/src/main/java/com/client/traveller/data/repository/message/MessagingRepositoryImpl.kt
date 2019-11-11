@@ -2,6 +2,7 @@ package com.client.traveller.data.repository.message
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.network.firebase.firestore.Chats
 import com.client.traveller.data.network.firebase.firestore.Messeages
@@ -95,9 +96,8 @@ class MessagingRepositoryImpl(
                 exception?.let {
                     return@EventListener
                 }
-
                 val chats = mutableListOf<ChatFirestoreModel>()
-                querySnapshot?.forEach {doc ->
+                querySnapshot?.forEach { doc ->
                     val chat = doc.toObject(ChatFirestoreModel::class.java)
                     chats.add(chat)
                 }
@@ -106,11 +106,15 @@ class MessagingRepositoryImpl(
         return usersChats
     }
 
+    override fun getUsersChatsRemoveObserver(observer: Observer<List<ChatFirestoreModel>>) {
+        this.usersChats.removeObserver(observer)
+    }
+
     override suspend fun findChatByUid(uid: String) = withContext(Dispatchers.IO) {
-        suspendCoroutine<ChatFirestoreModel> {continuation ->
-            chats.getChatByUid(uid).get().addOnSuccessListener {snapshot ->
+        suspendCoroutine<ChatFirestoreModel> { continuation ->
+            chats.getChatByUid(uid).get().addOnSuccessListener { snapshot ->
                 snapshot?.let {
-                    if (it.size() == 1){
+                    if (it.size() == 1) {
                         val chat = it.first().toObject(ChatFirestoreModel::class.java)
                         continuation.resumeWith(Result.success(chat))
                     }
@@ -120,16 +124,17 @@ class MessagingRepositoryImpl(
     }
 
     override fun initMesseages(chatUid: String): LiveData<List<Messeage>> {
-        this.messeages.getMesseages(chatUid).addSnapshotListener(EventListener<QuerySnapshot> {querySnapshot, exception ->
-            exception?.let { return@EventListener }
+        this.messeages.getMesseages(chatUid)
+            .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
+                exception?.let { return@EventListener }
 
-            val messeages = mutableListOf<Messeage>()
-            querySnapshot?.forEach {doc ->
-                val messeage = doc?.toObject(Messeage::class.java)
-                messeage?.let { messeages.add(messeage) }
-            }
-            this._chatMesseages.value = messeages
-        })
+                val messeages = mutableListOf<Messeage>()
+                querySnapshot?.forEach { doc ->
+                    val messeage = doc?.toObject(Messeage::class.java)
+                    messeage?.let { messeages.add(messeage) }
+                }
+                this._chatMesseages.value = messeages
+            })
         return this.chatMesseages
     }
 }

@@ -10,7 +10,7 @@ data class ChatFirestoreModel(
     var participantsNumber: Int? = null,
     var uid: String? = null,
     var tripUid: String? = null
-): Serializable {
+) : Serializable {
     init {
         this.uid = this.randomUid()
     }

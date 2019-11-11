@@ -48,7 +48,6 @@ class TripViewModel(
         userRepository.getUser().observeForever(currentUserObserver)
 
         currentTripObserver = Observer { trip ->
-            if (trip == null) return@Observer
             _currentTrip.value = trip
         }
         tripRepository.getCurrentTrip().observeForever(currentTripObserver)
@@ -60,17 +59,17 @@ class TripViewModel(
         tripRepository.getAllTrips().observeForever(allTripsObserver)
     }
 
-    suspend fun addTrip(trip: Trip): Void? {
-        return tripRepository.newTrip(trip)
-    }
+    suspend fun addTrip(trip: Trip) = tripRepository.newTrip(trip)
+
 
     // TODO trzeba dodać waypointy do wyznaczania długości
     suspend fun tripDistance(
         origin: String,
         destination: String,
+        waypoints: ArrayList<String>?,
         mode: TravelMode = TravelMode.driving
     ): Distance? {
-        return mapRepository.getDistance(origin, destination, mode)
+        return mapRepository.getDistance(origin, destination, waypoints, mode)
     }
 
     fun formatDateTime(dateTimeString: String?): String {
@@ -81,7 +80,11 @@ class TripViewModel(
     }
 
     fun isTripParticipant(trip: Trip, user: User) = tripRepository.isTripParticipant(trip, user)
-    suspend fun setTripAsActual(trip: Trip) = tripRepository.saveTripToLocalDB(trip)
+    fun setTripAsActual(trip: Trip) {
+        tripRepository.saveTripToLocalDB(trip)
+        tripRepository.initCurrentTripUpdates()
+    }
+
     fun updateTripPersons(tripToUpdate: Trip, emails: List<String>) =
         tripRepository.updateTripPersons(tripToUpdate, emails)
 

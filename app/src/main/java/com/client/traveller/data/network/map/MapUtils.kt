@@ -20,6 +20,6 @@ interface MapUtils : GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListen
 
     fun clearMap()
     fun centerCurrentLocation()
-    suspend fun getDistance(origin: String, destination: String): Distance?
+    suspend fun getDistance(origin: String, destination: String, waypoints: ArrayList<String>?): Distance?
     fun getCurrentLocation(): Location
 }

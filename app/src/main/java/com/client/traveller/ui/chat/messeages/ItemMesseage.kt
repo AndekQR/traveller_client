@@ -33,18 +33,22 @@ class ItemMesseage(
 
     private fun GroupieViewHolder.updateAvatar() {
         val participant = this@ItemMesseage.getUser(messeage.senderIdFirebase)
-        when(getMesseageType()){
+        when (getMesseageType()) {
             MSG_TYPE_LEFT -> {
-                participant?.let { Glide.with(containerView).load(participant.image).into(avatar_left) }
+                participant?.let {
+                    Glide.with(containerView).load(participant.image).into(avatar_left)
+                }
             }
             MSG_TYPE_RIGHT -> {
-                participant?.let { Glide.with(containerView).load(participant.image).into(avatar_right) }
+                participant?.let {
+                    Glide.with(containerView).load(participant.image).into(avatar_right)
+                }
             }
         }
     }
 
     private fun GroupieViewHolder.updateText() {
-        when(getMesseageType()){
+        when (getMesseageType()) {
             MSG_TYPE_LEFT -> {
                 messeage_item_left_text.text = messeage.messeage
             }
@@ -71,7 +75,7 @@ class ItemMesseage(
 
         val dateToShow = "$hour:$minute:$second\n" +
                 "${date.dayOfMonth}.${date.monthValue}.${date.year}"
-        when(getMesseageType()) {
+        when (getMesseageType()) {
             MSG_TYPE_LEFT -> {
                 send_time_left.text = dateToShow
             }
@@ -84,7 +88,7 @@ class ItemMesseage(
     private fun GroupieViewHolder.updateSenderName() {
         var sender: User? = null
         chatParticipants.forEach { if (messeage.senderIdFirebase == it.idUserFirebase) sender = it }
-        when(getMesseageType()) {
+        when (getMesseageType()) {
             MSG_TYPE_LEFT -> {
                 sender?.let { sender_name_left.text = it.displayName }
             }

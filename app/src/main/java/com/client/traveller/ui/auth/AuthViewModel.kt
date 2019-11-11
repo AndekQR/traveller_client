@@ -91,7 +91,6 @@ class AuthViewModel(
      *
      * @param user użytkownik do którego zostanie wysłany email weryfikacyjny
      */
-    //TODO trzeba zmiany wysyłac do firestore i metoda przeniesc do authNormal
     fun sendEmailVerification(user: FirebaseUser) {
 
         userRepository.sendEmailVerification(user) { isSuccessful, exception ->

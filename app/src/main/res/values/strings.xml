@@ -59,7 +59,6 @@
     <string name="send_location_summary">Gdy włączone, osoby z tej samej wycieczki widzą twoją lokalizację</string>
     <string name="search_hint">Szukaj...</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="post_email_verification_success">Weryfikacja e-mail została ukończona!</string>
     <string name="post_email_verification_fail">Weryfikacja e-mail zakończyła się niepowodzeniem. Skontaktuj się z twórcą.</string>
@@ -115,7 +114,7 @@
     <string name="chat_title">Wiadomości</string>
     <string name="list">Lista</string>
     <string name="participants">Uczestnicy</string>
-    <string name="click_back_again_to_exit">Please click BACK again to exit</string>
+    <string name="click_back_again_to_exit">Naciśnij WSTECZ jeszcze raz aby wyjść</string>
     <string name="type_a_messeage">Wiadomość...</string>
 
     <string-array name="intervals">

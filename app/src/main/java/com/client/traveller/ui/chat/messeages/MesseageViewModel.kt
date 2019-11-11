@@ -10,7 +10,6 @@ import com.client.traveller.data.repository.message.MessagingRepository
 import com.client.traveller.data.repository.user.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.Exception
 
 class MesseageViewModel(
     private val userRepository: UserRepository,
@@ -99,14 +98,15 @@ class MesseageViewModel(
      */
     fun getChatParticipantsUid(): ArrayList<String> {
         val uidParticipants = arrayListOf<String>()
-        this.chatParticipants.mapTo(uidParticipants){
+        this.chatParticipants.mapTo(uidParticipants) {
             it.idUserFirebase!!
         }
         return uidParticipants
     }
 
     suspend fun getUserByFirestoreId(id: String) = userRepository.getUserByFirestoreId(id)
-    fun sendMesseageAsync(chatUid: String, messeage: Messeage) = messagingRepository.saveMesseage(chatUid, messeage)
+    fun sendMesseageAsync(chatUid: String, messeage: Messeage) =
+        messagingRepository.saveMesseage(chatUid, messeage)
 
     suspend fun findChat(participants: ArrayList<String>): ChatFirestoreModel? {
         return try {
@@ -117,7 +117,7 @@ class MesseageViewModel(
             if (result) {
                 try {
                     messagingRepository.findChat(participants, this.tripUid!!)
-                }catch (ex: Exception){
+                } catch (ex: Exception) {
                     throw ex
                 }
             } else {
@@ -129,21 +129,22 @@ class MesseageViewModel(
     suspend fun findChatByUid(uid: String) = this.messagingRepository.findChatByUid(uid)
 
 
-
     fun initChatMesseages() {
-        this.chatMesseagesObserver = Observer {messeages ->
+        this.chatMesseagesObserver = Observer { messeages ->
             if (messeages == null) return@Observer
             this._chatMesseages.value = messeages
         }
         try {
-            this.messagingRepository.initMesseages(this.chatId!!).observeForever(this.chatMesseagesObserver)
+            this.messagingRepository.initMesseages(this.chatId!!)
+                .observeForever(this.chatMesseagesObserver)
         } catch (ex: NullPointerException) {
             Log.e(javaClass.simpleName, "Wiadomości nie zostały zainicjalizowane, tripUid == null")
         }
     }
 
     fun removeChatMesseagesObserver() {
-        this.messagingRepository.initMesseages(this.chatId!!).observeForever(this.chatMesseagesObserver)
+        this.messagingRepository.initMesseages(this.chatId!!)
+            .observeForever(this.chatMesseagesObserver)
     }
 
     private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {

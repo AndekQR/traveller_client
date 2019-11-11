@@ -1,22 +1,15 @@
 package com.client.traveller.ui.chat.chatList
 
-import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import androidx.lifecycle.LifecycleObserver
-import com.bumptech.glide.Glide
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
-import com.client.traveller.ui.util.Coroutines.io
 import com.client.traveller.ui.util.Coroutines.main
 import com.stfalcon.multiimageview.MultiImageView
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import com.xwray.groupie.kotlinandroidextensions.Item
 import kotlinx.android.synthetic.main.item_chat_list.*
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.URL
@@ -34,12 +27,12 @@ class ItemChatList(
         }
     }
 
-    private fun GroupieViewHolder.updateAvatar() = main{
+    private fun GroupieViewHolder.updateAvatar() = main {
         val multiImageView = multi_image_view as MultiImageView
         multiImageView.clear()
         multiImageView.shape = MultiImageView.Shape.CIRCLE
         val participants = users
-        participants.forEach{user ->
+        participants.forEach { user ->
             val bitmap = getBitmapFromUrl(user.image!!)
             bitmap?.let { multiImageView.addImage(it) }
         }
@@ -48,7 +41,7 @@ class ItemChatList(
     private fun GroupieViewHolder.updateText() = main {
         val participants = users
         val text: StringBuilder = StringBuilder()
-        for(i in participants.indices) {
+        for (i in participants.indices) {
             if (i == participants.lastIndex)
                 text.append(participants[i].displayName)
             else
@@ -60,7 +53,7 @@ class ItemChatList(
     override fun getLayout() = R.layout.item_chat_list
 
     private suspend fun getBitmapFromUrl(urlString: String) = withContext(Dispatchers.IO) {
-          try {
+        try {
             val url = URL(urlString)
             val connection = url.openConnection().apply {
                 doInput = true

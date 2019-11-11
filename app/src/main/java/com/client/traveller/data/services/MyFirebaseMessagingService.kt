@@ -9,7 +9,6 @@ import com.google.firebase.messaging.FirebaseMessagingService
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
-        Log.e(javaClass.simpleName, token)
         this.saveToken(token)
     }
 
@@ -17,7 +16,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         currentUser?.let {
             FirebaseFirestore.getInstance().collection(Tokens.COLLECTION_NAME).document(it.email!!)
-                .set(token)
+                .set(mapOf("token" to token))
         }
     }
 }

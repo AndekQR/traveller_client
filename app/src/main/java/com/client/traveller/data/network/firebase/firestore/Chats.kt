@@ -23,7 +23,9 @@ class Chats {
      * @param participants lista uidFirebase uczestników szukanego chatu, muszą być wszyscy
      */
     fun getChatByParticipantsFiltrSize(participants: ArrayList<String>, tripUid: String): Query {
-        var result = this.getCollectionReference().whereEqualTo("participantsNumber", participants.size).whereEqualTo("tripUid", tripUid)
+        var result =
+            this.getCollectionReference().whereEqualTo("participantsNumber", participants.size)
+                .whereEqualTo("tripUid", tripUid)
         for (i in 0 until participants.size) {
             result = result.whereEqualTo("participantsUid.${participants[i]}", true)
         }
@@ -37,7 +39,8 @@ class Chats {
      * @param tripUid uid wycieczki
      */
     fun getUserAllChats(userId: String, tripUid: String): Query {
-        return this.getCollectionReference().whereEqualTo("tripUid", tripUid).whereEqualTo("participantsUid.$userId", true)
+        return this.getCollectionReference().whereEqualTo("tripUid", tripUid)
+            .whereEqualTo("participantsUid.$userId", true)
     }
 
     fun addChat(chat: ChatFirestoreModel): Task<Void> {

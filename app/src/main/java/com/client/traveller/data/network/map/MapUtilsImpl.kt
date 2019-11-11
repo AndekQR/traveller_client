@@ -189,10 +189,13 @@ class MapUtilsImpl(
     /**
      * Zwraca [Distance] trasy podanej w parametrach
      */
-    override suspend fun getDistance(origin: String, destination: String): Distance? {
-        val result =
-            directionsApiService.getDirections(origin, destination, TravelMode.driving.name)
-        return if (result.status == "OK") {
+    override suspend fun getDistance(origin: String, destination: String, waypoints: ArrayList<String>?): Distance? {
+        var result: Directions? = null
+        when {
+            waypoints != null -> result = directionsApiService.getDirectionsWithWaypoints(origin, destination,  TravelMode.driving.name, waypoints)
+            waypoints == null -> result = directionsApiService.getDirections(origin, destination,  TravelMode.driving.name)
+        }
+        return if (result != null && result.status == "OK") {
             result.routes.first().legs.first().distance
         } else
             null

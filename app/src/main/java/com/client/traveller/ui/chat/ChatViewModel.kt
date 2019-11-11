@@ -47,7 +47,6 @@ class ChatViewModel(
         userRepository.getUser().observeForever(currentUserObserver)
 
         currentTripObserver = Observer { trip ->
-            if (trip == null) return@Observer
             _currentTrip.value = trip
         }
         tripRepository.getCurrentTrip().observeForever(currentTripObserver)
@@ -58,11 +57,13 @@ class ChatViewModel(
             if (chats == null) return@Observer
             _currentUserChats.value = chats
         }
-       this.messagingRepository.getUsersChats(userId, tripUid).observeForever(currentUserChatsObserver)
+        this.usersChatsRemoveLiveDataObserver()
+        this.messagingRepository.getUsersChats(userId, tripUid)
+            .observeForever(currentUserChatsObserver)
     }
 
-    fun usersChatsRemoveLiveDataObserver(userId: String, tripUid: String) {
-        this.messagingRepository.getUsersChats(userId, tripUid).removeObserver(currentUserChatsObserver)
+    fun usersChatsRemoveLiveDataObserver() {
+        this.messagingRepository.getUsersChatsRemoveObserver(this.currentUserChatsObserver)
     }
 
     fun logoutUser(mGoogleSignInClient: GoogleSignInClient) =
@@ -76,7 +77,7 @@ class ChatViewModel(
         return null
     }
 
-     suspend fun getUsersById(ids: ArrayList<String>) = this.userRepository.getUsersByIds(ids)
+    suspend fun getUsersById(ids: ArrayList<String>) = this.userRepository.getUsersByIds(ids)
 
     private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {
         userRepository.getUser().removeObserver(currentUserObserver)

@@ -11,5 +11,5 @@ data class ChatRoomModel(
     var participants: ArrayList<String>? = null,
     var messeages: ArrayList<Messeage>? = null,
     var uid: String? = null
-): Serializable
+) : Serializable
 

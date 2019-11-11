@@ -6,7 +6,6 @@ import com.client.traveller.data.db.TripDao
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.Trips
-import com.client.traveller.data.network.firebase.firestore.Users
 import com.client.traveller.ui.util.Coroutines.io
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.QuerySnapshot
@@ -49,18 +48,21 @@ class TripRepositoryImpl(
     }
 
     /**
-     * aktualizcja lokalnej currentTrip gdy inny użytkownik wyśle do firestore zmiany do tej wycieczki
+     * aktualizcje lokalnej currentTrip gdy inny użytkownik wyśle do firestore zmiany do tej wycieczki
      */
-    private fun initCurrentTripUpdates() = io {
-        val currentTrip = this.tripDao.getCurrentTripNonLive()
-        trips.getTrip(currentTrip.uid!!).addSnapshotListener(EventListener<QuerySnapshot> {querySnapshot, excetion ->
-            excetion?.let { return@EventListener }
+    override fun initCurrentTripUpdates() = io {
+        val currentTripUid = this.tripDao.getCurrentTripNonLive()?.uid
+        currentTripUid?.let {
+            trips.getTrip(it)
+                .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, excetion ->
+                    excetion?.let { return@EventListener }
 
-            val updatedCurrentTrip = querySnapshot?.first()?.toObject(Trip::class.java)
-            updatedCurrentTrip?.let {
-                io{tripDao.upsert(it)}
-            }
-        })
+                    val updatedCurrentTrip = querySnapshot?.first()?.toObject(Trip::class.java)
+                    updatedCurrentTrip?.let {
+                        io { tripDao.upsert(it) }
+                    }
+                })
+        }
     }
 
     override suspend fun getAllTrips() = this.tripList
@@ -86,7 +88,7 @@ class TripRepositoryImpl(
         }
     }
 
-    override fun saveTripToLocalDB(trip: Trip)= io {
+    override fun saveTripToLocalDB(trip: Trip) = io {
         this.tripDao.upsert(trip)
         this.initCurrentTripUpdates()
     }

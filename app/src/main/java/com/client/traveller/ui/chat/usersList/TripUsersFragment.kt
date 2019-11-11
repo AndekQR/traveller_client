@@ -69,17 +69,18 @@ class TripUsersFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
                 }
             }
         })
-        this.viewModel.searchQuery.observe(viewLifecycleOwner, Observer {filtr ->
+        this.viewModel.searchQuery.observe(viewLifecycleOwner, Observer { filtr ->
             launch {
                 progress_bar.showProgressBar()
-                if (filtr.isEmpty() && this@TripUsersFragment.allParticipants.isNotEmpty()){
+                if (filtr.isEmpty() && this@TripUsersFragment.allParticipants.isNotEmpty()) {
                     this@TripUsersFragment.updateUsersList(this@TripUsersFragment.allParticipants)
                     progress_bar.hideProgressBar()
                     return@launch
                 } else if (this@TripUsersFragment.allParticipants.isNotEmpty()) {
                     val newParticipantsList = mutableListOf<User>()
                     this@TripUsersFragment.allParticipants.forEach { participant ->
-                        val result = participant.displayName?.toLowerCase(Locale.ROOT)?.contains(filtr.toLowerCase(Locale.ROOT))
+                        val result = participant.displayName?.toLowerCase(Locale.ROOT)
+                            ?.contains(filtr.toLowerCase(Locale.ROOT))
                         if (result != null && result) newParticipantsList.add(participant)
                     }
                     this@TripUsersFragment.updateUsersList(newParticipantsList)

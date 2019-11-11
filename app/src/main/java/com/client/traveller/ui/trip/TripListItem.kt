@@ -76,12 +76,12 @@ class TripListItem(
     }
 
     private fun GroupieViewHolder.updateTripDistance() = main {
-        val distance = viewModel.tripDistance(trip.startAddress!!, trip.endAddress!!)
+        val distance = viewModel.tripDistance(trip.startAddress!!, trip.endAddress!!, trip.waypoints)
         if (context != null) {
             trip_distance.text =
                 "${context.getString(R.string.trip_distance)} ${distance?.text ?: " - "}"
         } else {
-            trip_distance.text = "${viewModel.tripDistance(trip.startAddress!!, trip.endAddress!!)}"
+            trip_distance.text = "${viewModel.tripDistance(trip.startAddress!!, trip.endAddress!!, trip.waypoints)}"
         }
     }
 

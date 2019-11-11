@@ -2,7 +2,6 @@ package com.client.traveller.ui.trip
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.collection.ArraySet
 import androidx.collection.arraySetOf
 import androidx.lifecycle.Observer
@@ -91,7 +89,7 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
     }
 
     /**
-     * Klasa sprawdza czy została uruchomiona do tworzenia nowej wycieczki
+     * Metoda sprawdza czy została uruchomiona do tworzenia nowej wycieczki
      * czy do wyświetlenia już istniejącej
      *
      */
@@ -117,6 +115,9 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
         }
     }
 
+    /**
+     * @param trip przekazana przez Navigation components wycieczka, kliknięta na liście wycieczek
+     */
     private fun insertData(trip: Trip) {
         trip_name.setText(trip.name)
         trip_start_address.setText(trip.startAddress)

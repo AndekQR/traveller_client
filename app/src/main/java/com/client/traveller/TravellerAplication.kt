@@ -58,7 +58,7 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { AuthFacebook() }
         bind() from provider { AuthUtils() }
         bind() from provider { AuthProvider() }
-        bind() from provider { Chats()}
+        bind() from provider { Chats() }
         bind() from singleton { instance<AppDatabase>().userDao() }
         bind<UserRepository>() with singleton {
             UserRepositoryImpl(

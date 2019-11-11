@@ -77,9 +77,8 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
 
         viewModel.currentTrip.observe(viewLifecycleOwner, Observer {
             this.currentTrip = it
-            this.bindUI()
         })
-//        this.bindUI()
+        this.bindUI()
     }
 
     override fun onStart() {

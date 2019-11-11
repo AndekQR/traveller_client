@@ -2,7 +2,10 @@ package com.client.traveller.data.network.firebase.firestore
 
 import com.client.traveller.data.db.entities.Trip
 import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class Trips {
 

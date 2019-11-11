@@ -53,7 +53,8 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
             launch(Dispatchers.Main) {
                 viewModel.setIdentifier(intent)
                 this@MesseageActivity.viewModel.addChatParticipantLocal(this@MesseageActivity.currentUser.email)
-                if (this@MesseageActivity.viewModel.chatId == null) viewModel.chatId = viewModel.findChat(viewModel.getChatParticipantsUid())?.uid
+                if (this@MesseageActivity.viewModel.chatId == null) viewModel.chatId =
+                    viewModel.findChat(viewModel.getChatParticipantsUid())?.uid
                 when {
                     viewModel.chatParticipants.size > 1 -> supportActionBar?.title =
                         viewModel.chatParticipants.first().displayName + ", " + viewModel.chatParticipants.elementAt(

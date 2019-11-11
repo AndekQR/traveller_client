@@ -6,9 +6,7 @@ import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.db.entities.User
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.threeten.bp.Instant
 import org.threeten.bp.LocalDateTime
-import org.threeten.bp.ZoneId
 import org.threeten.bp.format.DateTimeFormatter
 
 object DataTypeConverter {

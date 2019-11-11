@@ -13,4 +13,5 @@ interface TripRepository {
     fun saveTripToLocalDB(trip: Trip): Job
     fun isTripParticipant(trip: Trip, user: User): Boolean
     fun updateTripPersons(trip: Trip, emails: List<String>)
+    fun initCurrentTripUpdates(): Job
 }

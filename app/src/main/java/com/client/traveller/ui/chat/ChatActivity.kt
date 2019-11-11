@@ -86,8 +86,8 @@ class ChatActivity : AppCompatActivity(), KodeinAware {
         this.viewPagerAdapter.addFragment(TripUsersFragment())
         this.viewPager.adapter = this.viewPagerAdapter
 //        this.tabLayout.setupWithViewPager(this.viewPager)
-        TabLayoutMediator(tabLayout, viewPager){tab, position ->
-            when(position){
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            when (position) {
                 0 -> tab.text = getString(R.string.list)
                 1 -> tab.text = getString(R.string.participants)
             }

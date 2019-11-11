@@ -19,7 +19,7 @@ interface MapRepository {
     fun sendingLocationData(): Boolean
 
     fun centerCurrentLocation()
-    suspend fun getDistance(origin: String, destination: String, mode: TravelMode): Distance?
+    suspend fun getDistance(origin: String, destination: String, waypoints: ArrayList<String>? = null, mode: TravelMode): Distance?
     fun getCurrentLocation(): Location
     fun clearMap()
 
