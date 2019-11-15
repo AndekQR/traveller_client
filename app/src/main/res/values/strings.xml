@@ -116,6 +116,8 @@
     <string name="participants">Uczestnicy</string>
     <string name="click_back_again_to_exit">Naciśnij WSTECZ jeszcze raz aby wyjść</string>
     <string name="type_a_messeage">Wiadomość...</string>
+    <string name="wrong_trip">Zła wycieczka</string>
+    <string name="need_to_join_different_trip">Żeby wyświetlić wiadomość musisz dołączyć do</string>
 
     <string-array name="intervals">
         <item>"1 sekunda"</item>

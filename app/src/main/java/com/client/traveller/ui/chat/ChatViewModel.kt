@@ -1,6 +1,7 @@
 package com.client.traveller.ui.chat
 
 import androidx.lifecycle.*
+import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
@@ -32,6 +33,8 @@ class ChatViewModel(
         get() = _currentUserChats
     // Obserwator jest usuwany w ChatListFragment bo potrzebne są parametry
     private lateinit var currentUserChatsObserver: Observer<List<ChatFirestoreModel>>
+
+    lateinit var chatsLastMessage: LiveData<MutableMap<String, Messeage>>
 
     val searchQuery: MutableLiveData<String> = MutableLiveData()
 
@@ -82,6 +85,14 @@ class ChatViewModel(
     private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {
         userRepository.getUser().removeObserver(currentUserObserver)
         tripRepository.getCurrentTrip().removeObserver(currentTripObserver)
+        messagingRepository.initChatsLastMessageRemoveObservers()
+    }
+
+    fun initChatsLastMessage(chatsUid: List<String>) {
+        chatsUid.forEach{
+            messagingRepository.initChatLastMesseage(chatUid = it)
+        }
+        this.chatsLastMessage = messagingRepository.getChatsLastMessage()
     }
 
     override fun onCleared() {

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e0faffa2109494d0e254786eb1b13407",
+    "identityHash": "6c3eb92c7a1141fe57c5b54422a32cc7",
     "entities": [
       {
         "tableName": "User",
@@ -174,7 +174,7 @@
       },
       {
         "tableName": "ChatRoomModel",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `participants` TEXT, `messeages` TEXT, `uid` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `participants` TEXT, `messeages` TEXT, `uid` TEXT, `isSeen` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -199,6 +199,12 @@
             "columnName": "uid",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "isSeen",
+            "columnName": "isSeen",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -214,7 +220,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e0faffa2109494d0e254786eb1b13407')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6c3eb92c7a1141fe57c5b54422a32cc7')"
     ]
   }
 }

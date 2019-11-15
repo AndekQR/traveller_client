@@ -106,4 +106,13 @@ class TripRepositoryImpl(
         this.trips.updateTripPersons(trip, ArrayList(emails))
     }
 
+    override suspend fun getTripByUid(tripUid: String) = withContext(Dispatchers.IO){
+        suspendCoroutine<Trip> { continuation ->
+            trips.getTrip(tripUid).get().addOnSuccessListener { querySnapshot ->
+                val trip = querySnapshot.first().toObject(Trip::class.java)
+                continuation.resumeWith(Result.success(trip))
+            }
+        }
+    }
+
 }

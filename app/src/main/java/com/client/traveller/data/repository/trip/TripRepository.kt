@@ -14,4 +14,5 @@ interface TripRepository {
     fun isTripParticipant(trip: Trip, user: User): Boolean
     fun updateTripPersons(trip: Trip, emails: List<String>)
     fun initCurrentTripUpdates(): Job
+    suspend fun getTripByUid(tripUid: String): Trip
 }

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.client.traveller.R
@@ -21,6 +22,7 @@ import com.client.traveller.ui.chat.usersList.TripUsersFragment
 import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
+import com.client.traveller.ui.util.Coroutines
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -28,6 +30,7 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_chat.*
+import kotlinx.android.synthetic.main.nav_header.view.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
@@ -60,6 +63,10 @@ class ChatActivity : AppCompatActivity(), KodeinAware {
         this.drawerLayout = drawer_layout
         this.navigationView = navigation_view
         this.navigationView.setNavigationItemSelectedListener(onNavigationItemSelected)
+        this.viewModel.currentUser.observe(this, Observer { user ->
+            this.setSubtitleNavView(user.email!!)
+        })
+
 
         // inicjalizacja actionbara
         this.toolBar = toolbar
@@ -116,6 +123,10 @@ class ChatActivity : AppCompatActivity(), KodeinAware {
         })
 
         return super.onCreateOptionsMenu(menu)
+    }
+
+    private fun setSubtitleNavView(subtitle: String) = Coroutines.main {
+        navigationView.getHeaderView(0).subtitle.text = subtitle
     }
 
     private val onNavigationItemSelected = NavigationView.OnNavigationItemSelectedListener { item ->

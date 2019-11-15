@@ -4,16 +4,19 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.*
 import com.client.traveller.data.db.entities.Messeage
+import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
 import com.client.traveller.data.repository.message.MessagingRepository
+import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.user.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MesseageViewModel(
     private val userRepository: UserRepository,
-    private val messagingRepository: MessagingRepository
+    private val messagingRepository: MessagingRepository,
+    private val tripRepository: TripRepository
 ) : ViewModel() {
 
     // TODO trzeba zapisywać wartości do lokalnej bazy
@@ -21,8 +24,7 @@ class MesseageViewModel(
     // w przypadku wiadomości tak samo
     internal var userId: String? = null
     internal var chatId: String? = null
-    // tripUid jest zawsze podawane do tej aktywności
-    private var tripUid: String? = null
+
 
     private var _currentUser: MutableLiveData<User> = MutableLiveData()
     val currentUser: LiveData<User>
@@ -33,6 +35,11 @@ class MesseageViewModel(
     val chatMesseages: LiveData<List<Messeage>>
         get() = _chatMesseages
     private lateinit var chatMesseagesObserver: Observer<List<Messeage>>
+
+    private var _currentTrip: MutableLiveData<Trip> = MutableLiveData()
+    val currentTrip: LiveData<Trip>
+        get() = _currentTrip
+    private lateinit var currentTripObserver: Observer<Trip>
 
     // uczestnicy danego chatu (razem z aktualnym użytkownikiem)
     internal val chatParticipants = mutableSetOf<User>()
@@ -47,6 +54,11 @@ class MesseageViewModel(
             _currentUser.value = user
         }
         userRepository.getUser().observeForever(currentUserObserver)
+
+        currentTripObserver = Observer { trip ->
+            _currentTrip.value = trip
+        }
+        tripRepository.getCurrentTrip().observeForever(currentTripObserver)
     }
 
     /**
@@ -55,12 +67,16 @@ class MesseageViewModel(
      * czy wiadomość z listy wiadomości
      * Pobiera również uid wycieczki (bo wiadomości są w obrębie danej wycieczki)
      *
+     * Jeżeli zwróci nie nulla to aktywność została uruchomiona z powiadomienia o wiadomości
+     * wtedy zwróci tripUid przekazanego jako chatId czatu
+     *
      * @param intent dane przekazane tej aktywności podczas jej uruchamiania
      */
-    suspend fun setIdentifier(intent: Intent) {
+    suspend fun setIdentifier(intent: Intent): String? {
         val userId = intent.extras!!.getString("userId")
         val chatId = intent.extras!!.getString("chatId")
-        this.tripUid = intent.extras!!.getString("tripUid")
+
+        val tripUid = intent.extras!!.getString("tripUid")
 
         if (userId != null) {
             this.userId = userId
@@ -72,6 +88,7 @@ class MesseageViewModel(
             val clickedChat = findChatByUid(this.chatId!!)
             this.addChatParticipantLocal(clickedChat.participantsUid?.keys)
         }
+        return tripUid
     }
 
     /**
@@ -104,19 +121,20 @@ class MesseageViewModel(
         return uidParticipants
     }
 
-    suspend fun getUserByFirestoreId(id: String) = userRepository.getUserByFirestoreId(id)
-    fun sendMesseageAsync(chatUid: String, messeage: Messeage) =
-        messagingRepository.saveMesseage(chatUid, messeage)
+    suspend fun findTripByUid(tripUid: String) = tripRepository.getTripByUid(tripUid)
 
-    suspend fun findChat(participants: ArrayList<String>): ChatFirestoreModel? {
+    suspend fun getUserByFirestoreId(id: String) = userRepository.getUserByFirestoreId(id)
+    suspend fun sendMesseage(chat: ChatFirestoreModel, messeage: Messeage) =
+        messagingRepository.saveMesseage(chat, messeage)
+
+    suspend fun findChat(participants: ArrayList<String>, tripUid: String): ChatFirestoreModel? {
         return try {
-            messagingRepository.findChat(participants, tripUid!!)
+            messagingRepository.findChat(participants, tripUid)
         } catch (ex: Exception) {
-            Log.e(javaClass.simpleName, "catch")
-            val result = messagingRepository.createChat(participants, this.tripUid!!)
+            val result = messagingRepository.createChat(participants, tripUid)
             if (result) {
                 try {
-                    messagingRepository.findChat(participants, this.tripUid!!)
+                    messagingRepository.findChat(participants, tripUid)
                 } catch (ex: Exception) {
                     throw ex
                 }
@@ -143,12 +161,13 @@ class MesseageViewModel(
     }
 
     fun removeChatMesseagesObserver() {
-        this.messagingRepository.initMesseages(this.chatId!!)
-            .observeForever(this.chatMesseagesObserver)
+        if (::chatMesseagesObserver.isInitialized)
+            this.messagingRepository.chatMesseagesRemoveObserver(this.chatMesseagesObserver)
     }
 
     private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {
         userRepository.getUser().removeObserver(currentUserObserver)
+        tripRepository.getCurrentTrip().removeObserver(currentTripObserver)
     }
 
     override fun onCleared() {

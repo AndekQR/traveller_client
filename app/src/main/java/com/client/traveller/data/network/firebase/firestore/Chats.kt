@@ -50,4 +50,8 @@ class Chats {
     fun getChatByUid(uid: String): Query {
         return this.getCollectionReference().whereEqualTo("uid", uid)
     }
+
+    fun setChatUnSeen(chaUid: String) {
+        this.getCollectionReference().document(chaUid).update("isSeen", false)
+    }
 }

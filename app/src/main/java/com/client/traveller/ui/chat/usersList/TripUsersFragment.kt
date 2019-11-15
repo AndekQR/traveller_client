@@ -111,7 +111,6 @@ class TripUsersFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
         if (item is ItemUsersListChat) {
             Intent(context, MesseageActivity::class.java).also {
                 it.putExtra("userId", item.user.idUserFirebase)
-                it.putExtra("tripUid", this.currentTrip.uid)
                 startActivity(it)
             }
         }

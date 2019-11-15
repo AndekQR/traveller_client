@@ -98,7 +98,7 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { SettingsViewModelFactory(instance()) }
         bind() from provider { TripViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { ChatViewModelFactory(instance(), instance(), instance()) }
-        bind() from provider { MesseageViewModelFactory(instance(), instance()) }
+        bind() from provider { MesseageViewModelFactory(instance(), instance(), instance()) }
 
 
     }

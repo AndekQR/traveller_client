@@ -1,7 +1,9 @@
 package com.client.traveller.ui.chat.chatList
 
 import android.graphics.BitmapFactory
+import androidx.lifecycle.*
 import com.client.traveller.R
+import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
 import com.client.traveller.ui.util.Coroutines.main
@@ -16,19 +18,25 @@ import java.net.URL
 
 class ItemChatList(
     val chat: ChatFirestoreModel,
-    private val users: List<User>
-) : Item() {
+    private val users: List<User>,
+    private val lastMessage: Messeage?
+) : Item(){
 
+    private lateinit var viewHolder: GroupieViewHolder
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
-        viewHolder.apply {
+            this.viewHolder = viewHolder
             updateAvatar()
             updateText()
-        }
+            updateLastMessage()
     }
 
-    private fun GroupieViewHolder.updateAvatar() = main {
-        val multiImageView = multi_image_view as MultiImageView
+    private fun updateLastMessage() = main {
+        viewHolder.last_message.text = lastMessage?.messeage
+    }
+
+    private fun updateAvatar() = main {
+        val multiImageView = viewHolder.multi_image_view as MultiImageView
         multiImageView.clear()
         multiImageView.shape = MultiImageView.Shape.CIRCLE
         val participants = users
@@ -38,7 +46,8 @@ class ItemChatList(
         }
     }
 
-    private fun GroupieViewHolder.updateText() = main {
+
+    private fun updateText() = main {
         val participants = users
         val text: StringBuilder = StringBuilder()
         for (i in participants.indices) {
@@ -47,7 +56,7 @@ class ItemChatList(
             else
                 text.append(participants[i].displayName + ", ")
         }
-        nameChat.text = text
+        viewHolder.nameChat.text = text
     }
 
     override fun getLayout() = R.layout.item_chat_list

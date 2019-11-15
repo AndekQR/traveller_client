@@ -1,5 +1,6 @@
 package com.client.traveller.ui.chat.messeages
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -11,9 +12,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.autofit.et.lib.AutoFitEditText
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Messeage
+import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
 import com.client.traveller.ui.dialog.Dialog
+import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.util.*
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
@@ -21,10 +24,12 @@ import kotlinx.android.synthetic.main.activity_messeage.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import org.threeten.bp.LocalDateTime
+import kotlin.coroutines.suspendCoroutine
 
 
 class MesseageActivity : ScopedAppActivity(), KodeinAware {
@@ -40,21 +45,26 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
     private lateinit var groupAdapter: GroupAdapter<GroupieViewHolder>
 
     private lateinit var currentUser: User
+    private lateinit var currentTrip: Trip
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_messeage)
 
         viewModel = ViewModelProvider(this, factory).get(MesseageViewModel::class.java)
+        this.viewModel.currentTrip.observe(this, Observer {
+            if (it == null) return@Observer
+            this.currentTrip = it
+        })
         this.viewModel.currentUser.observe(this, Observer {
             if (it == null) return@Observer
             progress_bar.showProgressBar()
             this.currentUser = it
             launch(Dispatchers.Main) {
-                viewModel.setIdentifier(intent)
+                val result = viewModel.setIdentifier(intent)
                 this@MesseageActivity.viewModel.addChatParticipantLocal(this@MesseageActivity.currentUser.email)
-                if (this@MesseageActivity.viewModel.chatId == null) viewModel.chatId =
-                    viewModel.findChat(viewModel.getChatParticipantsUid())?.uid
+                if (this@MesseageActivity.viewModel.chatId == null)
+                    viewModel.chatId = viewModel.findChat(viewModel.getChatParticipantsUid(), currentTrip.uid!!)?.uid
                 when {
                     viewModel.chatParticipants.size > 1 -> supportActionBar?.title =
                         viewModel.chatParticipants.first().displayName + ", " + viewModel.chatParticipants.elementAt(
@@ -64,7 +74,8 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
                         viewModel.chatParticipants.first().displayName
                     else -> supportActionBar?.title = "no"
                 }
-                viewModel.initChatMesseages()
+                if (checkIfCorrectTrip(result))
+                    viewModel.initChatMesseages()
                 progress_bar.hideProgressBar()
             }
         })
@@ -75,13 +86,34 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
         this.sendButton.setOnClickListener(onSendButtonClick)
     }
 
+    private suspend fun checkIfCorrectTrip(tripUid: String?): Boolean {
+        if (tripUid == null) return true
+        else if (tripUid == this.currentTrip.uid) return true
+        else {
+            val messeageTrip = this.viewModel.findTripByUid(tripUid)
+            Dialog.Builder()
+                .addTitle(getString(R.string.wrong_trip))
+                .addMessage(getString(R.string.need_to_join_different_trip)+ " \"${messeageTrip.name}\"")
+                .addPositiveButton("ok") {
+                    it.dismiss()
+                    Intent(this, HomeActivity::class.java).also {intent ->
+                        startActivity(intent)
+                        this.finish()
+                    }
+                }
+                .build(supportFragmentManager, javaClass.simpleName)
+            return false
+        }
+    }
+
     private val onSendButtonClick = View.OnClickListener {
         launch {
+            if (messeageEditText.text.isEmpty()) return@launch
             val messeage = prepareMesseage()
             messeageEditText.setText("")
             var chat: ChatFirestoreModel? = null
             try {
-                chat = viewModel.findChat(participants = viewModel.getChatParticipantsUid())
+                chat = viewModel.findChat(participants = viewModel.getChatParticipantsUid(), tripUid = currentTrip.uid!!)
             } catch (ex: Exception) {
                 Dialog.Builder()
                     .addMessage(getString(R.string.something_went_wrong))
@@ -90,7 +122,7 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
                     }
                     .build(supportFragmentManager, javaClass.simpleName)
             }
-            chat?.let { viewModel.sendMesseageAsync(it.uid!!, messeage) }
+            chat?.let { viewModel.sendMesseage(it, messeage) }
         }
     }
 
@@ -125,6 +157,7 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
     private val recyclerViewOnLayoutChange =
         View.OnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
             if (bottom < oldBottom) {
+                if (this.recyclerView.adapter?.itemCount!! > 0)
                 this.recyclerView.postDelayed(
                     { this.recyclerView.smoothScrollToPosition(this.recyclerView.adapter?.itemCount!! - 1) },
                     100
@@ -140,7 +173,8 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
             layoutManager = LinearLayoutManager(this@MesseageActivity)
             adapter = groupAdapter
             addOnLayoutChangeListener(recyclerViewOnLayoutChange)
-            smoothScrollToPosition(messeages.size - 1)
+            if(messeages.isNotEmpty())
+                smoothScrollToPosition(messeages.size - 1)
         }
     }
 

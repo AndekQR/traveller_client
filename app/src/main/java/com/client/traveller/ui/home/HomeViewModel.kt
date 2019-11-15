@@ -29,7 +29,7 @@ class HomeViewModel(
     private lateinit var currentUserObserver: Observer<User>
 
     init {
-        this.messagingRepository.refreshToken()
+        viewModelScope.launch { messagingRepository.refreshToken() }
         this.initLiveData()
     }
 
