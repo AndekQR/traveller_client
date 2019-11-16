@@ -1,4 +1,4 @@
-package com.client.traveller.data.network.api.places.response.NearbySearchResponse
+package com.client.traveller.data.network.api.places.response.nearbySearchResponse
 
 
 import com.google.gson.annotations.SerializedName

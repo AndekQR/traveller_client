@@ -6,6 +6,8 @@ import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.provider.LocationProvider
+import com.client.traveller.ui.util.Coroutines.io
+import com.client.traveller.ui.util.Coroutines.main
 import com.google.android.gms.maps.SupportMapFragment
 
 

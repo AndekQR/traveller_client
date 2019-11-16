@@ -1,4 +1,4 @@
-package com.client.traveller.data.network.api.places.response.NearbySearchResponse
+package com.client.traveller.data.network.api.places.response.nearbySearchResponse
 
 
 import com.google.gson.annotations.SerializedName
@@ -14,6 +14,8 @@ data class Result(
     @SerializedName("place_id")
     val placeId: String,
     val rating: Double,
+    @SerializedName("plus_code")
+    val plusCode: PlusCode,
     val reference: String,
     val types: List<String>,
     @SerializedName("user_ratings_total")

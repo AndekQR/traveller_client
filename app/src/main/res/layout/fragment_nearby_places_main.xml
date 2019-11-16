@@ -4,12 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorWhiteDarkMaterial"
-    tools:context=".ui.nearby.NearbyPlacesMainFragment">
+    tools:context=".ui.nearby.mainFragment.NearbyPlacesMainFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:id="@+id/recycler_view"
+        />
+
+    <include layout="@layout/progress_bar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,6 +12,7 @@ import com.client.traveller.R
 import com.client.traveller.ui.util.ScopedFragment
 import com.google.android.gms.maps.SupportMapFragment
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance

@@ -77,7 +77,7 @@ class NearbyPlaces : AppCompatActivity(), KodeinAware {
 
         // inicjalizacja dolengo paska nwigacji
         this.bottomNavigation = bottom_navigation
-        this.bottomNavigation.selectedItemId = R.id.chat
+        this.bottomNavigation.selectedItemId = R.id.nearby
         this.bottomNavigation.setOnNavigationItemSelectedListener(onBottomNavigationItemSelected)
     }
 

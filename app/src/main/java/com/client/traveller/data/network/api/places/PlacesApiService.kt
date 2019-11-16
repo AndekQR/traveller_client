@@ -1,11 +1,13 @@
 package com.client.traveller.data.network.api.places
 
-import com.client.traveller.data.network.api.places.response.NearbySearchResponse.NearbySearchResponse
-import com.client.traveller.data.network.api.places.response.findPlacesResponse.FindPlacesResponse
+import android.media.Image
+import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
+import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Photo
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -16,15 +18,15 @@ interface PlacesApiService {
     @GET("nearbysearch/json")
     suspend fun findNearbyPlaces(
         @Query("location") latlng: String, // as latitude,longitude.
-        @Query("radius") radius: Int = 3000, //max 50 000
+        @Query("radius") radius: Int = 3000, //max 50 000 in meters
         @Query("language") language: String = "pl",
         @Query("type") type: String,
-        @Query("keyword") keyword: String = ""
+        @Query("keyword") keyword: String = "" //do szukajki
     ): NearbySearchResponse
 
 
     companion object {
-        private const val BASE_URL = "https://maps.googleapis.com/maps/api/place/"
+        const val BASE_URL = "https://maps.googleapis.com/maps/api/place/"
 
         private val requestInterceptor = Interceptor { chain ->
             val url = chain.request()

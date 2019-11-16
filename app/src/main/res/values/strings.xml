@@ -121,6 +121,7 @@
     <string name="travel_mode">Sposób podróżowania</string>
     <string name="driving">Samochodem</string>
     <string name="walking">Pieszo</string>
+    <string name="type">Typ</string>
 
 
 </resources>
