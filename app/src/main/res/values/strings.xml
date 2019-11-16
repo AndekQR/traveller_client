@@ -118,18 +118,9 @@
     <string name="type_a_messeage">Wiadomość...</string>
     <string name="wrong_trip">Zła wycieczka</string>
     <string name="need_to_join_different_trip">Żeby wyświetlić wiadomość musisz dołączyć do</string>
+    <string name="travel_mode">Sposób podróżowania</string>
+    <string name="driving">Samochodem</string>
+    <string name="walking">Pieszo</string>
 
-    <string-array name="intervals">
-        <item>"1 sekunda"</item>
-        <item>"2 sekundy"</item>
-        <item>"4 sekundy"</item>
-        <item>"6 sekund"</item>
-    </string-array>
-    <string-array name="intervals_values">
-        <item>"1"</item>
-        <item>"2"</item>
-        <item>"4"</item>
-        <item>"6"</item>
-    </string-array>
 
 </resources>

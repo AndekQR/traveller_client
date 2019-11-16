@@ -7,10 +7,10 @@ import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
 import com.client.traveller.R
-import com.client.traveller.data.network.map.directions.DirectionsApiService
-import com.client.traveller.data.network.map.directions.model.TravelMode
-import com.client.traveller.data.network.map.directions.response.Directions
-import com.client.traveller.data.network.map.directions.response.Distance
+import com.client.traveller.data.network.api.directions.DirectionsApiService
+import com.client.traveller.data.network.api.directions.model.TravelMode
+import com.client.traveller.data.network.api.directions.response.Directions
+import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.ui.util.Coroutines.main
 import com.client.traveller.ui.util.NoCurrentLocationException

@@ -109,7 +109,7 @@ class RegisterFragment : Fragment(), KodeinAware {
                             .addPositiveButton("ok") { dialog ->
                                 dialog.dismiss()
                             }
-                            .build(fragmentManager, javaClass.simpleName)
+                            .build(parentFragmentManager, javaClass.simpleName)
                     }
                 }
 
@@ -125,7 +125,7 @@ class RegisterFragment : Fragment(), KodeinAware {
                     .addPositiveButton("ok") { dialog ->
                         dialog.dismiss()
                     }
-                    .build(fragmentManager, javaClass.simpleName)
+                    .build(parentFragmentManager, javaClass.simpleName)
             }
         }
     }

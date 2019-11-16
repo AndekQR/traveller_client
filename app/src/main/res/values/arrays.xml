@@ -1,5 +1,19 @@
 <resources>
-    <!-- Reply Preference -->
+
+    <string-array name="intervals">
+        <item>"1 sekunda"</item>
+        <item>"2 sekundy"</item>
+        <item>"4 sekundy"</item>
+        <item>"6 sekund"</item>
+    </string-array>
+    <string-array name="intervals_values">
+        <item>"1"</item>
+        <item>"2"</item>
+        <item>"4"</item>
+        <item>"6"</item>
+    </string-array>
+
+
     <string-array name="reply_entries">
         <item>Reply</item>
         <item>Reply to all</item>
@@ -9,4 +23,16 @@
         <item>reply</item>
         <item>reply_all</item>
     </string-array>
+
+    <string-array name="travel_modes_keys">
+        <item>@string/driving</item>
+        <item>@string/walking</item>
+    </string-array>
+
+    <string-array name="travel_modes_values" >
+        <item>driving</item>
+        <item>walking</item>
+    </string-array>
+
+
 </resources>

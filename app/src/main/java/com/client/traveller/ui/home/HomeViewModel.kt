@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.*
 import com.client.traveller.data.db.entities.User
-import com.client.traveller.data.network.map.directions.model.TravelMode
+import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.message.MessagingRepository
 import com.client.traveller.data.repository.user.UserRepository

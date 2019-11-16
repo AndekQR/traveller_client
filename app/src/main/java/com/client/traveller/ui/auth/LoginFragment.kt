@@ -167,7 +167,7 @@ class LoginFragment : Fragment(), KodeinAware {
                     .addPositiveButton("Ok") { dialog ->
                         dialog.dismiss()
                     }
-                    .build(fragmentManager, javaClass.simpleName)
+                    .build(parentFragmentManager, javaClass.simpleName)
             } else {
                 val bundle = Bundle()
                 bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")

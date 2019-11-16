@@ -3,8 +3,8 @@ package com.client.traveller.data.repository.map
 import android.content.Context
 import android.location.Location
 import android.os.Bundle
-import com.client.traveller.data.network.map.directions.model.TravelMode
-import com.client.traveller.data.network.map.directions.response.Distance
+import com.client.traveller.data.network.api.directions.model.TravelMode
+import com.client.traveller.data.network.api.directions.response.Distance
 import com.google.android.gms.maps.SupportMapFragment
 
 interface MapRepository {

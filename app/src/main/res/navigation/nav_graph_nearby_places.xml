@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_nearby_places.xml"
+    app:startDestination="@id/nearbyPlacesMainFragment">
+
+    <fragment
+        android:id="@+id/nearbyPlacesMainFragment"
+        android:name="com.client.traveller.ui.nearby.NearbyPlacesMainFragment"
+        android:label="fragment_nearby_places_main"
+        tools:layout="@layout/fragment_nearby_places_main" />
+</navigation>

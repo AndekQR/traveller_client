@@ -3,8 +3,8 @@ package com.client.traveller.ui.trip
 import androidx.lifecycle.*
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
-import com.client.traveller.data.network.map.directions.model.TravelMode
-import com.client.traveller.data.network.map.directions.response.Distance
+import com.client.traveller.data.network.api.directions.model.TravelMode
+import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.user.UserRepository

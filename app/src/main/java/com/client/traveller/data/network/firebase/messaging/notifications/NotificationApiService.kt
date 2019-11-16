@@ -1,6 +1,5 @@
 package com.client.traveller.data.network.firebase.messaging.notifications
 
-import com.client.traveller.data.network.map.directions.DirectionsApiService
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

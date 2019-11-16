@@ -29,6 +29,7 @@ import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.chat.ChatActivity
 import com.client.traveller.ui.dialog.Dialog
+import com.client.traveller.ui.nearby.NearbyPlaces
 import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
 import com.client.traveller.ui.util.Coroutines
@@ -347,7 +348,10 @@ class HomeActivity : AppCompatActivity(),
 //                }
 //            }
                 R.id.nearby -> {
-
+                    Intent(this, NearbyPlaces::class.java).also {
+                        startActivity(it)
+                        this.finish()
+                    }
                 }
             }
             true

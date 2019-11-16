@@ -15,4 +15,7 @@ interface MesseageDao {
 
     @Query("SELECT * FROM messeage")
     fun getAll(): LiveData<List<Messeage>>
+
+    @Query("DELETE FROM messeage")
+    fun deleteAll()
 }

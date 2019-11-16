@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.client.traveller.R
+import com.client.traveller.data.db.MesseageDao
 import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.network.firebase.firestore.Chats
 import com.client.traveller.data.network.firebase.firestore.Messeages
@@ -31,7 +32,8 @@ class MessagingRepositoryImpl(
     private val cloudMessaging: CloudMessaging,
     private val messeages: Messeages,
     private val users: Users,
-    private val chats: Chats
+    private val chats: Chats,
+    private val messeageDao: MesseageDao
 ) : MessagingRepository {
 
     private val _usersChats = MutableLiveData<List<ChatFirestoreModel>>()
@@ -48,6 +50,7 @@ class MessagingRepositoryImpl(
         get() = _lastChatsMessage
 
     private val chatsLastMessageObservers = mutableListOf<ListenerRegistration>()
+    private var lastChatUidMessagesInitilized: String = ""
 
     override suspend fun refreshToken() = withContext(Dispatchers.IO) {
             val token = tokens.getCurrentToken()
@@ -177,10 +180,22 @@ class MessagingRepositoryImpl(
         }
     }
 
+    private fun saveMessageToLocalDB(messeage: Messeage) {
+        io { this.messeageDao.upsert(messeage) }
+    }
+
+    private fun isTheSameChat(chatUid: String): Boolean {
+        if (this.lastChatUidMessagesInitilized == chatUid) return true
+        this.lastChatUidMessagesInitilized = chatUid
+        return false
+    }
+
     /**
      * Inicjalizuje i zwraca livedata wiadomości z podanego czatu
      */
     override fun initMesseages(chatUid: String): LiveData<List<Messeage>> {
+        if (this.isTheSameChat(chatUid)) return this.messeageDao.getAll()
+        io { this.messeageDao.deleteAll() }
         this.messeages.getMesseages(chatUid).orderBy("sendDate", Query.Direction.ASCENDING)
             .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
                 exception?.let { return@EventListener }
@@ -188,11 +203,15 @@ class MessagingRepositoryImpl(
                 val messeages = mutableListOf<Messeage>()
                 querySnapshot?.forEach { doc ->
                     val messeage = doc?.toObject(Messeage::class.java)
-                    messeage?.let { messeages.add(messeage) }
+                    messeage?.let {
+                        messeages.add(messeage)
+                        this.saveMessageToLocalDB(messeage)
+                    }
                 }
                 this._chatMesseages.value = messeages
             })
-        return this.chatMesseages
+//        return this.chatMesseages
+        return this.messeageDao.getAll()
     }
 
     /**

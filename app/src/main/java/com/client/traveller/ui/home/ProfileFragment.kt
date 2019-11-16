@@ -137,7 +137,7 @@ class ProfileFragment : ScopedFragment(), KodeinAware {
             .addPositiveButton("ok") {
                 it.dismiss()
             }
-            .build(fragmentManager, javaClass.simpleName)
+            .build(parentFragmentManager, javaClass.simpleName)
 
     }
 

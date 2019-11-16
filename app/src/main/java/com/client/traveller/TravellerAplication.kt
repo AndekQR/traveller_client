@@ -10,14 +10,18 @@ import com.client.traveller.data.network.firebase.messaging.CloudMessaging
 import com.client.traveller.data.network.firebase.storage.Avatars
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.network.map.MapUtilsImpl
-import com.client.traveller.data.network.map.directions.DirectionsApiService
+import com.client.traveller.data.network.api.directions.DirectionsApiService
+import com.client.traveller.data.network.api.places.PlacesApiService
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.provider.LocationProviderImpl
+import com.client.traveller.data.provider.PlacesClientProvider
 import com.client.traveller.data.provider.PreferenceProvider
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.map.MapRepositoryImpl
 import com.client.traveller.data.repository.message.MessagingRepository
 import com.client.traveller.data.repository.message.MessagingRepositoryImpl
+import com.client.traveller.data.repository.place.PlacesRepository
+import com.client.traveller.data.repository.place.PlacesRepositoryImpl
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.trip.TripRepositoryImpl
 import com.client.traveller.data.repository.user.UserRepository
@@ -26,6 +30,7 @@ import com.client.traveller.ui.auth.AuthViewModelFactory
 import com.client.traveller.ui.chat.ChatViewModelFactory
 import com.client.traveller.ui.chat.messeages.MesseageViewModelFactory
 import com.client.traveller.ui.home.HomeViewModelFactory
+import com.client.traveller.ui.nearby.NearbyPlacesViewModelFactory
 import com.client.traveller.ui.settings.SettingsViewModelFactory
 import com.client.traveller.ui.trip.TripViewModelFactory
 import com.google.android.gms.location.LocationServices
@@ -46,6 +51,7 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { LocationServices.getFusedLocationProviderClient(instance<Context>()) }
         bind() from singleton { PreferenceProvider(instance()) }
         bind() from singleton { DirectionsApiService() }
+        bind() from singleton { PlacesApiService() }
         bind<LocationProvider>() with singleton { LocationProviderImpl(instance(), instance()) }
         bind<MapUtils>() with singleton { MapUtilsImpl(instance(), instance()) }
         bind() from singleton { AppDatabase(instance()) }
@@ -90,15 +96,18 @@ class TravellerAplication : Application(), KodeinAware {
                 instance(),
                 instance(),
                 instance(),
+                instance(),
                 instance()
             )
         }
+        bind<PlacesRepository>() with singleton { PlacesRepositoryImpl(instance(), instance()) }
         bind() from provider { AuthViewModelFactory(instance()) }
         bind() from provider { HomeViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }
         bind() from provider { TripViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { ChatViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { MesseageViewModelFactory(instance(), instance(), instance()) }
+        bind() from provider { NearbyPlacesViewModelFactory(instance(), instance(), instance()) }
 
 
     }

@@ -116,7 +116,7 @@ class PasswordResetFragment : Fragment(), KodeinAware {
                                 )
                             else Log.e(javaClass.simpleName, "View is null")
                         }
-                        .build(fragmentManager, javaClass.simpleName)
+                        .build(parentFragmentManager, javaClass.simpleName)
                 } else {
                     Dialog.Builder()
                         .addMessage("Wiadomość z linkiem resetującym hasło została wysłana na email")
@@ -134,7 +134,7 @@ class PasswordResetFragment : Fragment(), KodeinAware {
                                 )
                             else Log.e(javaClass.simpleName, "View is null")
                         }
-                        .build(fragmentManager, javaClass.simpleName)
+                        .build(parentFragmentManager, javaClass.simpleName)
                 }
             }
         } else {
