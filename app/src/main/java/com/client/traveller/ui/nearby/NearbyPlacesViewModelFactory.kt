@@ -10,7 +10,7 @@ class NearbyPlacesViewModelFactory(
     private val placesRepository: PlacesRepository,
     private val tripRepository: TripRepository,
     private val userRepository: UserRepository
-): ViewModelProvider.NewInstanceFactory() {
+) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {

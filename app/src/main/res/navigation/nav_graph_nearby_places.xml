@@ -9,5 +9,18 @@
         android:id="@+id/nearbyPlacesMainFragment"
         android:name="com.client.traveller.ui.nearby.mainFragment.NearbyPlacesMainFragment"
         android:label="fragment_nearby_places_main"
-        tools:layout="@layout/fragment_nearby_places_main" />
+        tools:layout="@layout/fragment_nearby_places_main" >
+        <action
+            android:id="@+id/action_nearbyPlacesMainFragment_to_placeDetailFragment"
+            app:destination="@id/placeDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/placeDetailFragment"
+        android:name="com.client.traveller.ui.nearby.placeDetails.PlaceDetailFragment"
+        android:label="fragment_place_detail"
+        tools:layout="@layout/fragment_place_detail" >
+        <action
+            android:id="@+id/action_placeDetailFragment_to_nearbyPlacesMainFragment"
+            app:destination="@id/nearbyPlacesMainFragment" />
+    </fragment>
 </navigation>

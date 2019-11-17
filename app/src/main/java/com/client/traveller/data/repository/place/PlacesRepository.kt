@@ -8,4 +8,5 @@ interface PlacesRepository {
 
     suspend fun getNearbyPlaces(latlng: String? = null): Set<Result>
     fun getPhotoUrl(reference: String, width: Int): String
+    fun getSearchedTypes(): List<String>
 }

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 
 import com.client.traveller.R
@@ -16,6 +17,7 @@ import com.client.traveller.ui.util.ScopedFragment
 import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.showProgressBar
 import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.fragment_nearby_places_main.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -24,8 +26,9 @@ import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
+import java.util.*
 
-class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware{
+class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
 
     override val kodein by kodein()
     private val factory: NearbyPlacesViewModelFactory by instance()
@@ -33,6 +36,8 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware{
 
     private lateinit var groupAdapter: GroupAdapter<GroupieViewHolder>
 
+    private lateinit var searchedPlaces: Set<Result>
+    private var searchQuery: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,31 +53,34 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware{
             ViewModelProvider(this, factory).get(NearbyPlacesViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
+
         launch(Dispatchers.Main) {
-            this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces())
+            val placesList = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces()
+            this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(placesList)
         }
-
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
         this.bindUI()
     }
 
+
     private fun bindUI() = launch(Dispatchers.Main) {
         progress_bar.showProgressBar()
-        this@NearbyPlacesMainFragment.viewModel.searchedPlaces.observe(viewLifecycleOwner, Observer { places ->
-            progress_bar.showProgressBar()
-            this@NearbyPlacesMainFragment.updateItems(places.toNearbyPlaceItems())
-            progress_bar.hideProgressBar()
-        })
+        this@NearbyPlacesMainFragment.viewModel.searchedPlaces.observe(
+            viewLifecycleOwner,
+            Observer { places ->
+                if (::searchedPlaces.isInitialized && places == this@NearbyPlacesMainFragment.searchedPlaces) return@Observer
+                progress_bar.showProgressBar()
+                this@NearbyPlacesMainFragment.viewModel.initOriginalListOfPlaces(places)
+                this@NearbyPlacesMainFragment.searchedPlaces = places
+                this@NearbyPlacesMainFragment.updateItems(places.toNearbyPlaceItems())
+                progress_bar.hideProgressBar()
+            })
     }
 
-    private fun updateItems(items: List<NearbyPlacesListItem>) {
-        this.groupAdapter = GroupAdapter<GroupieViewHolder>().apply {
+    private fun updateItems(items: List<NearbyPlacesListItem>) = launch(Dispatchers.Main) {
+        this@NearbyPlacesMainFragment.groupAdapter = GroupAdapter<GroupieViewHolder>().apply {
             addAll(items)
         }
+        this@NearbyPlacesMainFragment.groupAdapter.setOnItemClickListener(this@NearbyPlacesMainFragment.onItemClickListener)
         recycler_view?.apply {
             layoutManager = LinearLayoutManager(this@NearbyPlacesMainFragment.context)
             adapter = this@NearbyPlacesMainFragment.groupAdapter
@@ -80,14 +88,21 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware{
     }
 
     private fun Set<Result>.toNearbyPlaceItems(): List<NearbyPlacesListItem> {
-        return this.map {result ->
+        return this.map { result ->
             if (result.photos != null) {
-                val url = viewModel.getPhoto(result.photos.first().photoReference, result.photos.first().width)
-                NearbyPlacesListItem(result, view, url)
+                val url = viewModel.getPhoto(
+                    result.photos.first().photoReference,
+                    result.photos.first().width
+                )
+                NearbyPlacesListItem(result, view, url, context)
             } else {
-                NearbyPlacesListItem(result, view, null)
+                NearbyPlacesListItem(result, view, null, context)
             }
         }
+    }
+
+    private val onItemClickListener = OnItemClickListener { item, view ->
+        Navigation.findNavController(view).navigate(R.id.placeDetailFragment)
     }
 
 }

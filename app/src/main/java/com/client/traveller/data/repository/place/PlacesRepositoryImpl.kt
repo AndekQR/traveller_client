@@ -43,4 +43,8 @@ class PlacesRepositoryImpl(
         return "${PlacesApiService.BASE_URL}photo?maxwidth=${width}&photoreference=${reference}&key=$API_KEY"
     }
 
+    override fun getSearchedTypes(): List<String> {
+        return this.searchedTypes
+    }
+
 }

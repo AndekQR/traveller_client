@@ -12,5 +12,6 @@
     <color name="colorDark">#212121</color>
     <color name="grey">#E0E0E0</color>
     <color name="transparent">#00000000</color>
-    <color name="whiteTransparent">#BFFFFFFF</color>
+    <color name="whiteTransparent75">#BFFFFFFF</color>
+    <color name="whiteTransparent55">#8CFFFFFF</color>
 </resources>
