@@ -11,6 +11,7 @@ import com.client.traveller.data.network.firebase.storage.Avatars
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.network.map.MapUtilsImpl
 import com.client.traveller.data.network.api.directions.DirectionsApiService
+import com.client.traveller.data.network.api.geocoding.GeocodingApiService
 import com.client.traveller.data.network.api.places.PlacesApiService
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.provider.LocationProviderImpl
@@ -52,6 +53,7 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from singleton { PreferenceProvider(instance()) }
         bind() from singleton { DirectionsApiService() }
         bind() from singleton { PlacesApiService() }
+        bind() from singleton { GeocodingApiService() }
         bind<LocationProvider>() with singleton { LocationProviderImpl(instance(), instance()) }
         bind<MapUtils>() with singleton { MapUtilsImpl(instance(), instance()) }
         bind() from singleton { AppDatabase(instance()) }
@@ -79,7 +81,7 @@ class TravellerAplication : Application(), KodeinAware {
                 instance()
             )
         }
-        bind<MapRepository>() with singleton { MapRepositoryImpl(instance(), instance()) }
+        bind<MapRepository>() with singleton { MapRepositoryImpl(instance(), instance(), instance()) }
         bind() from provider { Trips() }
         bind() from singleton { instance<AppDatabase>().tripDao() }
         bind<TripRepository>() with singleton {
@@ -102,7 +104,7 @@ class TravellerAplication : Application(), KodeinAware {
         }
         bind<PlacesRepository>() with singleton { PlacesRepositoryImpl(instance(), instance()) }
         bind() from provider { AuthViewModelFactory(instance()) }
-        bind() from provider { HomeViewModelFactory(instance(), instance(), instance()) }
+        bind() from provider { HomeViewModelFactory(instance(), instance(), instance(), instance()) }
         bind() from provider { SettingsViewModelFactory(instance()) }
         bind() from provider { TripViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { ChatViewModelFactory(instance(), instance(), instance()) }

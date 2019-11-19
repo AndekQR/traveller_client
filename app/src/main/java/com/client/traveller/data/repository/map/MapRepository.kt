@@ -3,6 +3,7 @@ package com.client.traveller.data.repository.map
 import android.content.Context
 import android.location.Location
 import android.os.Bundle
+import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.google.android.gms.maps.SupportMapFragment
@@ -30,5 +31,6 @@ interface MapRepository {
         locations: List<String>,
         mode: TravelMode
     )
+    suspend fun drawTripRoute(trip: Trip)
 
 }

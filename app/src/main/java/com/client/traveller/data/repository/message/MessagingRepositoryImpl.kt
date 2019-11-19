@@ -176,19 +176,21 @@ class MessagingRepositoryImpl(
      */
     @ExperimentalCoroutinesApi
     override fun initChatMessages(chatUid: String): Flow<List<Messeage>> {
-        if (this.isTheSameChat(chatUid)) return this.messeageDao.getAll().asFlow()
+//        if (this.isTheSameChat(chatUid)) return this.messeageDao.getAll().asFlow()
         return this@MessagingRepositoryImpl.messeages.getMesseages(chatUid).orderBy(
             "sendDate",
             Query.Direction.ASCENDING
         )
             .toFlow()
-            .onStart { this@MessagingRepositoryImpl.messeageDao.deleteAll() }
+            .onStart {
+                this@MessagingRepositoryImpl.messeageDao.deleteAll()
+            }
             .onEach {
                 it.forEach { query ->
                     this.saveMessageToLocalDB(query.toObject(Messeage::class.java))
                 }
             }
-            .map {
+            .mapLatest {
                 it.toObjects(Messeage::class.java).toList()
             }
     }

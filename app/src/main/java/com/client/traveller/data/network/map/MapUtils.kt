@@ -5,6 +5,7 @@ import android.location.Location
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.LatLng
 
 interface MapUtils : GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener,
     GoogleMap.OnMapLongClickListener {
@@ -22,4 +23,5 @@ interface MapUtils : GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListen
     fun centerCurrentLocation()
     suspend fun getDistance(origin: String, destination: String, waypoints: ArrayList<String>?): Distance?
     fun getCurrentLocation(): Location
+    fun drawMarkerWithText(position: LatLng, text: String)
 }

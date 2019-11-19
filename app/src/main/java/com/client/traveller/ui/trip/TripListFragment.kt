@@ -15,6 +15,7 @@ import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.ui.util.ScopedFragment
 import com.client.traveller.ui.util.hideProgressBar
+import com.client.traveller.ui.util.observeOnce
 import com.client.traveller.ui.util.showProgressBar
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
@@ -70,16 +71,17 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
         viewModel = ViewModelProvider(activity!!, factory).get(TripViewModel::class.java)
         this.viewModel.initAllTripsLiveData()
 
-        viewModel.currentUser.observe(viewLifecycleOwner, Observer {
+        viewModel.currentUser.observeOnce(viewLifecycleOwner, Observer {
             if (it == null) return@Observer
-
             this.currentUser = it
+            viewModel.currentTrip.observe(viewLifecycleOwner, Observer {
+                this.currentTrip = it
+                this.bindUI()
+            })
+
         })
 
-        viewModel.currentTrip.observe(viewLifecycleOwner, Observer {
-            this.currentTrip = it
-        })
-        this.bindUI()
+
     }
 
     override fun onStart() {

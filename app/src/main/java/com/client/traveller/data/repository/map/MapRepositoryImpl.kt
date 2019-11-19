@@ -2,18 +2,23 @@ package com.client.traveller.data.repository.map
 
 import android.content.Context
 import android.os.Bundle
+import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
+import com.client.traveller.data.network.api.geocoding.GeocodingApiService
+import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.Location
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.ui.util.Coroutines.io
-import com.client.traveller.ui.util.Coroutines.main
+
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
 
 
 class MapRepositoryImpl(
     private val mapUtils: MapUtils,
-    private val locationProvider: LocationProvider
+    private val locationProvider: LocationProvider,
+    private val geocoding: GeocodingApiService
 ) : MapRepository {
 
     /**
@@ -56,4 +61,13 @@ class MapRepositoryImpl(
 
     override fun getCurrentLocation() = mapUtils.getCurrentLocation()
     override fun clearMap() = mapUtils.clearMap()
+
+    override suspend fun drawTripRoute(trip: Trip) {
+        val startAddress = geocoding.geocode(trip.startAddress!!)
+        mapUtils.drawMarkerWithText(startAddress.results.first().geometry.location.toLatLng(), "START")
+    }
+
+    private fun Location.toLatLng(): LatLng {
+        return LatLng(this.lat, this.lng)
+    }
 }

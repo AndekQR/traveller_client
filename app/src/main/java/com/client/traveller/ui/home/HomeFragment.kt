@@ -7,8 +7,10 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.client.traveller.R
+import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.ui.util.ScopedFragment
 import com.google.android.gms.maps.SupportMapFragment
 import kotlinx.android.synthetic.main.fragment_home.*
@@ -41,7 +43,6 @@ class HomeFragment : ScopedFragment(), KodeinAware {
         } ?: throw Exception("Invalid activity")
 
         // inicjalizacja mapy oraz jej funkcji
-
         // childFragmentManager służy do zarządzania fragmentami w tym fagmencie
         // a fragmentManager do zarządzania fragmentami które są związane z activity tego fragmentu
         (childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?)?.let {
@@ -49,6 +50,13 @@ class HomeFragment : ScopedFragment(), KodeinAware {
                 viewModel.initMap(it, activity, savedInstanceState)
             }
         }
+
+        this.viewModel.currentTrip.observe(viewLifecycleOwner, Observer { trip ->
+            if (trip == null) return@Observer
+            launch {
+                this@HomeFragment.viewModel.drawTripRoute(trip)
+            }
+        })
 
     }
 

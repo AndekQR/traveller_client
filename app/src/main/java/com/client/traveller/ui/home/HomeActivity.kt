@@ -341,12 +341,6 @@ class HomeActivity : AppCompatActivity(),
                         this.finish()
                     }
                 }
-//            R.id.map -> {
-////                Navigation.findNavController(this, R.id.nav_host_fragment_home).navigate(R.id.homeFragment)
-//                Intent(this, HomeActivity::class.java).also {
-//                    startActivity(it)
-//                }
-//            }
                 R.id.nearby -> {
                     Intent(this, NearbyPlaces::class.java).also {
                         startActivity(it)

@@ -57,12 +57,12 @@ fun CollectionReference.toFlow() = callbackFlow<QuerySnapshot> {
             cancel("ERROR", e)
             return@addSnapshotListener
         }
-        if (snapshot != null && !snapshot.isEmpty) {
+        if (snapshot != null) {
             offer(snapshot)
         }
     }
     awaitClose {
-        cancel()
+//        cancel()
         listener.remove()
     }
 }
@@ -74,12 +74,12 @@ fun Query.toFlow() = callbackFlow<QuerySnapshot> {
             cancel("ERROR", e)
             return@addSnapshotListener
         }
-        if (snapshot != null && !snapshot.isEmpty) {
+        if (snapshot != null ) {
             offer(snapshot)
         }
     }
     awaitClose {
-        cancel()
+//        cancel()
         registration.remove()
     }
 }

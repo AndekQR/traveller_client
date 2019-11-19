@@ -85,7 +85,8 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
             viewModel.initChatMesseages()
             this@MesseageActivity.viewModel.chatMesseages.observe(this@MesseageActivity, Observer { messeages ->
                 if (messeages == null) return@Observer
-                this@MesseageActivity.updateMesseages(messeages)
+                if (messeages.isNotEmpty())
+                    this@MesseageActivity.updateMesseages(messeages)
             })
         }
     }
@@ -114,9 +115,9 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
             Dialog.Builder()
                 .addTitle(getString(R.string.wrong_trip))
                 .addMessage(getString(R.string.need_to_join_different_trip)+ " \"${messeageTrip.name}\"")
-                .addPositiveButton("ok") {
-                    it.dismiss()
+                .addPositiveButton("ok") {dialog ->
                     Intent(this, HomeActivity::class.java).also {intent ->
+                        dialog.dismiss()
                         startActivity(intent)
                         this.finish()
                     }

@@ -117,7 +117,6 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
             this@ChatListFragment.updateChatsList(this@ChatListFragment.mapChatParticipants)
             return null
         } else if (this@ChatListFragment.mapChatParticipants.isNotEmpty()) {
-            progress_bar.showProgressBar()
             val newChatsList = mutableMapOf<ChatFirestoreModel, List<User>>()
             this@ChatListFragment.mapChatParticipants.forEach { entry ->
                 val chatParticipants = entry.value

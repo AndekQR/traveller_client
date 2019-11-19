@@ -117,7 +117,9 @@ class MesseageViewModel(
     @ExperimentalCoroutinesApi
     fun initChatMesseages() {
         this.chatMesseages = liveData {
-            messagingRepository.initChatMessages(chatId!!).collectLatest { emit(it) }
+            messagingRepository.initChatMessages(chatId!!).collectLatest {
+                emit(it)
+            }
         }
     }
 }

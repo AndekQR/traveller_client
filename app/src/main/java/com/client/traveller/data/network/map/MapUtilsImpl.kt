@@ -63,6 +63,14 @@ class MapUtilsImpl(
         return true
     }
 
+    override fun drawMarkerWithText(position: LatLng, text: String) {
+        val markerOptions = MarkerOptions()
+            .position(position)
+            .draggable(false)
+            .snippet(text)
+        locationProvider.mMap?.addMarker(markerOptions)
+    }
+
     private fun drawMarker(position: LatLng, default: Boolean = true) {
         val defaultMarker = MarkerOptions()
             .position(position)
