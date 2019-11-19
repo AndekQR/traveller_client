@@ -18,51 +18,19 @@ class TripViewModel(
     private val mapRepository: MapRepository
 ) : ViewModel() {
 
-    private var _currentUser: MutableLiveData<User> = MutableLiveData()
-    val currentUser: LiveData<User>
-        get() = _currentUser
-    private lateinit var currentUserObserver: Observer<User>
-
-    private var _currentTrip: MutableLiveData<Trip> = MutableLiveData()
-    val currentTrip: LiveData<Trip>
-        get() = _currentTrip
-    private lateinit var currentTripObserver: Observer<Trip>
-
-    private var _allTrips: MutableLiveData<List<Trip>> = MutableLiveData()
-    val allTrips: LiveData<List<Trip>>
-        get() = _allTrips
-    private lateinit var allTripsObserver: Observer<List<Trip>>
+    val currentUser: LiveData<User> = this.userRepository.getCurrentUser()
+    val currentTrip: LiveData<Trip> = this.tripRepository.getCurrentTrip()
+    lateinit var allTrips: LiveData<List<Trip>>
 
     var selectedItem: TripListItem? = null
     val searchQuery: MutableLiveData<String> = MutableLiveData()
 
-    init {
-        this.initLiveData()
-    }
-
-    private fun initLiveData() = viewModelScope.launch(Dispatchers.Main) {
-        currentUserObserver = Observer { user ->
-            if (user == null) return@Observer
-            _currentUser.value = user
-        }
-        userRepository.getUser().observeForever(currentUserObserver)
-
-        currentTripObserver = Observer { trip ->
-            _currentTrip.value = trip
-        }
-        tripRepository.getCurrentTrip().observeForever(currentTripObserver)
-
-        allTripsObserver = Observer { trips ->
-            if (trips == null) return@Observer
-            _allTrips.value = trips
-        }
-        tripRepository.getAllTrips().observeForever(allTripsObserver)
+    fun initAllTripsLiveData() = viewModelScope.launch(Dispatchers.Main) {
+        this@TripViewModel.allTrips = this@TripViewModel.tripRepository.getAllTrips()
     }
 
     suspend fun addTrip(trip: Trip) = tripRepository.newTrip(trip)
 
-
-    // TODO trzeba dodać waypointy do wyznaczania długości
     suspend fun tripDistance(
         origin: String,
         destination: String,
@@ -80,23 +48,11 @@ class TripViewModel(
     }
 
     fun isTripParticipant(trip: Trip, user: User) = tripRepository.isTripParticipant(trip, user)
-    fun setTripAsActual(trip: Trip) {
+    fun setTripAsActual(trip: Trip) = viewModelScope.launch {
         tripRepository.saveTripToLocalDB(trip)
         tripRepository.initCurrentTripUpdates()
     }
 
     fun updateTripPersons(tripToUpdate: Trip, emails: List<String>) =
         tripRepository.updateTripPersons(tripToUpdate, emails)
-
-    private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {
-        userRepository.getUser().removeObserver(currentUserObserver)
-        tripRepository.getCurrentTrip().removeObserver(currentTripObserver)
-        tripRepository.getAllTrips().removeObserver(allTripsObserver)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-
-        this.removeObservers()
-    }
 }

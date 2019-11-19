@@ -27,7 +27,7 @@ class PlacesRepositoryImpl(
         "zoo"
     )
 
-
+    //TODO switch map lokalna baza i places api, trzeba dodać jakiś interceptor czy jest internet
     override suspend fun getNearbyPlaces(latlng: String?): Set<Result> {
         val location = latlng ?: "${locationProvider.currentLocation?.latitude},${locationProvider.currentLocation?.longitude}"
         val listOfPlaces = mutableSetOf<Result>()

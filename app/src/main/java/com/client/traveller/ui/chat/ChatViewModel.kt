@@ -18,56 +18,17 @@ class ChatViewModel(
     private val tripRepository: TripRepository
 ) : ViewModel() {
 
-    private var _currentUser: MutableLiveData<User> = MutableLiveData()
-    val currentUser: LiveData<User>
-        get() = _currentUser
-    private lateinit var currentUserObserver: Observer<User>
-
-    private var _currentTrip: MutableLiveData<Trip> = MutableLiveData()
-    val currentTrip: LiveData<Trip>
-        get() = _currentTrip
-    private lateinit var currentTripObserver: Observer<Trip>
-
-    private var _currentUserChats: MutableLiveData<List<ChatFirestoreModel>> = MutableLiveData()
-    val currentUserChats: LiveData<List<ChatFirestoreModel>>
-        get() = _currentUserChats
-    // Obserwator jest usuwany w ChatListFragment bo potrzebne są parametry
-    private lateinit var currentUserChatsObserver: Observer<List<ChatFirestoreModel>>
-
+    var currentUser: LiveData<User> = userRepository.getCurrentUser()
+    var currentTrip: LiveData<Trip> = tripRepository.getCurrentTrip()
+    lateinit var currentUserChats: LiveData<List<ChatFirestoreModel>>
     lateinit var chatsLastMessage: LiveData<MutableMap<String, Messeage>>
 
     val searchQuery: MutableLiveData<String> = MutableLiveData()
 
-    init {
-        this.initLiveData()
-    }
-
-    private fun initLiveData() = viewModelScope.launch(Dispatchers.Main) {
-        currentUserObserver = Observer { user ->
-            if (user == null) return@Observer
-            _currentUser.value = user
-        }
-        userRepository.getUser().observeForever(currentUserObserver)
-
-        currentTripObserver = Observer { trip ->
-            _currentTrip.value = trip
-        }
-        tripRepository.getCurrentTrip().observeForever(currentTripObserver)
-    }
-
     fun initUsersChats(userId: String, tripUid: String) {
-        currentUserChatsObserver = Observer { chats ->
-            if (chats == null) return@Observer
-            _currentUserChats.value = chats
-        }
-        this.usersChatsRemoveLiveDataObserver()
-        this.messagingRepository.getUsersChats(userId, tripUid)
-            .observeForever(currentUserChatsObserver)
+        this.currentUserChats = this.messagingRepository.getUsersChats(userId, tripUid).asLiveData()
     }
-
-    fun usersChatsRemoveLiveDataObserver() {
-        this.messagingRepository.getUsersChatsRemoveObserver(this.currentUserChatsObserver)
-    }
+    
 
     fun logoutUser(mGoogleSignInClient: GoogleSignInClient) =
         userRepository.logoutUser(mGoogleSignInClient)
@@ -83,13 +44,11 @@ class ChatViewModel(
     suspend fun getUsersById(ids: ArrayList<String>) = this.userRepository.getUsersByIds(ids)
 
     private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {
-        userRepository.getUser().removeObserver(currentUserObserver)
-        tripRepository.getCurrentTrip().removeObserver(currentTripObserver)
         messagingRepository.initChatsLastMessageRemoveObservers()
     }
 
     fun initChatsLastMessage(chatsUid: List<String>) {
-        chatsUid.forEach{
+        chatsUid.forEach {
             messagingRepository.initChatLastMesseage(chatUid = it)
         }
         this.chatsLastMessage = messagingRepository.getChatsLastMessage()

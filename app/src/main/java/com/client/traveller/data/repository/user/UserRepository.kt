@@ -12,7 +12,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 interface UserRepository {
     fun registerUser(user: User, function: (Boolean, Exception?) -> Unit)
     fun loginUser(username: String, password: String, function: (Boolean, Exception?) -> Unit)
-    fun getUser(): LiveData<User>
+    fun getCurrentUser(): LiveData<User>
     fun logoutUser(googleSignInClient: GoogleSignInClient) //jest tylko jeden aktualnie zalogowany!
     fun setEmailVerifiedAsync()
     fun updateProfile(user: User)

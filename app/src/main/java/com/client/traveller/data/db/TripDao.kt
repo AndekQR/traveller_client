@@ -12,17 +12,17 @@ import com.client.traveller.data.db.entities.Trip
 interface TripDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsert(trip: Trip): Long
+    suspend fun upsert(trip: Trip): Long
 
     @Query("SELECT * FROM trip WHERE trip.id=$CURRENT_TRIP_ID")
     fun getCurrentTrip(): LiveData<Trip>
 
     @Query("DELETE FROM trip WHERE id=$CURRENT_TRIP_ID")
-    fun deleteCurrentTrip()
+    suspend fun deleteCurrentTrip()
 
     @Query("SELECT persons FROM trip WHERE id=$CURRENT_TRIP_ID")
     fun getCurrentTripPersonsEmail(): LiveData<List<String>>
 
     @Query("SELECT * FROM trip WHERE trip.id=$CURRENT_TRIP_ID")
-    fun getCurrentTripNonLive(): Trip?
+    suspend fun getCurrentTripNonLive(): Trip?
 }

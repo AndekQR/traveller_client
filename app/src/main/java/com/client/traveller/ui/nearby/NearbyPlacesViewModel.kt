@@ -15,7 +15,7 @@ class NearbyPlacesViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    val currentUser = userRepository.getUser()
+    val currentUser = userRepository.getCurrentUser()
     val currentTrip = tripRepository.getCurrentTrip()
 
     // fraza w wyszukiwarce

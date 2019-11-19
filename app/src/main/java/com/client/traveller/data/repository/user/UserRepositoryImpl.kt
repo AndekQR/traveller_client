@@ -34,8 +34,6 @@ class UserRepositoryImpl(
     private val authProvider: AuthProvider
 ) : UserRepository {
 
-    private val currentUserLiveData: LiveData<User> = this.userDao.getUser()
-
     /**
      * W tle
      * Metoda loguje do aplikacji użytkownika który się zarejstrował - w tym momencie zostaje przekirowany do [HomeFragment]
@@ -224,9 +222,7 @@ class UserRepositoryImpl(
             }
     }
 
-    override fun getUser(): LiveData<User> {
-        return this.currentUserLiveData
-    }
+    override fun getCurrentUser() = this.userDao.getUser()
 
     override fun logoutUser(googleSignInClient: GoogleSignInClient) {
         io {

@@ -23,22 +23,10 @@ class HomeViewModel(
     private val messagingRepository: MessagingRepository
 ) : ViewModel() {
 
-    private var _currentUser: MutableLiveData<User> = MutableLiveData()
-    val currentUser: LiveData<User>
-        get() = _currentUser
-    private lateinit var currentUserObserver: Observer<User>
+    val currentUser: LiveData<User> = this.userRepository.getCurrentUser()
 
     init {
         viewModelScope.launch { messagingRepository.refreshToken() }
-        this.initLiveData()
-    }
-
-    private fun initLiveData() = viewModelScope.launch(Dispatchers.Main) {
-        currentUserObserver = Observer { user ->
-            if (user == null) return@Observer
-            _currentUser.value = user
-        }
-        userRepository.getUser().observeForever(currentUserObserver)
     }
 
     fun logoutUser(mGoogleSignInClient: GoogleSignInClient) =
@@ -90,15 +78,5 @@ class HomeViewModel(
                     Log.e(javaClass.simpleName, exception?.localizedMessage)
                 }
             }
-    }
-
-    private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {
-        userRepository.getUser().removeObserver(currentUserObserver)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-
-        this.removeObservers()
     }
 }

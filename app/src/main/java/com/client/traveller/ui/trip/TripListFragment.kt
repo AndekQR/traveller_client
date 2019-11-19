@@ -68,6 +68,7 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
         super.onActivityCreated(savedInstanceState)
 
         viewModel = ViewModelProvider(activity!!, factory).get(TripViewModel::class.java)
+        this.viewModel.initAllTripsLiveData()
 
         viewModel.currentUser.observe(viewLifecycleOwner, Observer {
             if (it == null) return@Observer

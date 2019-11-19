@@ -12,18 +12,18 @@ import com.client.traveller.data.db.entities.User
 interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsert(user: User): Long
+    suspend fun upsert(user: User): Long
 
     @Query("SELECT * FROM user WHERE uid = $CURRENT_USER_ID")
     fun getUser(): LiveData<User>
 
     @Query("SELECT * FROM user WHERE uid = $CURRENT_USER_ID")
-    fun getUserNonLiveData(): User
+    suspend fun getUserNonLiveData(): User
 
     @Query("DELETE FROM user WHERE uid = $CURRENT_USER_ID")
-    fun deleteUser()
+    suspend fun deleteUser()
 
     @Query("UPDATE user SET verified = 1 WHERE uid = $CURRENT_USER_ID")
-    fun setEmailVerified()
+    suspend fun setEmailVerified()
 
 }

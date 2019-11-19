@@ -2,70 +2,78 @@ package com.client.traveller.data.repository.trip
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import com.client.traveller.data.db.TripDao
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.Trips
 import com.client.traveller.ui.util.Coroutines.io
+import com.client.traveller.ui.util.toFlow
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.QuerySnapshot
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
 import kotlin.coroutines.suspendCoroutine
 
+@ExperimentalCoroutinesApi
 class TripRepositoryImpl(
     private val trips: Trips,
     private val tripDao: TripDao
 ) : TripRepository {
 
-    private val tripList: MutableLiveData<List<Trip>> = MutableLiveData()
-    private val currentTrip: LiveData<Trip> = this.tripDao.getCurrentTrip()
-
+    private lateinit var tripList: LiveData<List<Trip>>
 
     init {
         this.initAllTrips()
-        this.initCurrentTripUpdates()
+        GlobalScope.launch(Dispatchers.IO) { this@TripRepositoryImpl.initCurrentTripUpdates() }
     }
 
     /**
      * Dodanie obserwatora do wycieczek w firestore
      * Przy każdej modyfkikacji tychdanych zostanie zaktualizowany [tripList]
      */
+    @ExperimentalCoroutinesApi
     private fun initAllTrips() {
-        this.trips.getAllTrips()
-            .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
-                exception?.let {
-                    return@EventListener
-                }
-
-                val trips = mutableListOf<Trip>()
-                for (doc in querySnapshot!!) {
-                    val trip = doc.toObject(Trip::class.java)
-                    trips.add(trip)
-                }
-                tripList.value = trips
-            })
+        this.tripList =  this.trips.getAllTrips().toFlow().map{it.toObjects(Trip::class.java)}.asLiveData()
     }
 
     /**
      * aktualizcje lokalnej currentTrip gdy inny użytkownik wyśle do firestore zmiany do tej wycieczki
      */
-    override fun initCurrentTripUpdates() = io {
+    // TODO mogą być problemy -> trzeab sprawdzić
+    @ExperimentalCoroutinesApi
+    override suspend fun initCurrentTripUpdates() {
         val currentTripUid = this.tripDao.getCurrentTripNonLive()?.uid
         currentTripUid?.let {
-            trips.getTrip(it)
-                .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, excetion ->
-                    excetion?.let { return@EventListener }
-
-                    val updatedCurrentTrip = querySnapshot?.first()?.toObject(Trip::class.java)
-                    updatedCurrentTrip?.let {
-                        io { tripDao.upsert(it) }
-                    }
-                })
+            this.trips.getTrip(it).toFlow().map { it.toObjects(Trip::class.java).toList() }.collect {list ->
+                this.tripDao.upsert(list.first())
+            }
         }
+//        currentTripUid?.let {
+//            trips.getTrip(it)
+//                .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, excetion ->
+//                    excetion?.let { return@EventListener }
+//
+//                    val updatedCurrentTrip = querySnapshot?.first()?.toObject(Trip::class.java)
+//                    updatedCurrentTrip?.let {
+//                        io { tripDao.upsert(it) }
+//                    }
+//                })
+//        }
     }
 
-    override suspend fun getAllTrips() = this.tripList
+    @ExperimentalCoroutinesApi
+    override suspend fun getAllTrips(): LiveData<List<Trip>> {
+        return if (!::tripList.isInitialized) {
+            this.initAllTrips()
+            this.tripList
+        } else {
+            this.tripList
+        }
+    }
 
     /**
      * Metoda tworzy nową wycieczkę tzn. zapisuje wycieeczkę do firestore i do lokalnej bazy danych
@@ -80,7 +88,7 @@ class TripRepositoryImpl(
                     continuation.resumeWith(Result.failure(it.exception!!))
                     return@addOnCompleteListener
                 } else {
-                    this@TripRepositoryImpl.saveTripToLocalDB(trip)
+                    io { this@TripRepositoryImpl.saveTripToLocalDB(trip) }
                     continuation.resumeWith(Result.success(it.result))
                     return@addOnCompleteListener
                 }
@@ -88,12 +96,13 @@ class TripRepositoryImpl(
         }
     }
 
-    override fun saveTripToLocalDB(trip: Trip) = io {
+    @ExperimentalCoroutinesApi
+    override suspend fun saveTripToLocalDB(trip: Trip)  {
         this.tripDao.upsert(trip)
         this.initCurrentTripUpdates()
     }
 
-    override fun getCurrentTrip() = this.currentTrip
+    override fun getCurrentTrip() = this.tripDao.getCurrentTrip()
     override fun isTripParticipant(trip: Trip, user: User): Boolean {
         trip.persons?.forEach {
             if (it == user.email)

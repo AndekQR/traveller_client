@@ -11,11 +11,11 @@ import com.client.traveller.data.db.entities.Messeage
 interface MesseageDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsert(messeage: Messeage): Long
+    suspend fun upsert(messeage: Messeage): Long
 
     @Query("SELECT * FROM messeage")
     fun getAll(): LiveData<List<Messeage>>
 
     @Query("DELETE FROM messeage")
-    fun deleteAll()
+    suspend fun deleteAll()
 }

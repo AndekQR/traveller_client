@@ -15,24 +15,7 @@ import kotlinx.coroutines.launch
 class AuthViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
-
-
-    private var _currentUser: MutableLiveData<User> = MutableLiveData()
-    val currentUser: LiveData<User>
-        get() = _currentUser
-    private lateinit var currentUserObserver: Observer<User>
-
-    init {
-        this.initLiveData()
-    }
-
-    private fun initLiveData() = viewModelScope.launch(Dispatchers.Main) {
-        currentUserObserver = Observer { user ->
-            if (user == null) return@Observer
-            _currentUser.value = user
-        }
-        userRepository.getUser().observeForever(currentUserObserver)
-    }
+    val currentUser: LiveData<User> = this.userRepository.getCurrentUser()
 
     fun loginJustLocalGoogle(
         googleUser: GoogleSignInAccount
@@ -133,16 +116,6 @@ class AuthViewModel(
         function: (Boolean, Exception?) -> Unit
     ) {
         userRepository.updateProfile(user, profileChangeRequest, function)
-    }
-
-    private fun removeObservers() = viewModelScope.launch(Dispatchers.IO) {
-        userRepository.getUser().removeObserver(currentUserObserver)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-
-        this.removeObservers()
     }
 
 }

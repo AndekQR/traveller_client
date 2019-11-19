@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Messeage
@@ -18,6 +19,7 @@ import com.client.traveller.ui.chat.ChatViewModelFactory
 import com.client.traveller.ui.chat.messeages.MesseageActivity
 import com.client.traveller.ui.util.ScopedFragment
 import com.client.traveller.ui.util.hideProgressBar
+import com.client.traveller.ui.util.observeOnce
 import com.client.traveller.ui.util.showProgressBar
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Item
@@ -60,20 +62,23 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
         super.onActivityCreated(savedInstanceState)
 
         viewModel = ViewModelProvider(activity!!, factory).get(ChatViewModel::class.java)
-        this.viewModel.currentUser.observe(viewLifecycleOwner, Observer { user ->
+        this.viewModel.currentUser.observeOnce(viewLifecycleOwner, Observer { user ->
             if (user == null) return@Observer
             this.currentUser = user
+
+            this.viewModel.currentTrip.observe(viewLifecycleOwner, Observer { trip ->
+                if (trip == null) return@Observer
+                if (!::currentTrip.isInitialized || this.currentTrip != trip) {
+                    this.currentTrip = trip
+                    this.bindUI()
+                }
+            })
         })
-        this.viewModel.currentTrip.observe(viewLifecycleOwner, Observer { trip ->
-            if (trip == null) return@Observer
-            if (!::currentTrip.isInitialized || this.currentTrip != trip) {
-                this.currentTrip = trip
-                this.bindUI()
-            }
-        })
+
     }
 
     private fun bindUI() {
+        progress_bar.showProgressBar()
         val mutext = Mutex()
         this.viewModel.initUsersChats(currentUser.idUserFirebase!!, currentTrip.uid!!)
         this.viewModel.currentUserChats.observe(viewLifecycleOwner, Observer { chats ->
@@ -92,13 +97,16 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
                         this@ChatListFragment.mapChatParticipants[chat] = participants
                     }
                     this@ChatListFragment.updateChatsList(this@ChatListFragment.mapChatParticipants)
+                    progress_bar.hideProgressBar()
                 }
             }
 
         })
         viewModel.searchQuery.observe(viewLifecycleOwner, Observer { filtr ->
             launch {
+                progress_bar.showProgressBar()
                 this@ChatListFragment.filterChats(filtr)?.let { this@ChatListFragment.updateChatsList(it) }
+                progress_bar.hideProgressBar()
             }
         })
 
@@ -142,7 +150,6 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
     }
 
     private fun updateChatsList(chats: Map<ChatFirestoreModel, List<User>>) {
-        progress_bar.hideProgressBar()
         this.groupAdapter = GroupAdapter<GroupieViewHolder>().apply {
             clear()
             val items = chats.toChatItem()
@@ -176,12 +183,5 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
         super.onResume()
 
         this.updateChatsList(this.mapChatParticipants)
-    }
-
-    override fun onStop() {
-        super.onStop()
-
-        if (::currentUser.isInitialized && ::currentTrip.isInitialized)
-            this.viewModel.usersChatsRemoveLiveDataObserver()
     }
 }

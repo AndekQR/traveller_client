@@ -84,6 +84,9 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
 
+    //livedata {}
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0-rc02"
+
     // Kodein - dependency injection
     implementation "org.kodein.di:kodein-di-generic-jvm:$kodein_version"
     implementation "org.kodein.di:kodein-di-framework-android-x:$kodein_version"
@@ -93,8 +96,9 @@ dependencies {
 
     // Room - baza danych ( adnotacje query, database, entity, itd)
     implementation "androidx.room:room-runtime:$room_version"
-    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+//    implementation "androidx.legacy:legacy-support-v4:1.0.0"
     kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
 
     // Navigation - latwe nawigowanie pomiedzy fragmentami itd
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"

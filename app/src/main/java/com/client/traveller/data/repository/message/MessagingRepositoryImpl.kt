@@ -3,6 +3,7 @@ package com.client.traveller.data.repository.message
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.asFlow
 import com.client.traveller.R
 import com.client.traveller.data.db.MesseageDao
 import com.client.traveller.data.db.entities.Messeage
@@ -16,13 +17,15 @@ import com.client.traveller.data.network.firebase.messaging.CloudMessaging
 import com.client.traveller.data.network.firebase.messaging.notifications.Data
 import com.client.traveller.data.network.firebase.messaging.notifications.NotificationApiService
 import com.client.traveller.data.network.firebase.messaging.notifications.Sender
-import com.client.traveller.ui.util.Coroutines.io
 import com.client.traveller.ui.util.randomUid
+import com.client.traveller.ui.util.toFlow
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -36,25 +39,16 @@ class MessagingRepositoryImpl(
     private val messeageDao: MesseageDao
 ) : MessagingRepository {
 
-    private val _usersChats = MutableLiveData<List<ChatFirestoreModel>>()
-    private val usersChats: LiveData<List<ChatFirestoreModel>>
-        get() = _usersChats
-
-    private val _chatMesseages = MutableLiveData<List<Messeage>>()
-    private val chatMesseages: LiveData<List<Messeage>>
-        get() = _chatMesseages
-
     private val _lastChatsMessageData = mutableMapOf<String, Messeage>()
     private val _lastChatsMessage = MutableLiveData<MutableMap<String, Messeage>>()
     private val lastChatsMessage: LiveData<MutableMap<String, Messeage>>
         get() = _lastChatsMessage
-
     private val chatsLastMessageObservers = mutableListOf<ListenerRegistration>()
     private var lastChatUidMessagesInitilized: String = ""
 
     override suspend fun refreshToken() = withContext(Dispatchers.IO) {
-            val token = tokens.getCurrentToken()
-            token?.let { tokens.saveToken(it) }
+        val token = tokens.getCurrentToken()
+        token?.let { tokens.saveToken(it) }
     }
 
     /**
@@ -75,8 +69,10 @@ class MessagingRepositoryImpl(
         participants?.remove(messeage.senderIdFirebase)
         val tokens = this.getUsersTokens(participants)
         tokens?.forEach {
-            val notificationData = Data(messeage.senderIdFirebase!!, R.mipmap.ic_launcher.toString(), messeage.messeage!!,
-                "Wiadomość", it.userUid!!, chat.uid!!, chat.tripUid!!)
+            val notificationData = Data(
+                messeage.senderIdFirebase!!, R.mipmap.ic_launcher.toString(), messeage.messeage!!,
+                "Wiadomość", it.userUid!!, chat.uid!!, chat.tripUid!!
+            )
             val sender = Sender(notificationData, it.token!!)
             notifictionService.sendNotification(sender)
         }
@@ -134,35 +130,19 @@ class MessagingRepositoryImpl(
             }
         }
 
+
     /**
      * pobiera chaty danego użytkownika w obrębie danej wycieczki
      */
+    @ExperimentalCoroutinesApi
     override fun getUsersChats(
         userId: String,
         tripUid: String
-    ): LiveData<List<ChatFirestoreModel>> {
-        this.chats.getUserAllChats(userId, tripUid)
-            .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
-                exception?.let {
-                    return@EventListener
-                }
-                val chats = mutableListOf<ChatFirestoreModel>()
-                querySnapshot?.forEach { doc ->
-                    val chat = doc.toObject(ChatFirestoreModel::class.java)
-                    chats.add(chat)
-                }
-                _usersChats.value = chats
-            })
-        return usersChats
-    }
-
-    override fun getUsersChatsRemoveObserver(observer: Observer<List<ChatFirestoreModel>>) {
-        this.usersChats.removeObserver(observer)
-    }
-
-    override fun chatMesseagesRemoveObserver(observer: Observer<List<Messeage>>) {
-        this.chatMesseages.removeObserver(observer)
-    }
+    ) = this.chats.getUserAllChats(userId, tripUid)
+        .toFlow()
+        .map {
+            it.toObjects(ChatFirestoreModel::class.java).toList()
+        }
 
     /**
      * Szuka czatu podanego jako uid
@@ -180,8 +160,8 @@ class MessagingRepositoryImpl(
         }
     }
 
-    private fun saveMessageToLocalDB(messeage: Messeage) {
-        io { this.messeageDao.upsert(messeage) }
+    private suspend fun saveMessageToLocalDB(messeage: Messeage) {
+        this.messeageDao.upsert(messeage)
     }
 
     private fun isTheSameChat(chatUid: String): Boolean {
@@ -190,28 +170,27 @@ class MessagingRepositoryImpl(
         return false
     }
 
-    /**
-     * Inicjalizuje i zwraca livedata wiadomości z podanego czatu
-     */
-    override fun initMesseages(chatUid: String): LiveData<List<Messeage>> {
-        if (this.isTheSameChat(chatUid)) return this.messeageDao.getAll()
-        io { this.messeageDao.deleteAll() }
-        this.messeages.getMesseages(chatUid).orderBy("sendDate", Query.Direction.ASCENDING)
-            .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
-                exception?.let { return@EventListener }
 
-                val messeages = mutableListOf<Messeage>()
-                querySnapshot?.forEach { doc ->
-                    val messeage = doc?.toObject(Messeage::class.java)
-                    messeage?.let {
-                        messeages.add(messeage)
-                        this.saveMessageToLocalDB(messeage)
-                    }
+    /**
+     * Inicjalizuje i zwraca flow wiadomości z podanego czatu
+     */
+    @ExperimentalCoroutinesApi
+    override fun initChatMessages(chatUid: String): Flow<List<Messeage>> {
+        if (this.isTheSameChat(chatUid)) return this.messeageDao.getAll().asFlow()
+        return this@MessagingRepositoryImpl.messeages.getMesseages(chatUid).orderBy(
+            "sendDate",
+            Query.Direction.ASCENDING
+        )
+            .toFlow()
+            .onStart { this@MessagingRepositoryImpl.messeageDao.deleteAll() }
+            .onEach {
+                it.forEach { query ->
+                    this.saveMessageToLocalDB(query.toObject(Messeage::class.java))
                 }
-                this._chatMesseages.value = messeages
-            })
-//        return this.chatMesseages
-        return this.messeageDao.getAll()
+            }
+            .map {
+                it.toObjects(Messeage::class.java).toList()
+            }
     }
 
     /**
@@ -222,15 +201,18 @@ class MessagingRepositoryImpl(
         val observer = this@MessagingRepositoryImpl.messeages.getMesseages(chatUid).orderBy("sendDate", Query.Direction.DESCENDING).limit(1).addSnapshotListener(EventListener<QuerySnapshot> {querySnapshot, exception ->
             exception?.let { return@EventListener }
 
-            val message = querySnapshot?.first()?.toObject(Messeage::class.java)
-            message?.let {
-                this._lastChatsMessageData[chatUid] = message
-                this.chats.setChatUnSeen(chatUid)
+            if (querySnapshot != null && !querySnapshot.isEmpty) {
+                val message = querySnapshot.first()?.toObject(Messeage::class.java)
+                message?.let {
+                    this._lastChatsMessageData[chatUid] = message
+                    this.chats.setChatUnSeen(chatUid)
+                }
+                this._lastChatsMessage.value = this._lastChatsMessageData
             }
-            this._lastChatsMessage.value = this._lastChatsMessageData
         })
         this.chatsLastMessageObservers.add(observer)
     }
+
 
     /**
      * zwraca liveData ostatniej wiadomości ze wszystkicj zainicjalizowanych czatów
@@ -238,7 +220,7 @@ class MessagingRepositoryImpl(
     override fun getChatsLastMessage(): LiveData<MutableMap<String, Messeage>> {
         return this.lastChatsMessage
     }
-    
+
     /**
      * usuwa słuchacza z ostatnich wiadomości czatów
      */

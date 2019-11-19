@@ -9,6 +9,6 @@ import com.client.traveller.data.db.entities.ChatRoomModel
 interface ChatDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsert(chat: ChatRoomModel): Long
+    suspend fun upsert(chat: ChatRoomModel): Long
 
 }

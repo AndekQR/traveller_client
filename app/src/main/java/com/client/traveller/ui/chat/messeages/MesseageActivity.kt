@@ -23,13 +23,12 @@ import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.activity_messeage.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import org.threeten.bp.LocalDateTime
-import kotlin.coroutines.suspendCoroutine
 
 
 class MesseageActivity : ScopedAppActivity(), KodeinAware {
@@ -47,6 +46,7 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
     private lateinit var currentUser: User
     private lateinit var currentTrip: Trip
 
+    @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_messeage)
@@ -55,30 +55,22 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
         this.viewModel.currentTrip.observe(this, Observer {
             if (it == null) return@Observer
             this.currentTrip = it
-        })
-        this.viewModel.currentUser.observe(this, Observer {
-            if (it == null) return@Observer
-            progress_bar.showProgressBar()
-            this.currentUser = it
-            launch(Dispatchers.Main) {
-                val result = viewModel.setIdentifier(intent)
-                this@MesseageActivity.viewModel.addChatParticipantLocal(this@MesseageActivity.currentUser.email)
-                if (this@MesseageActivity.viewModel.chatId == null)
-                    viewModel.chatId = viewModel.findChat(viewModel.getChatParticipantsUid(), currentTrip.uid!!)?.uid
-                when {
-                    viewModel.chatParticipants.size > 1 -> supportActionBar?.title =
-                        viewModel.chatParticipants.first().displayName + ", " + viewModel.chatParticipants.elementAt(
-                            1
-                        ).displayName
-                    viewModel.chatParticipants.size == 1 -> supportActionBar?.title =
-                        viewModel.chatParticipants.first().displayName
-                    else -> supportActionBar?.title = "no"
+
+            this.viewModel.currentUser.observeOnce(this, Observer {currentUser ->
+                if (currentUser == null) return@Observer
+                progress_bar.showProgressBar()
+                this.currentUser = currentUser
+                launch(Dispatchers.Main) {
+                    this@MesseageActivity.viewModel.identifyChat(intent, this@MesseageActivity.currentUser.email)
+                    if (this@MesseageActivity.viewModel.chatId == null)
+                        viewModel.chatId = viewModel.findChat(viewModel.getChatParticipantsUid(), currentTrip.uid!!)?.uid
+                    this@MesseageActivity.setWindowTitle()
+                    this@MesseageActivity.tryInitChatMessages()
+                    progress_bar.hideProgressBar()
                 }
-                if (checkIfCorrectTrip(result))
-                    viewModel.initChatMesseages()
-                progress_bar.hideProgressBar()
-            }
+            })
         })
+
 
         this.initializeView()
 
@@ -86,6 +78,34 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
         this.sendButton.setOnClickListener(onSendButtonClick)
     }
 
+    @ExperimentalCoroutinesApi
+    private suspend fun tryInitChatMessages() {
+        val tripUid = intent.extras!!.getString("tripUid")
+        if (this.checkIfCorrectTrip(tripUid)) {
+            viewModel.initChatMesseages()
+            this@MesseageActivity.viewModel.chatMesseages.observe(this@MesseageActivity, Observer { messeages ->
+                if (messeages == null) return@Observer
+                this@MesseageActivity.updateMesseages(messeages)
+            })
+        }
+    }
+
+    private fun setWindowTitle() {
+        when {
+            viewModel.chatParticipants.size > 1 -> supportActionBar?.title =
+                viewModel.chatParticipants.first().displayName + ", " + viewModel.chatParticipants.elementAt(
+                    1
+                ).displayName
+            viewModel.chatParticipants.size == 1 -> supportActionBar?.title =
+                viewModel.chatParticipants.first().displayName
+            else -> supportActionBar?.title = "no"
+        }
+    }
+
+    /**
+     * sprawdza czy przekazany w intent uid wycieczki zgadza się z atuaalną wycieczką użytkownika
+     * warunek if (tripUid == null) return true jest potrzebny bo tripUid w intent jest przekazywany tylko gdy klikniemy powiadomienie o nowej widomości
+     */
     private suspend fun checkIfCorrectTrip(tripUid: String?): Boolean {
         if (tripUid == null) return true
         else if (tripUid == this.currentTrip.uid) return true
@@ -147,11 +167,6 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
         this.recyclerView = recycler_view
         this.messeageEditText = messeage
         this.sendButton = send_button
-
-        this.viewModel.chatMesseages.observe(this, Observer { messeages ->
-            if (messeages == null) return@Observer
-            this.updateMesseages(messeages)
-        })
     }
 
     private val recyclerViewOnLayoutChange =
@@ -185,7 +200,6 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
     }
 
     private fun clearData() {
-        viewModel.removeChatMesseagesObserver()
         viewModel.userId = null
         viewModel.chatId = null
         viewModel.chatParticipants.removeAll { true }

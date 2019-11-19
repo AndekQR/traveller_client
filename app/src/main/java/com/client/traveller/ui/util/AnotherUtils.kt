@@ -1,7 +1,17 @@
 package com.client.traveller.ui.util
 
 import android.location.Location
+import androidx.lifecycle.*
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.flowViaChannel
 import org.threeten.bp.Instant
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneId
@@ -30,4 +40,59 @@ fun randomUid(): String {
         .map { allowedChars.random() }
         .joinToString("")
 }
+
+fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>) {
+    observe(lifecycleOwner, object : Observer<T> {
+        override fun onChanged(t: T?) {
+            observer.onChanged(t)
+            removeObserver(this)
+        }
+    })
+}
+
+@ExperimentalCoroutinesApi
+fun CollectionReference.toFlow() = callbackFlow<QuerySnapshot> {
+    val listener = this@toFlow.addSnapshotListener { snapshot, e ->
+        if (e != null) {
+            cancel("ERROR", e)
+            return@addSnapshotListener
+        }
+        if (snapshot != null && !snapshot.isEmpty) {
+            offer(snapshot)
+        }
+    }
+    awaitClose {
+        cancel()
+        listener.remove()
+    }
+}
+
+@ExperimentalCoroutinesApi
+fun Query.toFlow() = callbackFlow<QuerySnapshot> {
+    val registration = this@toFlow.addSnapshotListener { snapshot, e ->
+        if (e != null) {
+            cancel("ERROR", e)
+            return@addSnapshotListener
+        }
+        if (snapshot != null && !snapshot.isEmpty) {
+            offer(snapshot)
+        }
+    }
+    awaitClose {
+        cancel()
+        registration.remove()
+    }
+}
+
+fun <T, K, V> LiveData<T>.combineWith(liveData: LiveData<K>, combineFun: (T?, K?) -> V) : LiveData<V> {
+    val result = MediatorLiveData<V>()
+    result.addSource(this) {
+        result.value = combineFun.invoke(this.value, liveData.value)
+    }
+    result.addSource(liveData) {
+        result.value = combineFun.invoke(this.value, liveData.value)
+    }
+    return result
+}
+
 

@@ -29,10 +29,12 @@ class ItemChatList(
             updateAvatar()
             updateText()
             updateLastMessage()
+
     }
 
     private fun updateLastMessage() = main {
         viewHolder.last_message.text = lastMessage?.messeage
+
     }
 
     private fun updateAvatar() = main {
