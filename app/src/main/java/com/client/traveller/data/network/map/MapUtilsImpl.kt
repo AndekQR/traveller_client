@@ -1,6 +1,7 @@
 package com.client.traveller.data.network.map
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.location.Location
 import android.util.Log
@@ -28,8 +29,9 @@ class MapUtilsImpl(
     private val directionsApiService: DirectionsApiService
 ) : MapUtils {
 
-    private var markerOnMap: Marker? = null
     private lateinit var context: Context
+    private var markerOnMap: Marker? = null
+    private val polylinesOnMap = mutableListOf<Polyline>()
 
     /**
      * isBuildingEnabled = włącza wyświetlanie budynków 3D
@@ -63,36 +65,45 @@ class MapUtilsImpl(
         return true
     }
 
-    override fun drawMarkerWithText(position: LatLng, text: String) {
+    override fun getMarkerFromMap(): Marker? {
+        return this.markerOnMap
+    }
+
+    override fun drawMarkerFromBitmap(position: LatLng, bitmap: Bitmap) {
         val markerOptions = MarkerOptions()
             .position(position)
             .draggable(false)
-            .snippet(text)
+            .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
         locationProvider.mMap?.addMarker(markerOptions)
     }
 
-    private fun drawMarker(position: LatLng, default: Boolean = true) {
+    private fun drawMarker(position: LatLng, default: Boolean = true): Marker? {
         val defaultMarker = MarkerOptions()
             .position(position)
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags))
             .draggable(false)
 
-        if (default)
-            this.markerOnMap = locationProvider.mMap?.addMarker(defaultMarker)
+        return if (default)
+            locationProvider.mMap?.addMarker(defaultMarker)
+        else
+            null
     }
 
     override fun onMapClick(position: LatLng) {
         // TODO do zaimplementowania, po kliknięci wyskakuje menu z tym miejscem i z informacjami o nim, jeżeli nie ma w danym miejscu nic to obiekty w pobliżu
         // znacznik czyszczony po po otwrciu menu
         // mmenu się
-        markerOnMap?.remove()
-        this.drawMarker(position)
+//        markerOnMap?.remove()
+//        this.drawMarker(position)
     }
 
     override fun onMapLongClick(position: LatLng) {
-        locationProvider.mMap?.clear()
-        this.drawMarker(position)
-        this.drawRouteToMarker()
+        val marker = this.drawMarker(position)
+        marker?.let { main {
+            this.markerOnMap = it
+            val polyline = this.drawRouteToMarker(it)
+            polyline?.let { this.polylinesOnMap.add(it) }
+        } }
     }
 
     override fun lastKnownLocation() {
@@ -117,7 +128,7 @@ class MapUtilsImpl(
             .geodesic(true)
     }
 
-    override fun drawRouteToLocation(
+    override suspend fun drawRouteToLocation(
         origin: String,
         destination: String,
         locations: List<String>,
@@ -125,48 +136,56 @@ class MapUtilsImpl(
     ) {
         val start = origin.trim().replace(" ", "+")
         val stop = destination.trim().replace(" ", "+")
-        val waypoints = locations.map { it.trim().replace(" ", "+") }
+        val waypoints = this.getWaypointsString(waypoints = locations)
 
-        main {
-            val result =
-                directionsApiService.getDirectionsWithWaypoints(start, stop, mode.name, waypoints)
-            this.drawRoute(result)
-        }
+        val result =
+            directionsApiService.getDirectionsWithWaypoints(start, stop, mode.name, waypoints)
+        this.drawRoute(result)
+
     }
 
-    override fun drawRouteToMarker() {
-        if (locationProvider.currentLocation == null)
-            return
+    private fun getWaypointsString(waypoints: List<String>): String {
+        return waypoints.map { it.trim() }.joinToString("|")
+    }
+
+    override suspend fun drawRouteToMarker(marker: Marker?): Polyline? {
+        if (locationProvider.currentLocation == null || marker == null)
+            return null
 
         val origin: String
         val destination: String
 
         try {
             origin = locationProvider.currentLocation!!.format()
-            destination = this.markerOnMap?.position!!.format()
+            destination = marker.position!!.format()
 
-            main {
-                val result = directionsApiService.getDirections(origin, destination)
-                this.drawRoute(result)
-            }
+            val result = directionsApiService.getDirections(origin, destination)
+            return this.drawRoute(result)
+
         } catch (ex: Exception) {
             Log.e(javaClass.simpleName, ex.message)
         }
+        return null
     }
 
-    private fun drawRoute(result: Directions) {
+    private fun drawRoute(result: Directions): Polyline? {
         if (result.status == "OK") {
             val lineOptions = this.getDefaultPolyline()
             val pointList = PolyUtil.decode(result.routes.first().overviewPolyline.points)
             pointList.forEach {
                 lineOptions.add(it)
             }
-            locationProvider.mMap?.addPolyline(lineOptions)
+            return locationProvider.mMap?.addPolyline(lineOptions)
         }
+        return null
     }
 
     override fun clearMap() {
-        locationProvider.mMap?.clear()
+        this.markerOnMap?.remove()
+        this.polylinesOnMap.forEach {
+            it.remove()
+        }
+        this.polylinesOnMap.clear()
     }
 
     /**
@@ -197,11 +216,21 @@ class MapUtilsImpl(
     /**
      * Zwraca [Distance] trasy podanej w parametrach
      */
-    override suspend fun getDistance(origin: String, destination: String, waypoints: ArrayList<String>?): Distance? {
+    override suspend fun getDistance(
+        origin: String,
+        destination: String,
+        waypoints: ArrayList<String>?
+    ): Distance? {
         var result: Directions? = null
         when {
-            waypoints != null -> result = directionsApiService.getDirectionsWithWaypoints(origin, destination,  TravelMode.driving.name, waypoints)
-            waypoints == null -> result = directionsApiService.getDirections(origin, destination,  TravelMode.driving.name)
+            waypoints != null -> result = directionsApiService.getDirectionsWithWaypoints(
+                origin,
+                destination,
+                TravelMode.driving.name,
+                this.getWaypointsString(waypoints)
+            )
+            waypoints == null -> result =
+                directionsApiService.getDirections(origin, destination, TravelMode.driving.name)
         }
         return if (result != null && result.status == "OK") {
             result.routes.first().legs.first().distance

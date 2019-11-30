@@ -17,11 +17,11 @@
 <androidx.preference.PreferenceScreen
         xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
             app:title="@string/preferences_localization_title"
             app:iconSpaceReserved="false">
 
-        <SwitchPreference
+        <androidx.preference.SwitchPreference
                 android:key="SEND_LOCATION"
                 android:title="@string/send_location_title"
                 android:summary="@string/send_location_summary"
@@ -31,7 +31,7 @@
                 app:iconSpaceReserved="false"
         />
 
-        <ListPreference
+        <androidx.preference.ListPreference
                 android:key="SENDING_DATA_INTERVAL"
                 android:title="@string/interval_send_data"
                 android:summary="%s"
@@ -43,7 +43,7 @@
                 android:defaultValue="2"
                 />
 
-        <SwitchPreference
+        <androidx.preference.SwitchPreference
             android:key="CAMERA_TRACKING"
             android:title="@string/camera_tracking_title"
             android:summary="@string/camera_tracking_description"
@@ -53,7 +53,7 @@
             app:iconSpaceReserved="false"
             />
 
-        <ListPreference
+        <androidx.preference.ListPreference
             android:key="TRAVEL_MODE"
             android:title="@string/travel_mode"
             android:summary="%s"
@@ -64,7 +64,7 @@
             android:defaultValue="driving"
         />
 
-    </PreferenceCategory>
+    </androidx.preference.PreferenceCategory>
 
 
 </androidx.preference.PreferenceScreen>

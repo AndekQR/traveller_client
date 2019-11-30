@@ -3,11 +3,16 @@ package com.client.traveller.data.repository.place
 import com.client.traveller.data.network.api.places.API_KEY
 import com.client.traveller.data.network.api.places.PlacesApiService
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
+import com.client.traveller.data.network.api.places.response.placeDetailResponse.PlaceDetailResponse
+import com.client.traveller.data.network.api.wikipedia.WikipediaApiService
+import com.client.traveller.data.network.api.wikipedia.response.wikipediaPageSummaryResponse.WikipediaPageSummaryResponse
+import com.client.traveller.data.network.api.wikipedia.response.wikipediaPrefixSearchResponse.WikipediaPrefixSearchResponse
 import com.client.traveller.data.provider.LocationProvider
 
 class PlacesRepositoryImpl(
     private val locationProvider: LocationProvider,
-    private val placesApiClient: PlacesApiService
+    private val placesApiClient: PlacesApiService,
+    private val wikipediaApiService: WikipediaApiService
 ) : PlacesRepository {
 
     private val searchedTypes = listOf(
@@ -45,6 +50,24 @@ class PlacesRepositoryImpl(
 
     override fun getSearchedTypes(): List<String> {
         return this.searchedTypes
+    }
+
+    override suspend fun getPlaceDetail(placeId: String): PlaceDetailResponse {
+        return placesApiClient.getPlaceDetail(placeId)
+    }
+
+    /**
+     * Zwraca tablicę obiektów które mają numer strony wikipedii i tytuł strony
+     */
+    override suspend fun getPrefixes(query: String): WikipediaPrefixSearchResponse {
+        return this.wikipediaApiService.searchPrefixes(query = query)
+    }
+
+    /**
+     * otrzymujemy opis zagadnienia ze strony z podanym tytułem
+     */
+    override suspend fun getPageSummary(pageTitle: String): WikipediaPageSummaryResponse {
+        return this.wikipediaApiService.getPageSummary(pageTitle)
     }
 
 }

@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/nearbyPlacesMainFragment"
         android:name="com.client.traveller.ui.nearby.mainFragment.NearbyPlacesMainFragment"
-        android:label="fragment_nearby_places_main"
+        android:label="@string/nearby"
         tools:layout="@layout/fragment_nearby_places_main" >
         <action
             android:id="@+id/action_nearbyPlacesMainFragment_to_placeDetailFragment"
@@ -17,10 +17,13 @@
     <fragment
         android:id="@+id/placeDetailFragment"
         android:name="com.client.traveller.ui.nearby.placeDetails.PlaceDetailFragment"
-        android:label="fragment_place_detail"
+        android:label="@string/details"
         tools:layout="@layout/fragment_place_detail" >
         <action
             android:id="@+id/action_placeDetailFragment_to_nearbyPlacesMainFragment"
             app:destination="@id/nearbyPlacesMainFragment" />
+        <argument
+            android:name="place_id"
+            app:argType="string" />
     </fragment>
 </navigation>

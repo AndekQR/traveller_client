@@ -20,7 +20,7 @@ import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.chat.chatList.ChatListFragment
 import com.client.traveller.ui.chat.usersList.TripUsersFragment
 import com.client.traveller.ui.home.HomeActivity
-import com.client.traveller.ui.nearby.NearbyPlaces
+import com.client.traveller.ui.nearby.NearbyPlacesActivity
 import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
 import com.client.traveller.ui.util.Coroutines
@@ -182,7 +182,7 @@ class ChatActivity : AppCompatActivity(), KodeinAware {
                     }
                 }
                 R.id.nearby -> {
-                    Intent(this, NearbyPlaces::class.java).also {
+                    Intent(this, NearbyPlacesActivity::class.java).also {
                         startActivity(it)
                         this.finish()
                     }

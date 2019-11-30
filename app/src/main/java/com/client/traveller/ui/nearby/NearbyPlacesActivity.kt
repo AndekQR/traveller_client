@@ -3,6 +3,7 @@ package com.client.traveller.ui.nearby
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -13,6 +14,14 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.Navigation
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.client.traveller.R
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.ui.about.AboutActivity
@@ -23,21 +32,21 @@ import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
 import com.client.traveller.ui.util.Coroutines
 import com.client.traveller.ui.util.ScopedAppActivity
+import com.client.traveller.ui.util.contains
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_nearby_places.*
+import kotlinx.android.synthetic.main.activity_nearby_places.toolbar
+import kotlinx.android.synthetic.main.activity_trip.*
 import kotlinx.android.synthetic.main.nav_header.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.util.*
 
-class NearbyPlaces : ScopedAppActivity(), KodeinAware {
+class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware, NavController.OnDestinationChangedListener {
 
     override val kodein by kodein()
     private val factory: NearbyPlacesViewModelFactory by instance()
@@ -49,9 +58,14 @@ class NearbyPlaces : ScopedAppActivity(), KodeinAware {
     private lateinit var navigationView: NavigationView
     private lateinit var toolBar: androidx.appcompat.widget.Toolbar
     private lateinit var mDrawerToggle: ActionBarDrawerToggle
+    private lateinit var navController: NavController
+
 
     private lateinit var currentListOfPlaces: Set<Result>
     private var searchQuery: String = ""
+
+    private var searchItem: MenuItem? = null
+    private var filterItem: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +73,7 @@ class NearbyPlaces : ScopedAppActivity(), KodeinAware {
 
         this.viewModel = ViewModelProvider(this, factory).get(NearbyPlacesViewModel::class.java)
 
-        this@NearbyPlaces.viewModel.searchedPlaces.observe(this@NearbyPlaces, Observer { places ->
+        this@NearbyPlacesActivity.viewModel.searchedPlaces.observe(this@NearbyPlacesActivity, Observer { places ->
             if (places == null) return@Observer
             if(::currentListOfPlaces.isInitialized && places == currentListOfPlaces) return@Observer
             this.currentListOfPlaces = places
@@ -68,6 +82,7 @@ class NearbyPlaces : ScopedAppActivity(), KodeinAware {
 
         })
         this.initView()
+
     }
 
     private fun initView() {
@@ -92,14 +107,28 @@ class NearbyPlaces : ScopedAppActivity(), KodeinAware {
         )
         this.drawerLayout.addDrawerListener(mDrawerToggle)
         this.mDrawerToggle.syncState()
-        this.mDrawerToggle.isDrawerIndicatorEnabled = true
-        this.supportActionBar?.setHomeButtonEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
+//        this.mDrawerToggle.isDrawerIndicatorEnabled = true
+//        this.supportActionBar?.setHomeButtonEnabled(true)
+//        this.supportActionBar?.setDisplayShowHomeEnabled(true)
 
         // inicjalizacja dolengo paska nwigacji
         this.bottomNavigation = bottom_navigation
         this.bottomNavigation.selectedItemId = R.id.nearby
         this.bottomNavigation.setOnNavigationItemSelectedListener(onBottomNavigationItemSelected)
+
+        val navHostFragment = nav_host_fragment_nearby_places as NavHostFragment
+        this.navController = navHostFragment.navController
+        this.navController.addOnDestinationChangedListener(this)
+
+        NavigationUI.setupWithNavController(this.navigationView, this.navController)
+        NavigationUI.setupWithNavController(this.toolBar, this.navController, this.drawerLayout)
+        NavigationUI.setupActionBarWithNavController(this, this.navController)
+        NavigationUI.setupActionBarWithNavController(this, this.navController, this.drawerLayout)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        Log.e(javaClass.simpleName, "onsupportnavigationup")
+        return NavigationUI.navigateUp(this.navController, this.drawerLayout) || super.onSupportNavigateUp()
     }
 
     private fun setSubtitleNavView(subtitle: String) = Coroutines.main {
@@ -143,9 +172,10 @@ class NearbyPlaces : ScopedAppActivity(), KodeinAware {
                 }
             }
         }
-        drawer_layout.closeDrawer(GravityCompat.START)
+        this.drawerLayout.closeDrawer(GravityCompat.START)
         true
     }
+
     private val onBottomNavigationItemSelected =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -172,29 +202,31 @@ class NearbyPlaces : ScopedAppActivity(), KodeinAware {
         menu?.clear()
         menuInflater.inflate(R.menu.nearby_places_menu, menu)
 
-        val searchViewItem = menu?.findItem(R.id.search_menu)
-        val searchView = searchViewItem?.actionView as SearchView
+        this.filterItem = menu?.findItem(R.id.filter_places)
+        this.searchItem = menu?.findItem(R.id.search_menu)
+        val searchView = this.searchItem?.actionView as SearchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                this@NearbyPlaces.viewModel.searchQuery.value = newText
+                this@NearbyPlacesActivity.viewModel.searchQuery.value = newText
                 return true
             }
 
         })
-
-        return super.onCreateOptionsMenu(menu)
+        return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.filter_places -> {
-            this.showMultichooseDialog()
-            true
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.filter_places -> {
+                this.showMultichooseDialog()
+                return true
+            }
         }
-        else -> super.onOptionsItemSelected(item)
+        return super.onOptionsItemSelected(item)
     }
 
     private fun showMultichooseDialog() {
@@ -257,13 +289,13 @@ class NearbyPlaces : ScopedAppActivity(), KodeinAware {
 
     private fun Set<Result>.filtrPlacesByTypes(): Set<Result>  {
         val checkedTypesValues = mutableListOf<String>()
-        for ((position, value) in this@NearbyPlaces.viewModel.getPlacesSearchedTypes().withIndex()) {
-            if (this@NearbyPlaces.viewModel.checkedItems[position]) {
+        for ((position, value) in this@NearbyPlacesActivity.viewModel.getPlacesSearchedTypes().withIndex()) {
+            if (this@NearbyPlacesActivity.viewModel.checkedItems[position]) {
                 checkedTypesValues.add(value)
             }
         }
         val filteredPlaces = this.filter { result ->
-            result.types.containsAll(checkedTypesValues)
+            result.types.contains(checkedTypesValues)
         }
         return if (filteredPlaces.toSet() != this)
             filteredPlaces.toSet()
@@ -271,8 +303,11 @@ class NearbyPlaces : ScopedAppActivity(), KodeinAware {
             this
     }
 
+
     override fun onBackPressed() {
-        if (doubleBack) {
+        if (this.drawerLayout.isDrawerOpen(GravityCompat.START))
+            this.drawerLayout.closeDrawer(GravityCompat.START)
+        else if (doubleBack) {
             super.onBackPressed()
             return
         }
@@ -281,5 +316,15 @@ class NearbyPlaces : ScopedAppActivity(), KodeinAware {
         Toast.makeText(this, getString(R.string.click_back_again_to_exit), Toast.LENGTH_SHORT)
             .show()
         Handler().postDelayed({ doubleBack = false }, 2000)
+    }
+
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+            this.searchItem?.isVisible = destination.id != R.id.placeDetailFragment
+            this.filterItem?.isVisible = destination.id != R.id.placeDetailFragment
+
     }
 }

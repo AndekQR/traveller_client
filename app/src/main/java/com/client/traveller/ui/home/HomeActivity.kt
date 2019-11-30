@@ -17,6 +17,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.Navigation
@@ -29,7 +30,7 @@ import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.chat.ChatActivity
 import com.client.traveller.ui.dialog.Dialog
-import com.client.traveller.ui.nearby.NearbyPlaces
+import com.client.traveller.ui.nearby.NearbyPlacesActivity
 import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
 import com.client.traveller.ui.util.Coroutines
@@ -51,6 +52,7 @@ import com.paulrybitskyi.persistentsearchview.listeners.OnSuggestionChangeListen
 import com.paulrybitskyi.persistentsearchview.utils.SuggestionCreationUtil
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.nav_header.view.*
+import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
@@ -128,8 +130,10 @@ class HomeActivity : AppCompatActivity(),
         searchView.setOnSuggestionChangeListener(mySuggestionChangeListener)
         searchView.setOnSearchConfirmedListener { _, query ->
             try {
-                viewModel.clearMap()
-                viewModel.drawRouteToLocation(destination = query, locations = arrayListOf())
+                lifecycleScope.launch {
+                    viewModel.clearMap()
+                    viewModel.drawRouteToLocation(destination = query, locations = arrayListOf())
+                }
             } catch (ex: NoCurrentLocationException) {
                 Dialog.Builder()
                     .addMessage("Brak aktualnej lokalizacji")
@@ -150,13 +154,15 @@ class HomeActivity : AppCompatActivity(),
     private val mySuggestionChangeListener = object : OnSuggestionChangeListener {
         override fun onSuggestionPicked(suggestion: SuggestionItem?) {
             try {
-                viewModel.clearMap()
-                val destination = suggestion?.itemModel?.text
-                if (destination != null)
-                    viewModel.drawRouteToLocation(
-                        destination = destination,
-                        locations = arrayListOf()
-                    )
+                lifecycleScope.launch {
+                    viewModel.clearMap()
+                    val destination = suggestion?.itemModel?.text
+                    if (destination != null)
+                        viewModel.drawRouteToLocation(
+                            destination = destination,
+                            locations = arrayListOf()
+                        )
+                }
             } catch (ex: NoCurrentLocationException) {
                 Dialog.Builder()
                     .addMessage("Brak aktualnej lokalizacji")
@@ -342,7 +348,7 @@ class HomeActivity : AppCompatActivity(),
                     }
                 }
                 R.id.nearby -> {
-                    Intent(this, NearbyPlaces::class.java).also {
+                    Intent(this, NearbyPlacesActivity::class.java).also {
                         startActivity(it)
                         this.finish()
                     }

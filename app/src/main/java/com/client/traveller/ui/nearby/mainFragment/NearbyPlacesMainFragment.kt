@@ -59,6 +59,14 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
             this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(placesList)
         }
         this.bindUI()
+
+        swipe_to_refresh_layout.setOnRefreshListener {
+            launch(Dispatchers.Main) {
+                val placesList = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces()
+                this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(placesList)
+                swipe_to_refresh_layout.isRefreshing = false
+            }
+        }
     }
 
 
@@ -68,11 +76,20 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
             viewLifecycleOwner,
             Observer { places ->
                 if (::searchedPlaces.isInitialized && places == this@NearbyPlacesMainFragment.searchedPlaces) return@Observer
-                progress_bar.showProgressBar()
-                this@NearbyPlacesMainFragment.viewModel.initOriginalListOfPlaces(places)
-                this@NearbyPlacesMainFragment.searchedPlaces = places
-                this@NearbyPlacesMainFragment.updateItems(places.toNearbyPlaceItems())
-                progress_bar.hideProgressBar()
+                if (places.isEmpty()) {
+                    progress_bar.showProgressBar()
+                    nothing_to_display.visibility = View.VISIBLE
+                    recycler_view.visibility= View.GONE
+                    progress_bar.hideProgressBar()
+                } else {
+                    progress_bar.showProgressBar()
+                    recycler_view.visibility = View.VISIBLE
+                    nothing_to_display.visibility = View.GONE
+                    this@NearbyPlacesMainFragment.viewModel.initOriginalListOfPlaces(places)
+                    this@NearbyPlacesMainFragment.searchedPlaces = places
+                    this@NearbyPlacesMainFragment.updateItems(places.toNearbyPlaceItems())
+                    progress_bar.hideProgressBar()
+                }
             })
     }
 
@@ -102,7 +119,11 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
     }
 
     private val onItemClickListener = OnItemClickListener { item, view ->
-        Navigation.findNavController(view).navigate(R.id.placeDetailFragment)
+        if (item is NearbyPlacesListItem) {
+            val action =
+                NearbyPlacesMainFragmentDirections.actionNearbyPlacesMainFragmentToPlaceDetailFragment(item.getPlaceId())
+            Navigation.findNavController(view).navigate(action)
+        }
     }
 
 }

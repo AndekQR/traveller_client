@@ -190,7 +190,7 @@ class MessagingRepositoryImpl(
                     this.saveMessageToLocalDB(query.toObject(Messeage::class.java))
                 }
             }
-            .mapLatest {
+            .map {
                 it.toObjects(Messeage::class.java).toList()
             }
     }

@@ -17,7 +17,7 @@
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:allowBackup">
         <activity
-            android:name=".ui.nearby.NearbyPlaces"
+            android:name=".ui.nearby.NearbyPlacesActivity"
             android:theme="@style/AppTheme.StatusBar.Transparent"
 
             />
@@ -29,7 +29,8 @@
         <activity
             android:name=".ui.chat.ChatActivity"
             android:theme="@style/AppTheme.StatusBar.Transparent" />
-        <activity android:name=".ui.about.AboutActivity" />
+        <activity
+            android:name=".ui.about.AboutActivity" />
         <activity
             android:name=".ui.trip.TripActivity"
             android:parentActivityName=".ui.home.HomeActivity"

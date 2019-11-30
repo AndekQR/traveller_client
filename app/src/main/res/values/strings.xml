@@ -57,7 +57,7 @@
 
     <string name="send_location_title">Wysyłaj lokalizację urządzenia</string>
     <string name="send_location_summary">Gdy włączone, osoby z tej samej wycieczki widzą twoją lokalizację</string>
-    <string name="search_hint">Szukaj...</string>
+    <string name="search_hint">Szukaj…</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="post_email_verification_success">Weryfikacja e-mail została ukończona!</string>
@@ -69,11 +69,11 @@
     <string name="preferences_localization_title">Lokalizacja</string>
     <string name="interval_send_data">Częstotliwość wysyłania danych</string>
     <string name="interval_send_data_summary">Jak często aplikacja ma wysyłać dane o twojeje lokalizacji</string>
-    <string name="progress_upload">Wysyłanie...</string>
+    <string name="progress_upload">Wysyłanie…</string>
     <string name="upload_success">Wysyłanie powiodło się</string>
     <string name="upload_failure">Niepowodzenie</string>
     <string name="profile">Profil</string>
-    <string name="progress_downloading">Pobieranie...</string>
+    <string name="progress_downloading">Pobieranie…</string>
     <string name="download_success">Pobieranie zakończone</string>
     <string name="download_failure">Pobieranie nieudane</string>
     <string name="apply">Zatwierdź</string>
@@ -115,7 +115,7 @@
     <string name="list">Lista</string>
     <string name="participants">Uczestnicy</string>
     <string name="click_back_again_to_exit">Naciśnij WSTECZ jeszcze raz aby wyjść</string>
-    <string name="type_a_messeage">Wiadomość...</string>
+    <string name="type_a_messeage">Wiadomość…</string>
     <string name="wrong_trip">Zła wycieczka</string>
     <string name="need_to_join_different_trip">Żeby wyświetlić wiadomość musisz dołączyć do</string>
     <string name="travel_mode">Sposób podróżowania</string>
@@ -223,6 +223,12 @@
     <string name="food">Żywność</string>
     <string name="filter_places">Filtruj</string>
     <string name="places_types">Typy miejsc:</string>
+    <string name="no_places">Brak wyników :(</string>
+    <string name="google_users_rating">Ocena użytkowników Google:</string>
+    <string name="copy">Kopiuj</string>
+    <string name="text_copied">Tekst został skopiowany</string>
+    <string name="place_searching_result">Wyniki wyszukiwania miejsca</string>
+    <string name="details">Szczegóły</string>
 
 
 </resources>

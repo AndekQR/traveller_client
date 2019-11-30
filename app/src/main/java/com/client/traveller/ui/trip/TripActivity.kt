@@ -91,7 +91,7 @@ class TripActivity : AppCompatActivity(), KodeinAware, NavController.OnDestinati
 
     /**
      * jest wywoływane przed OnCreateOptionsMenu
-     * Jeżeli jesteśmy w [TripCreatorFragment] przycisk dołączdowycieczki jest widoczny
+     * Jeżeli jesteśmy w [TripCreatorFragment] przycisk dołącz do wycieczki jest widoczny
      * Potem [TripCreatorFragment] sprawdza czy użytkowwnik jest uczestnikiem jeśli tak to wywołuje metodę [makeJoinTripButtonInvisible] przez callbacck
      */
     override fun onDestinationChanged(

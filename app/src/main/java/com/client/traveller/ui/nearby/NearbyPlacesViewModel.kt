@@ -1,18 +1,24 @@
 package com.client.traveller.ui.nearby
 
+import android.content.Context
+import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
+import com.client.traveller.data.network.api.places.response.placeDetailResponse.PlaceDetailResponse
+import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.place.PlacesRepository
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.user.UserRepository
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.maps.SupportMapFragment
 
 class NearbyPlacesViewModel(
     private val placesRepository: PlacesRepository,
     private val tripRepository: TripRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val mapRepository: MapRepository
 ) : ViewModel() {
 
     val currentUser = userRepository.getCurrentUser()
@@ -49,6 +55,9 @@ class NearbyPlacesViewModel(
         return placesRepository.getPhotoUrl(photoReference, width)
     }
 
+    /**
+     * Zwraca listę typów miejsc, jakie były brane pod uwagę przy wyszukiwaniu miejsc
+     */
     fun getPlacesSearchedTypes() = placesRepository.getSearchedTypes()
 
     fun initOriginalListOfPlaces(places: Set<Result>) {
@@ -59,4 +68,15 @@ class NearbyPlacesViewModel(
     fun getOriginalListOfPlaces(): Set<Result> {
         return this.originalListOfPlaces
     }
+
+    suspend fun getPlaceDetails(placeId: String) = placesRepository.getPlaceDetail(placeId)
+
+    fun initMap(
+        map: SupportMapFragment,
+        context: Context,
+        savedInstanceState: Bundle?
+    ) = mapRepository.initializeMap(map, context, savedInstanceState)
+
+    suspend fun getWikipediaPrefixes(query: String) = this.placesRepository.getPrefixes(query)
+    suspend fun getWikipediaPageSummary(pageTitle: String) = this.placesRepository.getPageSummary(pageTitle)
 }

@@ -33,6 +33,7 @@ class TripListItem(
     override fun getLayout() = R.layout.item_trip_list
 
     private fun GroupieViewHolder.updateStatus() {
+
         if (currentTrip != null && currentTrip.name == trip.name)
             status.background = context?.getDrawable(R.drawable.status_green)
         else {

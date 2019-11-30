@@ -2,19 +2,17 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape
-            android:shape="rectangle"
+
 
             >
             <corners android:radius="2dp" />
-            <solid android:color="@color/colorWhiteDarkMaterial" />
+            <solid android:color="@color/whiteTransparent75" />
         </shape>
     </item>
     <item
-        android:drawable="@drawable/ic_my_location"
-        android:bottom="3dp"
-        android:top="3dp"
-        android:right="3dp"
-        android:left="3dp"
+        android:drawable="@drawable/ic_clear_all"
+        android:width="36dp"
+        android:height="36dp"
         >
     </item>
 </layer-list>

@@ -7,6 +7,7 @@ import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.Polyline
 
 interface MapRepository {
     fun initializeMap(
@@ -24,13 +25,13 @@ interface MapRepository {
     fun getCurrentLocation(): Location
     fun clearMap()
 
-    fun drawRouteMarker()
-    fun drawRouteToLocation(
+    suspend fun drawRouteToMarker(): Polyline?
+    suspend fun drawRouteToLocation(
         origin: String,
         destination: String,
         locations: List<String>,
         mode: TravelMode
     )
-    suspend fun drawTripRoute(trip: Trip)
+    suspend fun drawTripRoute(trip: Trip, travelMode: TravelMode = TravelMode.driving)
 
 }

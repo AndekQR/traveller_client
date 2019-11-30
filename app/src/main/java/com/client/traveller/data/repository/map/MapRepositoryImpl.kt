@@ -1,18 +1,27 @@
 package com.client.traveller.data.repository.map
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
-import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.network.api.geocoding.GeocodingApiService
 import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.Location
+import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.provider.LocationProvider
-import com.client.traveller.ui.util.Coroutines.io
-
+import com.client.traveller.ui.util.formatToApi
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.android.synthetic.main.my_simple_marker_view.view.*
 
 
 class MapRepositoryImpl(
@@ -20,6 +29,8 @@ class MapRepositoryImpl(
     private val locationProvider: LocationProvider,
     private val geocoding: GeocodingApiService
 ) : MapRepository {
+
+    private lateinit var context: Context
 
     /**
      * Inicjalzacja mapy oraz jej składników
@@ -30,6 +41,7 @@ class MapRepositoryImpl(
         context: Context,
         savedInstanceState: Bundle?
     ) {
+        this.context = context
         locationProvider.init(mapFragment, context, savedInstanceState) {
             mapUtils.initializeMap(context)
         }
@@ -49,8 +61,8 @@ class MapRepositoryImpl(
         return mapUtils.getDistance(origin, destination, waypoints)
     }
 
-    override fun drawRouteMarker() = mapUtils.drawRouteToMarker()
-    override fun drawRouteToLocation(
+    override suspend fun drawRouteToMarker() = this.mapUtils.drawRouteToMarker(this.mapUtils.getMarkerFromMap())
+    override suspend fun drawRouteToLocation(
         origin: String,
         destination: String,
         locations: List<String>,
@@ -60,14 +72,68 @@ class MapRepositoryImpl(
     }
 
     override fun getCurrentLocation() = mapUtils.getCurrentLocation()
-    override fun clearMap() = mapUtils.clearMap()
 
-    override suspend fun drawTripRoute(trip: Trip) {
-        val startAddress = geocoding.geocode(trip.startAddress!!)
-        mapUtils.drawMarkerWithText(startAddress.results.first().geometry.location.toLatLng(), "START")
+    override fun clearMap() = this.mapUtils.clearMap()
+
+    override suspend fun drawTripRoute(trip: Trip, travelMode: TravelMode) {
+        val startLatLng: String
+        val waypointsLatLng = mutableListOf<String>()
+        val endLatLng: String
+
+        val view =
+            (this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
+                R.layout.my_simple_marker_view, null
+            )
+        //start
+        view.marker_text.text = "S"
+        var bitmap = this.getBitmapFromView(view)
+        var address = geocoding.geocode(trip.startAddress!!)
+        var latlng = address.results.first().geometry.location.toLatLng()
+        startLatLng = latlng.formatToApi()
+        bitmap?.let { mapUtils.drawMarkerFromBitmap(
+            latlng,
+            it
+        ) }
+
+        //waypoints
+        trip.waypoints?.forEachIndexed { index, waypointAddress ->
+            view.marker_text.text = "${index+1}"
+            val address = geocoding.geocode(waypointAddress)
+            val latlng = address.results.first().geometry.location.toLatLng()
+            waypointsLatLng.add(latlng.formatToApi())
+            val bitmap = this.getBitmapFromView(view)
+            bitmap?.let { this.mapUtils.drawMarkerFromBitmap(latlng, bitmap) }
+        }
+
+        //stop
+        if (trip.startAddress?.trim() == trip.endAddress?.trim())
+            view.marker_text.text = "S-E"
+        else {
+            view.marker_text.text = "E"
+        }
+        address = geocoding.geocode(trip.endAddress!!)
+        latlng = address.results.first().geometry.location.toLatLng()
+        endLatLng = latlng.formatToApi()
+        bitmap = this.getBitmapFromView(view)
+        bitmap?.let { this.mapUtils.drawMarkerFromBitmap(latlng, it) }
+
+        this.mapUtils.drawRouteToLocation(startLatLng, endLatLng, waypointsLatLng, travelMode)
     }
 
     private fun Location.toLatLng(): LatLng {
         return LatLng(this.lat, this.lng)
     }
+
+    private fun getBitmapFromView(view: View): Bitmap? {
+        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        view.layout(0, 0, view.measuredWidth, view.measuredHeight)
+        val bitmap =
+            Bitmap.createBitmap(view.measuredWidth, view.measuredHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_IN)
+        view.background?.draw(canvas)
+        view.draw(canvas)
+        return bitmap
+    }
+
 }

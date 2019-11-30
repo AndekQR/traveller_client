@@ -43,6 +43,10 @@ class NearbyPlacesListItem(
         }
     }
 
+    fun getPlaceId(): String {
+        return nearbySearchResponseResult.placeId
+    }
+
     private fun GroupieViewHolder.updateTypes() {
         if (context != null) {
             val types = nearbySearchResponseResult.types.map {
@@ -80,7 +84,7 @@ class NearbyPlacesListItem(
             Glide.with(this.root.context)
                 .load(it)
                 .diskCacheStrategy(DiskCacheStrategy.DATA)
-                .centerCrop()
+                .fitCenter()
                 .into(this.photo)
         }
     }

@@ -1,13 +1,11 @@
 package com.client.traveller.data.network.api.places
 
-import android.media.Image
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
-import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Photo
+import com.client.traveller.data.network.api.places.response.placeDetailResponse.PlaceDetailResponse
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -24,6 +22,12 @@ interface PlacesApiService {
         @Query("keyword") keyword: String = "" //do szukajki
     ): NearbySearchResponse
 
+    @GET("details/json")
+    suspend fun getPlaceDetail(
+        @Query("place_id") placeId: String,
+        @Query("language") language: String = "pl",
+        @Query("fields") fields: String = "formatted_address,geometry,icon,name,photo,place_id,type,url,utc_offset,vicinity,formatted_phone_number,opening_hours,website,rating"
+    ): PlaceDetailResponse
 
     companion object {
         const val BASE_URL = "https://maps.googleapis.com/maps/api/place/"

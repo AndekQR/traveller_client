@@ -53,7 +53,7 @@ class HomeViewModel(
     fun stopLocationUpdates() = mapRepository.stopLocationUpdates()
     fun sendingLocationData() = mapRepository.sendingLocationData()
     fun centerOnMe() = mapRepository.centerCurrentLocation()
-    fun drawRouteToLocation(
+    suspend fun drawRouteToLocation(
         origin: String = mapRepository.getCurrentLocation().format(),
         destination: String,
         locations: List<String>,

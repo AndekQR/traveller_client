@@ -1,10 +1,12 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <!-- Base application theme.Theme.MaterialComponents.Light.NoActionBar -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryLight</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorOnSecondary">@color/colorWhiteDarkMaterial</item>
         <item name="colorAccent">@color/colorSecondary</item>
     </style>
 
@@ -24,9 +26,7 @@
 
 
 <!--    styl dla własnego actionbar -->
-    <style name="DarkActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-
-    </style>
+    <style name="DarkActionBar" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
 
 
     <style name="Divider">
@@ -35,6 +35,12 @@
         <item name="android:background">@color/colorDark</item>
     </style>
 
+    <style name="outlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton" />
 
+    <style name="FullScreenDialogStyle" parent="AppTheme">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
 
 </resources>

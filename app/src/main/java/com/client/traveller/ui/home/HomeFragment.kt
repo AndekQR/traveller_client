@@ -64,6 +64,7 @@ class HomeFragment : ScopedFragment(), KodeinAware {
         super.onViewCreated(view, savedInstanceState)
 
         my_location.setOnClickListener { viewModel.centerOnMe() }
+        clear_button.setOnClickListener { this.viewModel.clearMap() }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

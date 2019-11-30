@@ -26,7 +26,7 @@ interface DirectionsApiService {
         @Query("origin") origin: String,
         @Query("destination") destination: String,
         @Query("mode") mode: String = TravelMode.driving.name,
-        @Query("waypoints") waypoints: List<String>,
+        @Query("waypoints") waypoints: String,
         @Query("units") units: String = "metric"
     ): Directions
 

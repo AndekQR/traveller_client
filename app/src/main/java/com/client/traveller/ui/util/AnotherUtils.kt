@@ -95,4 +95,21 @@ fun <T, K, V> LiveData<T>.combineWith(liveData: LiveData<K>, combineFun: (T?, K?
     return result
 }
 
+fun LatLng.formatToApi(): String {
+    return "${this.latitude},${this.longitude}"
+}
+
+/**
+ * sprawdza czy jakikolwiek element z pierwszej listy jest taki sam jak jakikolwiek element z drugiej listy
+ */
+fun <T> List<T>.contains(list: List<T>): Boolean {
+    this.forEach { first ->
+        list.forEach {second ->
+            if (first == second)
+                return true
+        }
+    }
+    return false
+}
+
 
