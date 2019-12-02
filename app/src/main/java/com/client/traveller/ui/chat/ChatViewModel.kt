@@ -28,7 +28,7 @@ class ChatViewModel(
     fun initUsersChats(userId: String, tripUid: String) {
         this.currentUserChats = this.messagingRepository.getUsersChats(userId, tripUid).asLiveData()
     }
-    
+
 
     fun logoutUser(mGoogleSignInClient: GoogleSignInClient) =
         userRepository.logoutUser(mGoogleSignInClient)

@@ -6,7 +6,14 @@ import androidx.preference.PreferenceManager
 
 class PreferenceProvider(context: Context) {
 
-    private val SEND_LOCATION = "SEND_LOCATION"
+    companion object {
+        private const val NEARBY_PLACES_DISTANCE_SEARCH = "NEARBY_PLACES_DISTANCE_SEARCH"
+        private const val SEND_LOCATION = "SEND_LOCATION"
+        private const val TRAVEL_MODE = "TRAVEL_MODE"
+        private const val CAMERA_TRACKING = "CAMERA_TRACKING"
+        private const val SENDING_DATA_INTERVAL = "SENDING_DATA_INTERVAL"
+    }
+
     private val appContext = context.applicationContext
     private val preferences: SharedPreferences
 
@@ -14,7 +21,41 @@ class PreferenceProvider(context: Context) {
         preferences = PreferenceManager.getDefaultSharedPreferences(appContext)
     }
 
-    fun getPreferenceState(preferenceKey: String): Boolean {
-        return preferences.getBoolean(preferenceKey, true)
+    fun getSendLocation(): Boolean {
+        return preferences.getBoolean(SEND_LOCATION, true)
     }
+
+    fun getSendingDataInterval(): Int? {
+        val interval = preferences.getString(SENDING_DATA_INTERVAL, "2")
+        interval?.let {
+            return Integer.parseInt(interval)
+        }
+        return null
+    }
+
+    fun getCameraTracking(): Boolean {
+        return preferences.getBoolean(CAMERA_TRACKING, true)
+    }
+
+    fun getTravelMode(): String? {
+        return preferences.getString(TRAVEL_MODE, "driving")
+    }
+
+    fun getNearbyPlacesSearchDistance(): Int? {
+        val distance = preferences.getString(NEARBY_PLACES_DISTANCE_SEARCH, "3000")
+        if (distance != null) {
+            val distanceInt = distance.toInt()
+            return if (distanceInt > 10000) {
+                val editor = preferences.edit()
+                editor.putString(NEARBY_PLACES_DISTANCE_SEARCH, "10000")
+                editor.apply()
+                10000
+            } else {
+                distanceInt
+            }
+        }
+        return null
+    }
+
+
 }

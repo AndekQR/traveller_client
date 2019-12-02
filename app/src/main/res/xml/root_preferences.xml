@@ -64,6 +64,13 @@
             android:defaultValue="driving"
         />
 
+        <androidx.preference.EditTextPreference
+            android:key="NEARBY_PLACES_DISTANCE_SEARCH"
+            android:title="@string/nearby_places_search_distance_preferences"
+            app:iconSpaceReserved="false"
+            app:summary="@string/must_be_in_meters"
+            android:defaultValue="3000" />
+
     </androidx.preference.PreferenceCategory>
 
 

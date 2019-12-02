@@ -6,13 +6,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
-import com.client.traveller.data.network.api.places.response.placeDetailResponse.PlaceDetailResponse
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.place.PlacesRepository
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.user.UserRepository
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
 
 class NearbyPlacesViewModel(
     private val placesRepository: PlacesRepository,
@@ -78,5 +78,12 @@ class NearbyPlacesViewModel(
     ) = mapRepository.initializeMap(map, context, savedInstanceState)
 
     suspend fun getWikipediaPrefixes(query: String) = this.placesRepository.getPrefixes(query)
-    suspend fun getWikipediaPageSummary(pageTitle: String) = this.placesRepository.getPageSummary(pageTitle)
+    suspend fun getWikipediaPageSummary(pageTitle: String) =
+        this.placesRepository.getPageSummary(pageTitle)
+
+    suspend fun getWikipediaPageSectionsText(pageTitle: String) =
+        this.placesRepository.getPageSections(pageTitle)
+
+    fun disableMapDragging() = this.mapRepository.disableMapDragging()
+    fun centerOnLocation(location: LatLng, putMarker: Boolean = false) = this.mapRepository.centerCameraOnLocation(location, putMarker)
 }

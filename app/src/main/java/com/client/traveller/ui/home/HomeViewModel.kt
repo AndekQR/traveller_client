@@ -3,27 +3,30 @@ package com.client.traveller.ui.home
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.message.MessagingRepository
+import com.client.traveller.data.repository.place.PlacesRepository
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.user.UserRepository
-import com.client.traveller.ui.util.Coroutines.io
 import com.client.traveller.ui.util.format
+import com.client.traveller.ui.util.formatToApi
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.firebase.auth.FirebaseUser
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val userRepository: UserRepository,
     private val mapRepository: MapRepository,
     private val messagingRepository: MessagingRepository,
-    private val tripRepository: TripRepository
+    private val tripRepository: TripRepository,
+    private val placesRepository: PlacesRepository
 ) : ViewModel() {
 
     val currentUser: LiveData<User> = this.userRepository.getCurrentUser()
@@ -85,4 +88,15 @@ class HomeViewModel(
     suspend fun drawTripRoute(trip: Trip) {
         this.mapRepository.drawTripRoute(trip)
     }
+
+    suspend fun centerRoad(startAddress: String, waypoints: ArrayList<String>?, endAddress: String) = this.mapRepository.centerCameraOnRoute(startAddress, waypoints, endAddress)
+    fun elementsOnMap() = this.mapRepository.elementOnMap()
+    suspend fun drawMarkerNearbyPlaces() {
+        val marker = this.mapRepository.getActualMarker()
+        marker?.let {
+            val nearbyPlaces = this.placesRepository.getNearbyPlaces(it.position.formatToApi())
+            this.mapRepository.drawNearbyPlaceMarkers(nearbyPlaces)
+        }
+    }
+    suspend fun drawRouteToMainMarker() = this.mapRepository.drawRouteToMainMarker()
 }

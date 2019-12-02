@@ -17,12 +17,15 @@ interface NotificationApiService {
     companion object {
         private const val BASE_URL = "https://fcm.googleapis.com/"
 
-        private val requestInterceptor = Interceptor {chain ->
+        private val requestInterceptor = Interceptor { chain ->
 
             val request = chain.request()
                 .newBuilder()
                 .header("Content-Type", "application/json")
-                .header("Authorization", "key=AAAAFvkTcpc:APA91bGtCTplyIGz-thZecHdqw1TJpWonJtfryot0B6-ORt-M-ahIDwwtSFORfzb3NLl_XUgAVrmWsdprozyUb104ej0sfGT7l2qYI-MOFwCBsu5wpB_cR_oZEbK-BDOqWE1eRjDemcN")
+                .header(
+                    "Authorization",
+                    "key=AAAAFvkTcpc:APA91bGtCTplyIGz-thZecHdqw1TJpWonJtfryot0B6-ORt-M-ahIDwwtSFORfzb3NLl_XUgAVrmWsdprozyUb104ej0sfGT7l2qYI-MOFwCBsu5wpB_cR_oZEbK-BDOqWE1eRjDemcN"
+                )
                 .build()
 
             return@Interceptor chain.proceed(request)
@@ -32,7 +35,7 @@ interface NotificationApiService {
             .addInterceptor(requestInterceptor)
             .build()
 
-        operator fun invoke() : NotificationApiService {
+        operator fun invoke(): NotificationApiService {
             return Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(okHttpClient)

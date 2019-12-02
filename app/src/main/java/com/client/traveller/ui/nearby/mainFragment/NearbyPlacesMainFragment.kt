@@ -8,7 +8,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
-
 import com.client.traveller.R
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.ui.nearby.NearbyPlacesViewModel
@@ -26,7 +25,6 @@ import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
-import java.util.*
 
 class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
 
@@ -55,15 +53,23 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
 
 
         launch(Dispatchers.Main) {
-            val placesList = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces()
-            this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(placesList)
+            val nearbySearchResponses = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces()
+            val listofPlaces = mutableSetOf<Result>()
+            nearbySearchResponses.forEach {
+                listofPlaces.addAll(it.results)
+            }
+            this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(listofPlaces)
         }
         this.bindUI()
 
         swipe_to_refresh_layout.setOnRefreshListener {
             launch(Dispatchers.Main) {
-                val placesList = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces()
-                this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(placesList)
+                val nearbySearchResponses = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces()
+                val listofPlaces = mutableSetOf<Result>()
+                nearbySearchResponses.forEach {
+                    listofPlaces.addAll(it.results)
+                }
+                this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(listofPlaces)
                 swipe_to_refresh_layout.isRefreshing = false
             }
         }
@@ -79,7 +85,7 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
                 if (places.isEmpty()) {
                     progress_bar.showProgressBar()
                     nothing_to_display.visibility = View.VISIBLE
-                    recycler_view.visibility= View.GONE
+                    recycler_view.visibility = View.GONE
                     progress_bar.hideProgressBar()
                 } else {
                     progress_bar.showProgressBar()
@@ -121,7 +127,9 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
     private val onItemClickListener = OnItemClickListener { item, view ->
         if (item is NearbyPlacesListItem) {
             val action =
-                NearbyPlacesMainFragmentDirections.actionNearbyPlacesMainFragmentToPlaceDetailFragment(item.getPlaceId())
+                NearbyPlacesMainFragmentDirections.actionNearbyPlacesMainFragmentToPlaceDetailFragment(
+                    item.getPlaceId()
+                )
             Navigation.findNavController(view).navigate(action)
         }
     }

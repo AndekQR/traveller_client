@@ -16,6 +16,11 @@ class NearbyPlacesViewModelFactory(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return NearbyPlacesViewModel(placesRepository, tripRepository, userRepository, mapRepository) as T
+        return NearbyPlacesViewModel(
+            placesRepository,
+            tripRepository,
+            userRepository,
+            mapRepository
+        ) as T
     }
 }

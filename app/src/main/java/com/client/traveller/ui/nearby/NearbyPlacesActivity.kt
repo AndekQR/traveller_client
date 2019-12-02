@@ -16,12 +16,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
 import com.client.traveller.R
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.ui.about.AboutActivity
@@ -38,15 +34,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_nearby_places.*
-import kotlinx.android.synthetic.main.activity_nearby_places.toolbar
-import kotlinx.android.synthetic.main.activity_trip.*
 import kotlinx.android.synthetic.main.nav_header.view.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.util.*
 
-class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware, NavController.OnDestinationChangedListener {
+class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware,
+    NavController.OnDestinationChangedListener {
 
     override val kodein by kodein()
     private val factory: NearbyPlacesViewModelFactory by instance()
@@ -73,14 +68,16 @@ class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware, NavController.OnD
 
         this.viewModel = ViewModelProvider(this, factory).get(NearbyPlacesViewModel::class.java)
 
-        this@NearbyPlacesActivity.viewModel.searchedPlaces.observe(this@NearbyPlacesActivity, Observer { places ->
-            if (places == null) return@Observer
-            if(::currentListOfPlaces.isInitialized && places == currentListOfPlaces) return@Observer
-            this.currentListOfPlaces = places
-            this.viewModel.initOriginalListOfPlaces(places)
-            this.observeSearchQuery()
+        this@NearbyPlacesActivity.viewModel.searchedPlaces.observe(
+            this@NearbyPlacesActivity,
+            Observer { places ->
+                if (places == null) return@Observer
+                if (::currentListOfPlaces.isInitialized && places == currentListOfPlaces) return@Observer
+                this.currentListOfPlaces = places
+                this.viewModel.initOriginalListOfPlaces(places)
+                this.observeSearchQuery()
 
-        })
+            })
         this.initView()
 
     }
@@ -120,7 +117,7 @@ class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware, NavController.OnD
         this.navController = navHostFragment.navController
         this.navController.addOnDestinationChangedListener(this)
 
-        NavigationUI.setupWithNavController(this.navigationView, this.navController)
+//        NavigationUI.setupWithNavController(this.navigationView, this.navController)
         NavigationUI.setupWithNavController(this.toolBar, this.navController, this.drawerLayout)
         NavigationUI.setupActionBarWithNavController(this, this.navController)
         NavigationUI.setupActionBarWithNavController(this, this.navController, this.drawerLayout)
@@ -128,7 +125,10 @@ class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware, NavController.OnD
 
     override fun onSupportNavigateUp(): Boolean {
         Log.e(javaClass.simpleName, "onsupportnavigationup")
-        return NavigationUI.navigateUp(this.navController, this.drawerLayout) || super.onSupportNavigateUp()
+        return NavigationUI.navigateUp(
+            this.navController,
+            this.drawerLayout
+        ) || super.onSupportNavigateUp()
     }
 
     private fun setSubtitleNavView(subtitle: String) = Coroutines.main {
@@ -272,11 +272,14 @@ class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware, NavController.OnD
     }
 
     private fun Set<Result>.filterByQuery(searchQuery: String): Set<Result> {
-        if (searchQuery.isNotEmpty()){
+        if (searchQuery.isNotEmpty()) {
             val filteredPlaces = this.filter {
                 it.name.toLowerCase(Locale.ROOT).contains(searchQuery.toLowerCase(Locale.ROOT)) ||
-                        it.vicinity.toLowerCase(Locale.ROOT).contains(searchQuery.toLowerCase(
-                            Locale.ROOT))
+                        it.vicinity.toLowerCase(Locale.ROOT).contains(
+                            searchQuery.toLowerCase(
+                                Locale.ROOT
+                            )
+                        )
             }.toSet()
             if (filteredPlaces != this) {
                 return filteredPlaces
@@ -287,7 +290,7 @@ class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware, NavController.OnD
         return this
     }
 
-    private fun Set<Result>.filtrPlacesByTypes(): Set<Result>  {
+    private fun Set<Result>.filtrPlacesByTypes(): Set<Result> {
         val checkedTypesValues = mutableListOf<String>()
         for ((position, value) in this@NearbyPlacesActivity.viewModel.getPlacesSearchedTypes().withIndex()) {
             if (this@NearbyPlacesActivity.viewModel.checkedItems[position]) {
@@ -323,8 +326,8 @@ class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware, NavController.OnD
         destination: NavDestination,
         arguments: Bundle?
     ) {
-            this.searchItem?.isVisible = destination.id != R.id.placeDetailFragment
-            this.filterItem?.isVisible = destination.id != R.id.placeDetailFragment
+        this.searchItem?.isVisible = destination.id != R.id.placeDetailFragment
+        this.filterItem?.isVisible = destination.id != R.id.placeDetailFragment
 
     }
 }

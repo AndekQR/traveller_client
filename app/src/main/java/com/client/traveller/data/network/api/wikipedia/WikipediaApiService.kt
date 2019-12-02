@@ -2,6 +2,7 @@ package com.client.traveller.data.network.api.wikipedia
 
 import com.client.traveller.data.network.api.wikipedia.response.wikipediaPageSummaryResponse.WikipediaPageSummaryResponse
 import com.client.traveller.data.network.api.wikipedia.response.wikipediaPrefixSearchResponse.WikipediaPrefixSearchResponse
+import com.client.traveller.data.network.api.wikipedia.response.wikipediaSectionsResponse.WikipediaSectionsResponse
 import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -24,6 +25,11 @@ interface WikipediaApiService {
     suspend fun getPageSummary(
         @Path(value = "pageTitle", encoded = false) pageTitle: String
     ): WikipediaPageSummaryResponse
+
+    @GET("api/rest_v1/page/mobile-sections/{pageTitle}")
+    suspend fun getSectionsHtml(
+        @Path(value = "pageTitle", encoded = false) pageTitle: String
+    ): WikipediaSectionsResponse
 
     companion object {
         private const val BASE_URL = "https://pl.wikipedia.org/"

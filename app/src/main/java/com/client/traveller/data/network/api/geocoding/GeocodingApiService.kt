@@ -2,8 +2,6 @@ package com.client.traveller.data.network.api.geocoding
 
 import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.GeocodingResponse
 import com.client.traveller.data.network.api.geocoding.response.reverseGeocodingResponse.ReverseGeocodingResponse
-import com.client.traveller.data.network.api.places.PlacesApiService
-import com.client.traveller.data.services.BaseTaskService
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

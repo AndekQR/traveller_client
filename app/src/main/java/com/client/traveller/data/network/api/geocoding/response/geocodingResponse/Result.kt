@@ -1,9 +1,6 @@
 package com.client.traveller.data.network.api.geocoding.response.geocodingResponse
 
 
-import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.AddressComponent
-import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.Geometry
-import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.PlusCode
 import com.google.gson.annotations.SerializedName
 
 data class Result(

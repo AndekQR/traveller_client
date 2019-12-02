@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Messeage
@@ -105,7 +104,8 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
         viewModel.searchQuery.observe(viewLifecycleOwner, Observer { filtr ->
             launch {
                 progress_bar.showProgressBar()
-                this@ChatListFragment.filterChats(filtr)?.let { this@ChatListFragment.updateChatsList(it) }
+                this@ChatListFragment.filterChats(filtr)
+                    ?.let { this@ChatListFragment.updateChatsList(it) }
                 progress_bar.hideProgressBar()
             }
         })

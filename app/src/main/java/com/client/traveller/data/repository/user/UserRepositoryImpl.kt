@@ -2,7 +2,6 @@ package com.client.traveller.data.repository.user
 
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.LiveData
 import com.client.traveller.data.db.TripDao
 import com.client.traveller.data.db.UserDao
 import com.client.traveller.data.db.entities.User

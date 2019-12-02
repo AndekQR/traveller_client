@@ -3,10 +3,8 @@ package com.client.traveller.data.network.firebase.firestore
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.Token
 import com.client.traveller.ui.util.toLocalUser
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.iid.FirebaseInstanceId
 import kotlinx.coroutines.Dispatchers

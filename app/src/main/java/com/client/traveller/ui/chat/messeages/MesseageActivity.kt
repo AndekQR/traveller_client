@@ -56,14 +56,20 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
             if (it == null) return@Observer
             this.currentTrip = it
 
-            this.viewModel.currentUser.observeOnce(this, Observer {currentUser ->
+            this.viewModel.currentUser.observeOnce(this, Observer { currentUser ->
                 if (currentUser == null) return@Observer
                 progress_bar.showProgressBar()
                 this.currentUser = currentUser
                 launch(Dispatchers.Main) {
-                    this@MesseageActivity.viewModel.identifyChat(intent, this@MesseageActivity.currentUser.email)
+                    this@MesseageActivity.viewModel.identifyChat(
+                        intent,
+                        this@MesseageActivity.currentUser.email
+                    )
                     if (this@MesseageActivity.viewModel.chatId == null)
-                        viewModel.chatId = viewModel.findChat(viewModel.getChatParticipantsUid(), currentTrip.uid!!)?.uid
+                        viewModel.chatId = viewModel.findChat(
+                            viewModel.getChatParticipantsUid(),
+                            currentTrip.uid!!
+                        )?.uid
                     this@MesseageActivity.setWindowTitle()
                     this@MesseageActivity.tryInitChatMessages()
                     progress_bar.hideProgressBar()
@@ -83,11 +89,13 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
         val tripUid = intent.extras!!.getString("tripUid")
         if (this.checkIfCorrectTrip(tripUid)) {
             viewModel.initChatMesseages()
-            this@MesseageActivity.viewModel.chatMesseages.observe(this@MesseageActivity, Observer { messeages ->
-                if (messeages == null) return@Observer
-                if (messeages.isNotEmpty())
-                    this@MesseageActivity.updateMesseages(messeages)
-            })
+            this@MesseageActivity.viewModel.chatMesseages.observe(
+                this@MesseageActivity,
+                Observer { messeages ->
+                    if (messeages == null) return@Observer
+                    if (messeages.isNotEmpty())
+                        this@MesseageActivity.updateMesseages(messeages)
+                })
         }
     }
 
@@ -114,9 +122,9 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
             val messeageTrip = this.viewModel.findTripByUid(tripUid)
             Dialog.Builder()
                 .addTitle(getString(R.string.wrong_trip))
-                .addMessage(getString(R.string.need_to_join_different_trip)+ " \"${messeageTrip.name}\"")
-                .addPositiveButton("ok") {dialog ->
-                    Intent(this, HomeActivity::class.java).also {intent ->
+                .addMessage(getString(R.string.need_to_join_different_trip) + " \"${messeageTrip.name}\"")
+                .addPositiveButton("ok") { dialog ->
+                    Intent(this, HomeActivity::class.java).also { intent ->
                         dialog.dismiss()
                         startActivity(intent)
                         this.finish()
@@ -134,7 +142,10 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
             messeageEditText.setText("")
             var chat: ChatFirestoreModel? = null
             try {
-                chat = viewModel.findChat(participants = viewModel.getChatParticipantsUid(), tripUid = currentTrip.uid!!)
+                chat = viewModel.findChat(
+                    participants = viewModel.getChatParticipantsUid(),
+                    tripUid = currentTrip.uid!!
+                )
             } catch (ex: Exception) {
                 Dialog.Builder()
                     .addMessage(getString(R.string.something_went_wrong))
@@ -174,10 +185,10 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
         View.OnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
             if (bottom < oldBottom) {
                 if (this.recyclerView.adapter?.itemCount!! > 0)
-                this.recyclerView.postDelayed(
-                    { this.recyclerView.smoothScrollToPosition(this.recyclerView.adapter?.itemCount!! - 1) },
-                    100
-                )
+                    this.recyclerView.postDelayed(
+                        { this.recyclerView.smoothScrollToPosition(this.recyclerView.adapter?.itemCount!! - 1) },
+                        100
+                    )
             }
         }
 
@@ -189,7 +200,7 @@ class MesseageActivity : ScopedAppActivity(), KodeinAware {
             layoutManager = LinearLayoutManager(this@MesseageActivity)
             adapter = groupAdapter
             addOnLayoutChangeListener(recyclerViewOnLayoutChange)
-            if(messeages.isNotEmpty())
+            if (messeages.isNotEmpty())
                 smoothScrollToPosition(messeages.size - 1)
         }
     }

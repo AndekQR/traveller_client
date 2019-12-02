@@ -1,9 +1,6 @@
 package com.client.traveller.data.services
 
-import android.app.ActivityManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
@@ -17,10 +14,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import android.app.Activity
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
 
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
@@ -85,11 +78,16 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         bundle.putString("tripUid", tripUid)
         intent.putExtras(bundle)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendingIntent = PendingIntent.getActivity(this, NOTIFICATION_REQUEST_CODE, intent, PendingIntent.FLAG_ONE_SHOT)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            NOTIFICATION_REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_ONE_SHOT
+        )
 
         val defaultSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         this.createDefaultChannel()
-        val builder =  NotificationCompat.Builder(this, CHANNEL_ID_DEFAULT)
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID_DEFAULT)
             .setSmallIcon(Integer.parseInt(icon!!))
             .setContentTitle(title)
             .setContentText(body)

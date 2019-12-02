@@ -10,6 +10,7 @@ data class Result(
     @SerializedName("opening_hours")
     val openingHours: OpeningHours,
     val photos: List<Photo>,
+    val geometry: Geometry,
     @SerializedName("place_id")
     val placeId: String,
     val rating: Double,

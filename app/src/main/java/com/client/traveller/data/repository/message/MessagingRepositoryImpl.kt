@@ -2,8 +2,6 @@ package com.client.traveller.data.repository.message
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.asFlow
 import com.client.traveller.R
 import com.client.traveller.data.db.MesseageDao
 import com.client.traveller.data.db.entities.Messeage
@@ -25,7 +23,10 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -200,18 +201,20 @@ class MessagingRepositoryImpl(
      * Jeżeli ktoś wyśle nową wiadomość do podanego czatu to zotaje wywołany
      */
     override fun initChatLastMesseage(chatUid: String) {
-        val observer = this@MessagingRepositoryImpl.messeages.getMesseages(chatUid).orderBy("sendDate", Query.Direction.DESCENDING).limit(1).addSnapshotListener(EventListener<QuerySnapshot> {querySnapshot, exception ->
-            exception?.let { return@EventListener }
+        val observer = this@MessagingRepositoryImpl.messeages.getMesseages(chatUid)
+            .orderBy("sendDate", Query.Direction.DESCENDING).limit(1)
+            .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
+                exception?.let { return@EventListener }
 
-            if (querySnapshot != null && !querySnapshot.isEmpty) {
-                val message = querySnapshot.first()?.toObject(Messeage::class.java)
-                message?.let {
-                    this._lastChatsMessageData[chatUid] = message
-                    this.chats.setChatUnSeen(chatUid)
+                if (querySnapshot != null && !querySnapshot.isEmpty) {
+                    val message = querySnapshot.first()?.toObject(Messeage::class.java)
+                    message?.let {
+                        this._lastChatsMessageData[chatUid] = message
+                        this.chats.setChatUnSeen(chatUid)
+                    }
+                    this._lastChatsMessage.value = this._lastChatsMessageData
                 }
-                this._lastChatsMessage.value = this._lastChatsMessageData
-            }
-        })
+            })
         this.chatsLastMessageObservers.add(observer)
     }
 

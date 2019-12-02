@@ -9,4 +9,4 @@ data class Data(
     var sentTo: String,
     var chatUid: String,
     var tripUid: String
-    )
+)

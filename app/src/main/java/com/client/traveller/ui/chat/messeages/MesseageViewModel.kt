@@ -1,7 +1,9 @@
 package com.client.traveller.ui.chat.messeages
 
 import android.content.Intent
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
 import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User

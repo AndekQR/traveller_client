@@ -5,20 +5,19 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.location.Location
 import android.util.Log
-import android.view.View
-import android.widget.RelativeLayout
 import com.client.traveller.R
 import com.client.traveller.data.network.api.directions.DirectionsApiService
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Directions
 import com.client.traveller.data.network.api.directions.response.Distance
+import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.provider.LocationProvider
-import com.client.traveller.ui.util.Coroutines.main
 import com.client.traveller.ui.util.NoCurrentLocationException
 import com.client.traveller.ui.util.format
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.*
 import com.google.maps.android.PolyUtil
+import com.google.maps.android.clustering.ClusterManager
 
 /**
  * Klasa do zarządzania mapą w [HomeFragment]
@@ -30,8 +29,11 @@ class MapUtilsImpl(
 ) : MapUtils {
 
     private lateinit var context: Context
-    private var markerOnMap: Marker? = null
+    private lateinit var clusterManager: ClusterManager<NearbyPlaceClusterItem>
+
+    private var mainMarker: Marker? = null
     private val polylinesOnMap = mutableListOf<Polyline>()
+    private val markers = mutableListOf<Marker>()
 
     /**
      * isBuildingEnabled = włącza wyświetlanie budynków 3D
@@ -48,16 +50,26 @@ class MapUtilsImpl(
         ui?.isMapToolbarEnabled = false
         locationProvider.mMap?.isBuildingsEnabled = true
 
-        // zmiana lokalizacji przycisku do centrowania lokalizacji na prawy dół
-        val locationButton =
-            (locationProvider.mapFragment?.view?.findViewById<View>(Integer.parseInt("1"))?.parent as View).findViewById<View>(
-                Integer.parseInt("2")
-            )
-        val rlp = locationButton.layoutParams as (RelativeLayout.LayoutParams)
-        rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0)
-        rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE)
-        rlp.setMargins(0, 0, 30, 30)
+        this.setupClasterer()
 
+        // zmiana lokalizacji przycisku do centrowania lokalizacji na prawy dół
+//        val locationButton =
+//            (locationProvider.mapFragment?.view?.findViewById<View>(Integer.parseInt("1"))?.parent as View).findViewById<View>(
+//                Integer.parseInt("2")
+//            )
+//        val rlp = locationButton.layoutParams as (RelativeLayout.LayoutParams)
+//        rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0)
+//        rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE)
+//        rlp.setMargins(0, 0, 30, 30)
+
+    }
+
+    private fun setupClasterer() {
+        this.clusterManager = ClusterManager(this.context, this.locationProvider.mMap)
+        this.locationProvider.mMap?.setOnCameraIdleListener(this.clusterManager)
+        this.locationProvider.mMap?.setOnMarkerClickListener(this.clusterManager)
+        this.clusterManager.renderer = MyClusterItemRenderer(this.context,
+            this.locationProvider.mMap!!, this.clusterManager)
     }
 
     override fun onMarkerClick(marker: Marker?): Boolean {
@@ -66,27 +78,36 @@ class MapUtilsImpl(
     }
 
     override fun getMarkerFromMap(): Marker? {
-        return this.markerOnMap
+        return this.mainMarker
     }
 
-    override fun drawMarkerFromBitmap(position: LatLng, bitmap: Bitmap) {
+    /**
+     * @param toClear jeżeli true to marker jest dodawana do globalnej tablicy, dzięki czemu możemy go wyczyścić z mapy
+     */
+    override fun drawMarkerFromBitmap(position: LatLng, bitmap: Bitmap, toClear: Boolean) {
         val markerOptions = MarkerOptions()
             .position(position)
             .draggable(false)
             .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
-        locationProvider.mMap?.addMarker(markerOptions)
+        val marker = locationProvider.mMap?.addMarker(markerOptions)
+        if (toClear && marker != null) this.markers.add(marker)
     }
 
-    private fun drawMarker(position: LatLng, default: Boolean = true): Marker? {
+    override fun drawPlaceMarkersInCluster(places: Set<Result>) {
+        places.forEach {
+            this.clusterManager.addItem(NearbyPlaceClusterItem(it))
+        }
+        this.clusterManager.cluster()
+    }
+
+    override fun drawMainMarker(position: LatLng): Marker? {
         val defaultMarker = MarkerOptions()
             .position(position)
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags))
             .draggable(false)
 
-        return if (default)
-            locationProvider.mMap?.addMarker(defaultMarker)
-        else
-            null
+          return locationProvider.mMap?.addMarker(defaultMarker)
+
     }
 
     override fun onMapClick(position: LatLng) {
@@ -98,12 +119,10 @@ class MapUtilsImpl(
     }
 
     override fun onMapLongClick(position: LatLng) {
-        val marker = this.drawMarker(position)
-        marker?.let { main {
-            this.markerOnMap = it
-            val polyline = this.drawRouteToMarker(it)
-            polyline?.let { this.polylinesOnMap.add(it) }
-        } }
+        val marker = this.drawMainMarker(position)
+        marker?.let {
+            this.mainMarker = it
+        }
     }
 
     override fun lastKnownLocation() {
@@ -181,17 +200,19 @@ class MapUtilsImpl(
     }
 
     override fun clearMap() {
-        this.markerOnMap?.remove()
+        this.mainMarker?.remove()
         this.polylinesOnMap.forEach {
             it.remove()
         }
+        this.markers.clear()
+        this.clusterManager.clearItems()
         this.polylinesOnMap.clear()
     }
 
     /**
      * Centruje kamerę na aktualnej lokalizacji
      *
-     * Na początku currentLocation może być nullem
+     * Na początku locationProvider.currentLocation może być nullem
      */
     override fun centerCurrentLocation() {
         var currentLocation: LatLng? = null
@@ -203,14 +224,34 @@ class MapUtilsImpl(
         } catch (ex: NullPointerException) {
         }
         currentLocation?.let {
-            val cameraPosition = CameraPosition.Builder()
-                .target(it)
-                .zoom(17F)
-                .tilt(50F)
-                .build()
-            val cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition)
-            locationProvider.mMap?.animateCamera(cameraUpdate)
+            this.centerCameraOnLocation(it)
         }
+    }
+
+    override fun centerCameraOnRoute(
+        startAddress: LatLng,
+        waypoints: ArrayList<LatLng>?,
+        endAddress: LatLng
+    ) {
+        val latLngBoundsBuilder = LatLngBounds.Builder()
+        latLngBoundsBuilder.include(startAddress)
+        waypoints?.forEach {
+            latLngBoundsBuilder.include(it)
+        }
+        latLngBoundsBuilder.include(endAddress)
+        val bounds = latLngBoundsBuilder.build()
+        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 170)
+        locationProvider.mMap?.animateCamera(cameraUpdate)
+    }
+
+    override fun centerCameraOnLocation(location: LatLng) {
+        val cameraPosition = CameraPosition.Builder()
+            .target(location)
+            .zoom(17F)
+            .tilt(50F)
+            .build()
+        val cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition)
+        locationProvider.mMap?.animateCamera(cameraUpdate)
     }
 
     /**
@@ -247,5 +288,22 @@ class MapUtilsImpl(
             return currentLocation
         else
             throw NoCurrentLocationException()
+    }
+
+    /**
+     * sprawdza czy na mappie znajdują się elementy które można wyczyścić
+     */
+    override fun elementsOnMap(): Boolean {
+        if (this.mainMarker != null) return true
+        if (this.polylinesOnMap.isNotEmpty()) return true
+        return false
+    }
+
+    override fun disableMapDragging() {
+        this.locationProvider.mMap?.uiSettings?.isScrollGesturesEnabled = false
+    }
+
+    override fun enableMapDragging() {
+        this.locationProvider.mMap?.uiSettings?.isScrollGesturesEnabled = true
     }
 }

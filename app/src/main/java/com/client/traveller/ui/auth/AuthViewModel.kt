@@ -1,7 +1,8 @@
 package com.client.traveller.ui.auth
 
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.repository.user.UserRepository
 import com.facebook.AccessToken
@@ -9,8 +10,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class AuthViewModel(
     private val userRepository: UserRepository

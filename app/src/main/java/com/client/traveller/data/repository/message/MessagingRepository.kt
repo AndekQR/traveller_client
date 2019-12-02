@@ -1,14 +1,10 @@
 package com.client.traveller.data.repository.message
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
 import com.client.traveller.data.network.firebase.firestore.model.Token
 import kotlinx.coroutines.flow.Flow
-import java.util.*
-import kotlin.collections.ArrayList
 
 interface MessagingRepository {
 

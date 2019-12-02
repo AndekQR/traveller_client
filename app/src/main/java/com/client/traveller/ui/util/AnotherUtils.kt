@@ -1,7 +1,10 @@
 package com.client.traveller.ui.util
 
 import android.location.Location
-import androidx.lifecycle.*
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.Observer
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.Query
@@ -10,8 +13,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.flowViaChannel
 import org.threeten.bp.Instant
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneId
@@ -62,7 +63,7 @@ fun CollectionReference.toFlow() = callbackFlow<QuerySnapshot> {
         }
     }
     awaitClose {
-//        cancel()
+        //        cancel()
         listener.remove()
     }
 }
@@ -74,17 +75,20 @@ fun Query.toFlow() = callbackFlow<QuerySnapshot> {
             cancel("ERROR", e)
             return@addSnapshotListener
         }
-        if (snapshot != null ) {
+        if (snapshot != null) {
             offer(snapshot)
         }
     }
     awaitClose {
-//        cancel()
+        //        cancel()
         registration.remove()
     }
 }
 
-fun <T, K, V> LiveData<T>.combineWith(liveData: LiveData<K>, combineFun: (T?, K?) -> V) : LiveData<V> {
+fun <T, K, V> LiveData<T>.combineWith(
+    liveData: LiveData<K>,
+    combineFun: (T?, K?) -> V
+): LiveData<V> {
     val result = MediatorLiveData<V>()
     result.addSource(this) {
         result.value = combineFun.invoke(this.value, liveData.value)
@@ -104,7 +108,7 @@ fun LatLng.formatToApi(): String {
  */
 fun <T> List<T>.contains(list: List<T>): Boolean {
     this.forEach { first ->
-        list.forEach {second ->
+        list.forEach { second ->
             if (first == second)
                 return true
         }

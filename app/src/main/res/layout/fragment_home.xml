@@ -44,5 +44,65 @@
         app:layout_constraintBottom_toTopOf="@id/my_location"
         app:layout_constraintRight_toRightOf="parent" />
 
+    <ImageButton
+        android:id="@+id/center_road_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="15dp"
+        android:background="@color/transparent"
+        android:padding="0dp"
+        android:src="@drawable/ic_center_road_background"
+        app:layout_constraintRight_toLeftOf="@id/my_location"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/search_nearby_places_progress_bar"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="15dp"
+        android:visibility="gone"
+        />
+
+    <ImageButton
+        android:id="@+id/search_nearby_places_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="15dp"
+        android:src="@drawable/ic_search_nearby_places_background"
+        android:background="@color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:padding="0dp" />
+
+    <ProgressBar
+        android:id="@+id/draw_route_button_progress_bar"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/search_nearby_places_button"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="15dp"
+        android:visibility="gone"
+        />
+
+    <ImageButton
+        android:id="@+id/draw_route_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginBottom="15dp"
+        android:src="@drawable/ic_route_icon_background"
+        android:background="@color/transparent"
+        android:padding="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/search_nearby_places_button"
+        />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

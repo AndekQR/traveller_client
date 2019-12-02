@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.client.traveller.R
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Photo
+import com.client.traveller.data.network.api.places.response.placeDetailResponse.Location
 import com.client.traveller.data.network.api.places.response.placeDetailResponse.PlaceDetailResponse
 import com.client.traveller.ui.nearby.NearbyPlacesViewModel
 import com.client.traveller.ui.nearby.NearbyPlacesViewModelFactory
@@ -26,6 +27,7 @@ import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.showProgressBar
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.material.button.MaterialButton
+import com.google.type.LatLng
 import kotlinx.android.synthetic.main.fragment_place_detail.*
 import kotlinx.android.synthetic.main.progress_bar.view.*
 import kotlinx.coroutines.launch
@@ -70,7 +72,7 @@ class PlaceDetailFragment : Fragment(), KodeinAware {
         this.updateIcon(result.icon)
         this.updateName(result.name)
         this.updateSearchResults(result.name)
-        this.updateMap()
+        this.updateMap(result.geometry.location)
         this.initFab()
         this.updatePhotos(result.photos)
         this.updateRating(result.rating)
@@ -204,12 +206,14 @@ class PlaceDetailFragment : Fragment(), KodeinAware {
     }
 
 
-    private fun updateMap() {
+    private fun updateMap(location: Location) {
         (childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?)?.let {
             activity?.let { activity ->
                 viewModel.initMap(it, activity, null)
             }
         }
+        val latlng = com.google.android.gms.maps.model.LatLng(location.lat, location.lng)
+        this.viewModel.centerOnLocation(latlng, true)
     }
 
     private fun updateSearchResults(name: String) = lifecycleScope.launch {
@@ -223,13 +227,27 @@ class PlaceDetailFragment : Fragment(), KodeinAware {
                 for (i in 0..6) {
                     val button = this@PlaceDetailFragment.createButton(prefixes[i].title)
                     link_buttons.addView(button)
-                    button.setOnClickListener { this@PlaceDetailFragment.showDialog(prefixes[i].title.replace(" ", "_")) }
+                    button.setOnClickListener {
+                        this@PlaceDetailFragment.showDialog(
+                            prefixes[i].title.replace(
+                                " ",
+                                "_"
+                            )
+                        )
+                    }
                 }
             } else {
                 prefixes.forEachIndexed { _, prefixsearch ->
                     val button = this@PlaceDetailFragment.createButton(prefixsearch.title)
                     link_buttons.addView(button)
-                    button.setOnClickListener { this@PlaceDetailFragment.showDialog(prefixsearch.title.replace(" ", "_")) }
+                    button.setOnClickListener {
+                        this@PlaceDetailFragment.showDialog(
+                            prefixsearch.title.replace(
+                                " ",
+                                "_"
+                            )
+                        )
+                    }
                 }
             }
             search_result_layout.progress_bar.hideProgressBar()

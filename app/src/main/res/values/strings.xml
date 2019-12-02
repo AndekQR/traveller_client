@@ -229,6 +229,8 @@
     <string name="text_copied">Tekst został skopiowany</string>
     <string name="place_searching_result">Wyniki wyszukiwania miejsca</string>
     <string name="details">Szczegóły</string>
+    <string name="nearby_places_search_distance_preferences">Promień wyszukiwania miejsc w pobliżu</string>
+    <string name="must_be_in_meters">Wartość musi być podana w metrach</string>
 
 
 </resources>

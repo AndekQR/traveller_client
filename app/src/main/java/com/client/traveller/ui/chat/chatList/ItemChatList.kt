@@ -1,7 +1,6 @@
 package com.client.traveller.ui.chat.chatList
 
 import android.graphics.BitmapFactory
-import androidx.lifecycle.*
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.db.entities.User
@@ -20,15 +19,15 @@ class ItemChatList(
     val chat: ChatFirestoreModel,
     private val users: List<User>,
     private val lastMessage: Messeage?
-) : Item(){
+) : Item() {
 
     private lateinit var viewHolder: GroupieViewHolder
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
-            this.viewHolder = viewHolder
-            updateAvatar()
-            updateText()
-            updateLastMessage()
+        this.viewHolder = viewHolder
+        updateAvatar()
+        updateText()
+        updateLastMessage()
 
     }
 

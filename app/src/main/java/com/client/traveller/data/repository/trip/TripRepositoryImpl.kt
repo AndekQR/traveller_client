@@ -1,8 +1,6 @@
 package com.client.traveller.data.repository.trip
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import com.client.traveller.data.db.TripDao
 import com.client.traveller.data.db.entities.Trip
@@ -10,12 +8,9 @@ import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.Trips
 import com.client.traveller.ui.util.Coroutines.io
 import com.client.traveller.ui.util.toFlow
-import com.google.firebase.firestore.EventListener
-import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
 import kotlin.coroutines.suspendCoroutine
 
 @ExperimentalCoroutinesApi
@@ -37,7 +32,8 @@ class TripRepositoryImpl(
      */
     @ExperimentalCoroutinesApi
     private fun initAllTrips() {
-        this.tripList =  this.trips.getAllTrips().toFlow().map{it.toObjects(Trip::class.java)}.asLiveData()
+        this.tripList =
+            this.trips.getAllTrips().toFlow().map { it.toObjects(Trip::class.java) }.asLiveData()
     }
 
     /**
@@ -48,9 +44,10 @@ class TripRepositoryImpl(
     override suspend fun initCurrentTripUpdates() {
         val currentTripUid = this.tripDao.getCurrentTripNonLive()?.uid
         currentTripUid?.let {
-            this.trips.getTrip(it).toFlow().map { it.toObjects(Trip::class.java).toList() }.collect {list ->
-                this.tripDao.upsert(list.first())
-            }
+            this.trips.getTrip(it).toFlow().map { it.toObjects(Trip::class.java).toList() }
+                .collect { list ->
+                    this.tripDao.upsert(list.first())
+                }
         }
 //        currentTripUid?.let {
 //            trips.getTrip(it)
@@ -97,7 +94,7 @@ class TripRepositoryImpl(
     }
 
     @ExperimentalCoroutinesApi
-    override suspend fun saveTripToLocalDB(trip: Trip)  {
+    override suspend fun saveTripToLocalDB(trip: Trip) {
         this.tripDao.upsert(trip)
         this.initCurrentTripUpdates()
     }
@@ -115,7 +112,7 @@ class TripRepositoryImpl(
         this.trips.updateTripPersons(trip, ArrayList(emails))
     }
 
-    override suspend fun getTripByUid(tripUid: String) = withContext(Dispatchers.IO){
+    override suspend fun getTripByUid(tripUid: String) = withContext(Dispatchers.IO) {
         suspendCoroutine<Trip> { continuation ->
             trips.getTrip(tripUid).get().addOnSuccessListener { querySnapshot ->
                 val trip = querySnapshot.first().toObject(Trip::class.java)

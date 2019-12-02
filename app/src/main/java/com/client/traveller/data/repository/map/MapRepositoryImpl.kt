@@ -5,22 +5,34 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.request.transition.Transition
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.network.api.geocoding.GeocodingApiService
 import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.Location
+import com.client.traveller.data.network.api.places.API_KEY
+import com.client.traveller.data.network.api.places.PlacesApiService
+import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
+import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.ui.util.formatToApi
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.android.synthetic.main.my_place_map_marker.view.*
 import kotlinx.android.synthetic.main.my_simple_marker_view.view.*
 
 
@@ -61,7 +73,9 @@ class MapRepositoryImpl(
         return mapUtils.getDistance(origin, destination, waypoints)
     }
 
-    override suspend fun drawRouteToMarker() = this.mapUtils.drawRouteToMarker(this.mapUtils.getMarkerFromMap())
+    override suspend fun drawRouteToMainMarker() =
+        this.mapUtils.drawRouteToMarker(this.mapUtils.getMarkerFromMap())
+
     override suspend fun drawRouteToLocation(
         origin: String,
         destination: String,
@@ -90,14 +104,16 @@ class MapRepositoryImpl(
         var address = geocoding.geocode(trip.startAddress!!)
         var latlng = address.results.first().geometry.location.toLatLng()
         startLatLng = latlng.formatToApi()
-        bitmap?.let { mapUtils.drawMarkerFromBitmap(
-            latlng,
-            it
-        ) }
+        bitmap?.let {
+            mapUtils.drawMarkerFromBitmap(
+                latlng,
+                it
+            )
+        }
 
         //waypoints
         trip.waypoints?.forEachIndexed { index, waypointAddress ->
-            view.marker_text.text = "${index+1}"
+            view.marker_text.text = "${index + 1}"
             val address = geocoding.geocode(waypointAddress)
             val latlng = address.results.first().geometry.location.toLatLng()
             waypointsLatLng.add(latlng.formatToApi())
@@ -120,6 +136,18 @@ class MapRepositoryImpl(
         this.mapUtils.drawRouteToLocation(startLatLng, endLatLng, waypointsLatLng, travelMode)
     }
 
+    override suspend fun drawNearbyPlaceMarkers(places: Set<NearbySearchResponse>) {
+        val placesResult = mutableSetOf<Result>()
+        places.forEach {
+            placesResult.addAll(it.results)
+        }
+        this.mapUtils.drawPlaceMarkersInCluster(placesResult)
+    }
+
+    override fun getPhotoUrl(reference: String, width: Int): String {
+        return "${PlacesApiService.BASE_URL}photo?maxwidth=${width}&photoreference=${reference}&key=$API_KEY"
+    }
+
     private fun Location.toLatLng(): LatLng {
         return LatLng(this.lat, this.lng)
     }
@@ -135,5 +163,27 @@ class MapRepositoryImpl(
         view.draw(canvas)
         return bitmap
     }
+
+    override fun centerCameraOnLocation(location: LatLng, putMarker: Boolean) {
+        this.mapUtils.centerCameraOnLocation(location)
+        if (putMarker) this.mapUtils.drawMainMarker(location)
+    }
+
+    override suspend fun centerCameraOnRoute(
+        startAddress: String,
+        waypoints: ArrayList<String>?,
+        endAddress: String
+    ) {
+        val startAddressLatLng = this.geocoding.geocode(startAddress).results.first().geometry.location.toLatLng()
+        val waypointsLatLng = waypoints?.map {
+            this.geocoding.geocode(it).results.first().geometry.location.toLatLng()
+        }?.toCollection(ArrayList())
+        val endAddressLatLng = this.geocoding.geocode(endAddress).results.first().geometry.location.toLatLng()
+        this.mapUtils.centerCameraOnRoute(startAddressLatLng, waypointsLatLng, endAddressLatLng)
+    }
+
+    override fun elementOnMap() = this.mapUtils.elementsOnMap()
+    override fun getActualMarker() = this.mapUtils.getMarkerFromMap()
+    override fun disableMapDragging() = this.mapUtils.disableMapDragging()
 
 }

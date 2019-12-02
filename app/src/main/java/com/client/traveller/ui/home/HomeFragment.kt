@@ -9,11 +9,13 @@ import android.view.ViewGroup
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.ui.util.ScopedFragment
 import com.google.android.gms.maps.SupportMapFragment
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
@@ -26,6 +28,8 @@ class HomeFragment : ScopedFragment(), KodeinAware {
     private val factory: HomeViewModelFactory by instance()
     private lateinit var viewModel: HomeViewModel
     private lateinit var toggle: ActionBarDrawerToggle
+
+    private lateinit var currentTrip: Trip
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,6 +60,7 @@ class HomeFragment : ScopedFragment(), KodeinAware {
             launch {
                 this@HomeFragment.viewModel.drawTripRoute(trip)
             }
+            this.currentTrip = trip
         })
 
     }
@@ -65,6 +70,30 @@ class HomeFragment : ScopedFragment(), KodeinAware {
 
         my_location.setOnClickListener { viewModel.centerOnMe() }
         clear_button.setOnClickListener { this.viewModel.clearMap() }
+        center_road_button.setOnClickListener {
+            if (::currentTrip.isInitialized)
+                lifecycleScope.launch(Dispatchers.Main) {
+                    this@HomeFragment.viewModel.centerRoad(this@HomeFragment.currentTrip.startAddress!!, this@HomeFragment.currentTrip.waypoints, this@HomeFragment.currentTrip.endAddress!!)
+                }
+        }
+        search_nearby_places_button.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.Main) {
+                search_nearby_places_button.visibility = View.INVISIBLE
+                search_nearby_places_progress_bar.visibility = View.VISIBLE
+                this@HomeFragment.viewModel.drawMarkerNearbyPlaces()
+                search_nearby_places_progress_bar.visibility = View.GONE
+                search_nearby_places_button.visibility = View.VISIBLE
+            }
+        }
+        draw_route_button.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.Main) {
+                draw_route_button.visibility = View.INVISIBLE
+                draw_route_button_progress_bar.visibility = View.VISIBLE
+                this@HomeFragment.viewModel.drawRouteToMainMarker()
+                draw_route_button.visibility = View.VISIBLE
+                draw_route_button_progress_bar.visibility = View.GONE
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

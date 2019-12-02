@@ -165,7 +165,7 @@ class LocationProviderImpl(
      * kamera śledząca jest aktywna
      */
     fun updateLocationUI() = Coroutines.main {
-        if (preferenceProvider.getPreferenceState(CAMERA_TRACKING) && currentLocation != null) {
+        if (preferenceProvider.getCameraTracking() && currentLocation != null) {
             val cameraPosition = CameraPosition.Builder().zoom(17F).tilt(50F).target(
                 LatLng(
                     currentLocation?.latitude!!,
@@ -246,15 +246,15 @@ class LocationProviderImpl(
     }
 
     override fun sendingLocationData(): Boolean {
-        if (!requestingLocationUpdates && preferenceProvider.getPreferenceState(SEND_LOCATION)) {
+        if (!requestingLocationUpdates && preferenceProvider.getSendLocation()) {
             return true
-        } else if (requestingLocationUpdates && !preferenceProvider.getPreferenceState(SEND_LOCATION)) {
+        } else if (requestingLocationUpdates && !preferenceProvider.getSendLocation()
+        ) {
             return false
-        } else if (requestingLocationUpdates && preferenceProvider.getPreferenceState(SEND_LOCATION)) {
+        } else if (requestingLocationUpdates && preferenceProvider.getSendLocation()
+        ) {
             return true
-        } else if (!requestingLocationUpdates && !preferenceProvider.getPreferenceState(
-                SEND_LOCATION
-            )
+        } else if (!requestingLocationUpdates && !preferenceProvider.getSendLocation()
         ) {
             return false
         }
