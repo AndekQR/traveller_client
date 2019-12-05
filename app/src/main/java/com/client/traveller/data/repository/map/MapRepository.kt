@@ -6,6 +6,8 @@ import android.os.Bundle
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
+import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.GeocodingResponse
+import com.client.traveller.data.network.api.geocoding.response.reverseGeocodingResponse.ReverseGeocodingResponse
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.google.android.gms.maps.SupportMapFragment
@@ -39,7 +41,7 @@ interface MapRepository {
     suspend fun drawRouteToLocation(
         origin: String,
         destination: String,
-        locations: List<String>,
+        locations: List<String>?,
         mode: TravelMode
     )
 
@@ -51,4 +53,6 @@ interface MapRepository {
     fun getPhotoUrl(reference: String, width: Int): String
     fun getActualMarker(): Marker?
     fun disableMapDragging()
+    suspend fun geocodeAddress(address: String): GeocodingResponse
+    suspend fun reverseGeocoding(latlng: String): ReverseGeocodingResponse
 }

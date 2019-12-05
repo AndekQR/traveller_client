@@ -103,6 +103,15 @@ fun LatLng.formatToApi(): String {
     return "${this.latitude},${this.longitude}"
 }
 
+fun com.client.traveller.data.network.api.places.response.nearbySearchResponse.Location.toLatLng(): LatLng {
+    return LatLng(this.lat, this.lng)
+}
+
+fun com.client.traveller.data.network.api.geocoding.response.geocodingResponse.Location.toLatLng(): LatLng {
+    return LatLng(this.lat, this.lng)
+}
+
+
 /**
  * sprawdza czy jakikolwiek element z pierwszej listy jest taki sam jak jakikolwiek element z drugiej listy
  */

@@ -34,6 +34,7 @@ import com.client.traveller.ui.home.HomeViewModelFactory
 import com.client.traveller.ui.nearby.NearbyPlacesViewModelFactory
 import com.client.traveller.ui.settings.SettingsViewModelFactory
 import com.client.traveller.ui.trip.TripViewModelFactory
+import com.client.traveller.ui.tripInfo.TripInfoViewModelFactory
 import com.google.android.gms.location.LocationServices
 import com.jakewharton.threetenabp.AndroidThreeTen
 import org.kodein.di.Kodein
@@ -139,6 +140,7 @@ class TravellerAplication : Application(), KodeinAware {
                 instance()
             )
         }
+        bind() from provider { TripInfoViewModelFactory(instance(), instance(), instance(), instance())}
 
 
     }

@@ -17,7 +17,6 @@
         android:layout_height="28dp"
         android:layout_centerHorizontal="true"
         android:paddingTop="2dp"
-        android:paddingStart="1dp"
         />
 
 

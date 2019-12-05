@@ -40,14 +40,14 @@ class PlacesRepositoryImpl(
     )
 
     //TODO switch map lokalna baza i places api, trzeba dodać jakiś interceptor czy jest internet
-    override suspend fun getNearbyPlaces(latlng: String?): Set<NearbySearchResponse> {
+    override suspend fun getNearbyPlaces(latlng: String?, radius: Int?): Set<NearbySearchResponse> {
         val location = latlng
             ?: "${locationProvider.currentLocation?.latitude},${locationProvider.currentLocation?.longitude}"
         val listofNearbyResponse = mutableSetOf<NearbySearchResponse>()
         this.searchedTypes.forEach { type ->
-            val radius = preferencesProvider.getNearbyPlacesSearchDistance()
+            val myRadius = radius ?: preferencesProvider.getNearbyPlacesSearchDistance()
             val response: NearbySearchResponse
-            response = if (radius != null) this.placesApiClient.findNearbyPlaces(latlng = location, type = type, radius = radius)
+            response = if (myRadius != null) this.placesApiClient.findNearbyPlaces(latlng = location, type = type, radius = myRadius)
             else this.placesApiClient.findNearbyPlaces(latlng = location, type = type)
             listofNearbyResponse.add(response)
         }
@@ -80,6 +80,9 @@ class PlacesRepositoryImpl(
         return this.wikipediaApiService.getPageSummary(pageTitle)
     }
 
+    /**
+     * zwraca obiektu typu section ktore zawierają odkodowany nagłówek i treść sekcji z wikipedia
+     */
     override suspend fun getPageSections(pageTitle: String): List<Section> {
         val reponse = this.wikipediaApiService.getSectionsHtml(pageTitle)
         val sectionsHTML = reponse.remaining.sections

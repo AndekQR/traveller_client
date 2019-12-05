@@ -34,6 +34,7 @@ class MapUtilsImpl(
     private var mainMarker: Marker? = null
     private val polylinesOnMap = mutableListOf<Polyline>()
     private val markers = mutableListOf<Marker>()
+    private val clusterItems = mutableListOf<NearbyPlaceClusterItem>()
 
     /**
      * isBuildingEnabled = włącza wyświetlanie budynków 3D
@@ -95,7 +96,9 @@ class MapUtilsImpl(
 
     override fun drawPlaceMarkersInCluster(places: Set<Result>) {
         places.forEach {
-            this.clusterManager.addItem(NearbyPlaceClusterItem(it))
+            val item = NearbyPlaceClusterItem(it)
+            this.clusterItems.add(item)
+            this.clusterManager.addItem(item)
         }
         this.clusterManager.cluster()
     }
@@ -121,6 +124,7 @@ class MapUtilsImpl(
     override fun onMapLongClick(position: LatLng) {
         val marker = this.drawMainMarker(position)
         marker?.let {
+            this.mainMarker?.remove()
             this.mainMarker = it
         }
     }
@@ -150,21 +154,23 @@ class MapUtilsImpl(
     override suspend fun drawRouteToLocation(
         origin: String,
         destination: String,
-        locations: List<String>,
+        locations: List<String>?,
         mode: TravelMode
     ) {
         val start = origin.trim().replace(" ", "+")
         val stop = destination.trim().replace(" ", "+")
         val waypoints = this.getWaypointsString(waypoints = locations)
 
-        val result =
-            directionsApiService.getDirectionsWithWaypoints(start, stop, mode.name, waypoints)
-        this.drawRoute(result)
+        val result = if (waypoints == null) this.directionsApiService.getDirections(start, stop, mode.name)
+        else directionsApiService.getDirectionsWithWaypoints(start, stop, mode.name, waypoints)
+        val polyline =  this.drawRoute(result)
+        polyline?.let { this.polylinesOnMap.add(it) }
+
 
     }
 
-    private fun getWaypointsString(waypoints: List<String>): String {
-        return waypoints.map { it.trim() }.joinToString("|")
+    private fun getWaypointsString(waypoints: List<String>?): String? {
+        return waypoints?.map { it.trim() }?.joinToString("|")
     }
 
     override suspend fun drawRouteToMarker(marker: Marker?): Polyline? {
@@ -204,8 +210,14 @@ class MapUtilsImpl(
         this.polylinesOnMap.forEach {
             it.remove()
         }
+        this.markers.forEach {
+            it.remove()
+        }
+        this.clusterItems.forEach {
+            this.clusterManager.removeItem(it)
+        }
         this.markers.clear()
-        this.clusterManager.clearItems()
+        this.clusterItems.clear()
         this.polylinesOnMap.clear()
     }
 
@@ -268,7 +280,7 @@ class MapUtilsImpl(
                 origin,
                 destination,
                 TravelMode.driving.name,
-                this.getWaypointsString(waypoints)
+                this.getWaypointsString(waypoints)!!
             )
             waypoints == null -> result =
                 directionsApiService.getDirections(origin, destination, TravelMode.driving.name)

@@ -59,7 +59,7 @@ class HomeViewModel(
     suspend fun drawRouteToLocation(
         origin: String = mapRepository.getCurrentLocation().format(),
         destination: String,
-        locations: List<String>,
+        locations: List<String>?,
         mode: TravelMode = TravelMode.driving
     ) {
         mapRepository.drawRouteToLocation(origin, destination, locations, mode)
@@ -99,4 +99,5 @@ class HomeViewModel(
         }
     }
     suspend fun drawRouteToMainMarker() = this.mapRepository.drawRouteToMainMarker()
+    fun getCurrentLocation() = this.mapRepository.getCurrentLocation()
 }

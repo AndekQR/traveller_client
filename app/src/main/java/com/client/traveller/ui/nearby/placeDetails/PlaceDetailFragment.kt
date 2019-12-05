@@ -214,6 +214,7 @@ class PlaceDetailFragment : Fragment(), KodeinAware {
         }
         val latlng = com.google.android.gms.maps.model.LatLng(location.lat, location.lng)
         this.viewModel.centerOnLocation(latlng, true)
+        this.viewModel.disableMapDragging()
     }
 
     private fun updateSearchResults(name: String) = lifecycleScope.launch {

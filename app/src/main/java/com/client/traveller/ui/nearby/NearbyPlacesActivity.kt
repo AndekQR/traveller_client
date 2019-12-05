@@ -26,6 +26,7 @@ import com.client.traveller.ui.chat.ChatActivity
 import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
+import com.client.traveller.ui.tripInfo.TripInfoActivity
 import com.client.traveller.ui.util.Coroutines
 import com.client.traveller.ui.util.ScopedAppActivity
 import com.client.traveller.ui.util.contains
@@ -180,7 +181,10 @@ class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware,
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.trip -> {
-
+                    Intent(this, TripInfoActivity::class.java).also {
+                        startActivity(it)
+                        this.finish()
+                    }
                 }
                 R.id.map -> {
                     Intent(this, HomeActivity::class.java).also {

@@ -19,7 +19,7 @@ interface MapUtils : GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListen
     suspend fun drawRouteToLocation(
         origin: String,
         destination: String,
-        locations: List<String>,
+        locations: List<String>?,
         mode: TravelMode
     )
 

@@ -33,10 +33,8 @@ import com.client.traveller.ui.dialog.Dialog
 import com.client.traveller.ui.nearby.NearbyPlacesActivity
 import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
-import com.client.traveller.ui.util.Coroutines
-import com.client.traveller.ui.util.NoCurrentLocationException
-import com.client.traveller.ui.util.hideLoding
-import com.client.traveller.ui.util.showLoading
+import com.client.traveller.ui.tripInfo.TripInfoActivity
+import com.client.traveller.ui.util.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.libraries.places.api.model.AutocompletePrediction
@@ -52,6 +50,7 @@ import com.paulrybitskyi.persistentsearchview.listeners.OnSuggestionChangeListen
 import com.paulrybitskyi.persistentsearchview.utils.SuggestionCreationUtil
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.nav_header.view.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -106,11 +105,30 @@ class HomeActivity : AppCompatActivity(),
         this.navController = host.navController
         this.navController.addOnDestinationChangedListener(this)
 
-        when (intent.extras?.getString("frag")) {
-            "profile" -> Navigation.findNavController(
-                this,
-                R.id.nav_host_fragment_home
-            ).navigate(R.id.profileFragment)
+        this.checkForActions()
+    }
+
+    /**
+     * sprawdza czy aktywność została uruchomiona z dodatkowymi argumentami
+     * które trzeba obsłużyć
+     */
+    private fun checkForActions(){
+        val extras = intent.extras
+        extras?.let {
+            if (it.containsKey(ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name)){
+                val latlng = it.getString(ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name)
+                lifecycleScope.launch(Dispatchers.Main) {
+                    latlng?.let {location -> this@HomeActivity.viewModel.drawRouteToLocation(destination = location, locations = null)
+                        this@HomeActivity.viewModel.centerRoad(this@HomeActivity.viewModel.getCurrentLocation().format(), null, location)
+                    }
+                }
+            }
+            if (it.containsKey(ActivitiesAction.HOME_ACTIVITY_OPEN_PROFILE.name)){
+                Navigation.findNavController(
+                    this,
+                    R.id.nav_host_fragment_home
+                ).navigate(R.id.profileFragment)
+            }
         }
     }
 
@@ -340,6 +358,10 @@ class HomeActivity : AppCompatActivity(),
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.trip -> {
+                    Intent(this, TripInfoActivity::class.java).also {
+                        startActivity(it)
+                        this.finish()
+                    }
                 }
                 R.id.chat -> {
                     Intent(this, ChatActivity::class.java).also {

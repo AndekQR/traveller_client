@@ -1,11 +1,18 @@
 package com.client.traveller.ui.nearby.mainFragment
 
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
 import android.view.View
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.client.traveller.R
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
+import com.client.traveller.ui.home.HomeActivity
+import com.client.traveller.ui.util.ActivitiesAction
+import com.client.traveller.ui.util.formatToApi
+import com.client.traveller.ui.util.toLatLng
+import com.google.android.gms.maps.model.LatLng
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import com.xwray.groupie.kotlinandroidextensions.Item
 import kotlinx.android.synthetic.main.item_nearby_place.*
@@ -26,6 +33,15 @@ class NearbyPlacesListItem(
             updateRatingStars()
             updateTypes()
             updateStatus()
+        }
+        viewHolder.navigate_to_button.setOnClickListener {
+            Intent(context, HomeActivity::class.java).also {
+                val bundle = Bundle()
+                val location = nearbySearchResponseResult.geometry.location.toLatLng().formatToApi()
+                bundle.putString(ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name, location)
+                it.putExtras(bundle)
+                context?.startActivity(it)
+            }
         }
     }
 

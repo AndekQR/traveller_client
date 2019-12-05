@@ -25,5 +25,9 @@ data class Trip(
     @PrimaryKey(autoGenerate = false)
     var id: Int = CURRENT_TRIP_ID
 
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
+    }
+
 
 }

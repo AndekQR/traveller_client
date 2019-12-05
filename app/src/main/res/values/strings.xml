@@ -123,7 +123,7 @@
     <string name="walking">Pieszo</string>
     <string name="type">Typ</string>
 
-<!--    google place types-->
+    <!--    google place types-->
     <string name="accounting">księgowość</string>
     <string name="airport">port lotniczy</string>
     <string name="amusement_park">park rozrywki</string>
@@ -231,6 +231,12 @@
     <string name="details">Szczegóły</string>
     <string name="nearby_places_search_distance_preferences">Promień wyszukiwania miejsc w pobliżu</string>
     <string name="must_be_in_meters">Wartość musi być podana w metrach</string>
+    <string name="trip_plan">Plan wycieczki:</string>
+    <string name="begin">Rozpoczęcie:</string>
+    <string name="trip_progress">Przebieg wycieczki:</string>
+    <string name="end">Zakończenie:</string>
+    <string name="no_trip_waypoints">Brak punktów wycieczki</string>
+    <string name="load_more">Załaduj więcej</string>
 
 
 </resources>

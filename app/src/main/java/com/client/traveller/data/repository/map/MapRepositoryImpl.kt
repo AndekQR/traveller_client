@@ -21,7 +21,9 @@ import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.network.api.geocoding.GeocodingApiService
+import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.GeocodingResponse
 import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.Location
+import com.client.traveller.data.network.api.geocoding.response.reverseGeocodingResponse.ReverseGeocodingResponse
 import com.client.traveller.data.network.api.places.API_KEY
 import com.client.traveller.data.network.api.places.PlacesApiService
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
@@ -79,7 +81,7 @@ class MapRepositoryImpl(
     override suspend fun drawRouteToLocation(
         origin: String,
         destination: String,
-        locations: List<String>,
+        locations: List<String>?,
         mode: TravelMode
     ) {
         mapUtils.drawRouteToLocation(origin, destination, locations, mode)
@@ -185,5 +187,7 @@ class MapRepositoryImpl(
     override fun elementOnMap() = this.mapUtils.elementsOnMap()
     override fun getActualMarker() = this.mapUtils.getMarkerFromMap()
     override fun disableMapDragging() = this.mapUtils.disableMapDragging()
+    override suspend fun geocodeAddress(address: String) = this.geocoding.geocode(address)
+    override suspend fun reverseGeocoding(latlng: String) = this.geocoding.reverseGeocode(latlng)
 
 }

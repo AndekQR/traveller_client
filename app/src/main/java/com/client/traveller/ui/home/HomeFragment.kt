@@ -102,4 +102,5 @@ class HomeFragment : ScopedFragment(), KodeinAware {
         }
         return super.onOptionsItemSelected(item)
     }
+
 }
