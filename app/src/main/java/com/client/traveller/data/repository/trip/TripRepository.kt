@@ -13,4 +13,5 @@ interface TripRepository {
     fun updateTripPersons(trip: Trip, emails: List<String>)
     suspend fun initCurrentTripUpdates()
     suspend fun getTripByUid(tripUid: String): Trip
+    fun updateWaypoints(waypoints: List<String>, tripToUpdate: Trip)
 }

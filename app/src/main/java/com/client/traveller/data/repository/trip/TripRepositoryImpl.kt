@@ -121,4 +121,8 @@ class TripRepositoryImpl(
         }
     }
 
+    override fun updateWaypoints(waypoints: List<String>, tripToUpdate: Trip) {
+        this.trips.updateWaypoints(ArrayList(waypoints), tripToUpdate)
+    }
+
 }

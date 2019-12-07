@@ -20,7 +20,8 @@ interface MapUtils : GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListen
         origin: String,
         destination: String,
         locations: List<String>?,
-        mode: TravelMode
+        mode: TravelMode,
+        clearAble: Boolean = true
     )
 
     fun clearMap()

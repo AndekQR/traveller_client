@@ -1,9 +1,9 @@
 package com.client.traveller.ui.tripInfo
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,22 +11,31 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
-import com.client.traveller.ui.util.NonScrollListView
-import com.client.traveller.ui.util.hideProgressBar
-import com.client.traveller.ui.util.setMargins
-import com.client.traveller.ui.util.showProgressBar
+import com.client.traveller.ui.dialog.Dialog
+import com.client.traveller.ui.home.HomeActivity
+import com.client.traveller.ui.util.*
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.trip_info_fragment.*
+import kotlinx.android.synthetic.main.trip_info_recyclerview_dragable_item.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
+import java.util.*
+
 
 class TripInfoFragment : Fragment(), KodeinAware {
 
@@ -38,13 +47,15 @@ class TripInfoFragment : Fragment(), KodeinAware {
     private lateinit var tripTime: TextView
     private lateinit var tripStartLocation: TextView
     private lateinit var tripEndLocation: TextView
-    private lateinit var tripProgressListView: ListView
-    private lateinit var listViewAdapter: ArrayAdapter<String>
+    private  var tripWaypointsRecyclerView: RecyclerView? = null
+    private  var groupAdapter: GroupAdapter<GroupieViewHolder>? = null
     private lateinit var anotherPlacesLayout: LinearLayout
 
     private lateinit var currentUser: User
-    private var waypoints = mutableListOf<String>()
-    private var waypointsFormatted = mutableListOf<String>()
+    private lateinit var currentTrip: Trip
+    private var dragableItems = mutableListOf<DragableItem>()
+    private val anotherPlaces = mutableListOf<Pair<ListView, ArrayAdapter<String>>>()
+    private val anotherPlacesTetView = mutableListOf<TextView>()
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -57,20 +68,42 @@ class TripInfoFragment : Fragment(), KodeinAware {
             this.currentUser = user
 
             this.viewModel.currentTrip.observe(viewLifecycleOwner, Observer { trip ->
-                if (trip == null) return@Observer
-                this.waypoints = trip.waypoints?.toMutableList()!!
-                this.waypointsFormatted = trip.waypoints?.mapIndexed { index, s ->
-                    "${index+1}. $s"
-                }?.toMutableList()!!
+                if (trip == null) {
+                    cards.visibility = View.GONE
+                    no_trip_layout.visibility = View.VISIBLE
+                    return@Observer
+                }
+                cards.visibility = View.VISIBLE
+                no_trip_layout.visibility = View.GONE
                 progress_bar.showProgressBar()
+                this.clearOldData()
+                this.viewModel.waypoints = trip.waypoints?.toMutableList()!!
+                this.currentTrip = trip
                 this.bindUI(trip)
-                // to znaczy że autor
-//                if (this.currentUser.idUserFirebase == trip.author?.idUserFirebase) {
-                    this.bindAdminUI(trip)
-//                }
+                this.bindAdminUI(trip)
                 progress_bar.hideProgressBar()
             })
         })
+    }
+
+    private fun clearOldData() {
+        this.viewModel.waypoints.clear()
+        this.dragableItems.clear()
+        this.anotherPlaces.forEach {
+           it.second.clear()
+            if (::anotherPlacesLayout.isInitialized) {
+                this.anotherPlacesLayout.removeView(it.first)
+
+            }
+        }
+        this.anotherPlacesTetView.forEach {
+            if (::anotherPlacesLayout.isInitialized) {
+                this.anotherPlacesLayout.removeView(it)
+
+            }
+        }
+        this.anotherPlaces.clear()
+        // this.groupAdapter jest czyszczony przy dodawaniu nowych elementów
     }
 
     private fun bindAdminUI(trip: Trip) {
@@ -83,7 +116,8 @@ class TripInfoFragment : Fragment(), KodeinAware {
     private fun initStartAddressPlaces(
         startAddress: String
     ) = lifecycleScope.launch {
-        val nearbyStartAddress = this@TripInfoFragment.viewModel.getNearbyPlaces(startAddress).toMutableList()
+        val nearbyStartAddress =
+            this@TripInfoFragment.viewModel.getNearbyPlaces(startAddress).toMutableList()
         var numberOfListedPlace = 0
         val listToAdapter = mutableListOf<String>()
         (0..6).forEachIndexed { index, i ->
@@ -93,12 +127,20 @@ class TripInfoFragment : Fragment(), KodeinAware {
             }
         }
         val listView = this@TripInfoFragment.createListView()
-        val adapter = ArrayAdapter<String>(context!!, R.layout.trip_info_list_view_item, listToAdapter)
+        val adapter =
+            ArrayAdapter<String>(context!!, R.layout.trip_info_list_view_item, listToAdapter)
         val button = this@TripInfoFragment.createButton()
         listView.adapter = adapter
         listView.addFooterView(button)
         listView.onItemClickListener = this@TripInfoFragment.onItemClickListener
-        this@TripInfoFragment.anotherPlacesLayout.addView(this@TripInfoFragment.createTextView(startAddress))
+        val textView = this@TripInfoFragment.createTextView(
+            startAddress
+        )
+        this@TripInfoFragment.anotherPlacesLayout.addView(
+            textView
+        )
+        this@TripInfoFragment.anotherPlacesTetView.add(textView)
+        this@TripInfoFragment.anotherPlaces.add(listView to adapter)
         this@TripInfoFragment.anotherPlacesLayout.addView(listView)
 
         button.setOnClickListener {
@@ -115,9 +157,10 @@ class TripInfoFragment : Fragment(), KodeinAware {
 
     private fun initWaypointsAddressPlaces(
         waypoints: ArrayList<String>
-    ) = lifecycleScope.launch  {
+    ) = lifecycleScope.launch {
         waypoints.forEach {
-            val nearbyStartAddress = this@TripInfoFragment.viewModel.getNearbyPlaces(it).toMutableList()
+            val nearbyStartAddress =
+                this@TripInfoFragment.viewModel.getNearbyPlaces(it).toMutableList()
             var numberOfListedPlace = 0
             val listToAdapter = mutableListOf<String>()
             (0..6).forEachIndexed { index, i ->
@@ -127,12 +170,20 @@ class TripInfoFragment : Fragment(), KodeinAware {
                 }
             }
             val listView = this@TripInfoFragment.createListView()
-            val adapter = ArrayAdapter<String>(context!!, R.layout.trip_info_list_view_item, listToAdapter)
+            val adapter =
+                ArrayAdapter<String>(context!!, R.layout.trip_info_list_view_item, listToAdapter)
             val button = this@TripInfoFragment.createButton()
             listView.adapter = adapter
             listView.addFooterView(button)
             listView.onItemClickListener = this@TripInfoFragment.onItemClickListener
-            this@TripInfoFragment.anotherPlacesLayout.addView(this@TripInfoFragment.createTextView(it))
+            val textView = this@TripInfoFragment.createTextView(
+                it
+            )
+            this@TripInfoFragment.anotherPlacesLayout.addView(
+                textView
+            )
+            this@TripInfoFragment.anotherPlacesTetView.add(textView)
+            this@TripInfoFragment.anotherPlaces.add(listView to adapter)
             this@TripInfoFragment.anotherPlacesLayout.addView(listView)
 
             button.setOnClickListener {
@@ -152,7 +203,8 @@ class TripInfoFragment : Fragment(), KodeinAware {
     private fun initEndAddressPlaces(
         endAddress: String
     ) = lifecycleScope.launch {
-        val nearbyStartAddress = this@TripInfoFragment.viewModel.getNearbyPlaces(endAddress).toMutableList()
+        val nearbyStartAddress =
+            this@TripInfoFragment.viewModel.getNearbyPlaces(endAddress).toMutableList()
         var numberOfListedPlace = 0
         val listToAdapter = mutableListOf<String>()
         (0..6).forEachIndexed { index, i ->
@@ -162,12 +214,20 @@ class TripInfoFragment : Fragment(), KodeinAware {
             }
         }
         val listView = this@TripInfoFragment.createListView()
-        val adapter = ArrayAdapter<String>(context!!, R.layout.trip_info_list_view_item, listToAdapter)
+        val adapter =
+            ArrayAdapter<String>(context!!, R.layout.trip_info_list_view_item, listToAdapter)
         val button = this@TripInfoFragment.createButton()
         listView.adapter = adapter
         listView.addFooterView(button)
         listView.onItemClickListener = this@TripInfoFragment.onItemClickListener
-        this@TripInfoFragment.anotherPlacesLayout.addView(this@TripInfoFragment.createTextView(endAddress))
+        val textView = this@TripInfoFragment.createTextView(
+            endAddress
+        )
+        this@TripInfoFragment.anotherPlacesLayout.addView(
+            textView
+        )
+        this@TripInfoFragment.anotherPlacesTetView.add(textView)
+        this@TripInfoFragment.anotherPlaces.add(listView to adapter)
         this@TripInfoFragment.anotherPlacesLayout.addView(listView)
 
         button.setOnClickListener {
@@ -182,12 +242,52 @@ class TripInfoFragment : Fragment(), KodeinAware {
         }
     }
 
+    /**
+     * sprawdza czy nastąpiły zmiany
+     * jeżeli tak pokazuje przycisk do zapisania zmian
+     */
+    private fun checkForUnsavedChanges() {
+        if (this.viewModel.waypoints != this.currentTrip.waypoints) {
+            this.viewModel.unsavedChanges.postValue(true)
+        } else {
+            this.viewModel.unsavedChanges.postValue(false)
+        }
+    }
+
     private val onItemClickListener =
-        AdapterView.OnItemClickListener { parent, view, position, id ->
+        AdapterView.OnItemClickListener { parent, _, position, _ ->
             val value = parent.adapter.getItem(position) as String
-            this.waypoints.add(value)
-            this.waypointsFormatted.add("${this.waypointsFormatted.size+1}. $value")
-            this.listViewAdapter.notifyDataSetChanged()
+            if (this.currentUser.idUserFirebase == this.currentTrip.author?.idUserFirebase) {
+                this.viewModel.waypoints.add(value)
+                this.groupAdapter?.add(DragableItem(value))
+                this.groupAdapter?.notifyDataSetChanged()
+                this.checkForUnsavedChanges()
+            } else {
+                Dialog.Builder()
+                    .addMessage(getString(R.string.show_route_to) + value)
+                    .addPositiveButton("Tak") {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            progress_bar.showProgressBar()
+                            val latlng = this@TripInfoFragment.viewModel.geocodeAddress(value)
+                                .results.first().geometry.location.toLatLng()
+                            Intent(context, HomeActivity::class.java).also {
+                                val bundle = Bundle()
+                                bundle.putString(
+                                    ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name,
+                                    latlng.formatToApi()
+                                )
+                                it.putExtras(bundle)
+                                context?.startActivity(it)
+                            }
+                            progress_bar.hideProgressBar()
+                            it.dismiss()
+                        }
+                    }
+                    .addNegativeButton("Anuluj") {
+                        it.dismiss()
+                    }
+                    .build(parentFragmentManager, javaClass.simpleName)
+            }
         }
 
     private fun createListView(): NonScrollListView {
@@ -207,14 +307,14 @@ class TripInfoFragment : Fragment(), KodeinAware {
         loadMoreButton.setPadding(0, 5, 0, 5)
         loadMoreButton.setTextColor(Color.WHITE)
         loadMoreButton.textSize = 15F
-        loadMoreButton.background =  ContextCompat.getDrawable(context!!, R.color.colorPrimary)
+        loadMoreButton.background = ContextCompat.getDrawable(context!!, R.color.colorPrimary)
         return loadMoreButton
     }
 
     private fun createTextView(text: String): TextView {
         val textView = TextView(context)
         textView.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
-        textView.setPadding(10,10,10,10)
+        textView.setPadding(10, 10, 10, 10)
         textView.text = text
         textView.textSize = 18F
         return textView
@@ -232,28 +332,98 @@ class TripInfoFragment : Fragment(), KodeinAware {
         textView.typeface = Typeface.DEFAULT_BOLD
         textView.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
 
-        if (trip.waypoints?.isEmpty()!!) {
-            val empty = listOf(getString(R.string.no_trip_waypoints))
-            this.listViewAdapter =
-                ArrayAdapter(context!!, R.layout.trip_info_list_view_item, empty)
-            this.tripProgressListView.adapter = this.listViewAdapter
-        } else {
-                this.listViewAdapter =
-                    ArrayAdapter(context!!, R.layout.trip_info_list_view_item, this.waypointsFormatted)
-            this.tripProgressListView.adapter = this.listViewAdapter
-            this.tripProgressListView.setOnItemClickListener { parent, view, position, id ->
-                if (this.waypoints.size > 0) {
-                    this.waypoints.removeAt(position)
-                    val _waypointsFormatted = this.waypoints.mapIndexed { index, s ->
-                        "${index+1}. $s"
-                    }.toMutableList()
-                    this.waypointsFormatted.removeAll { true }
-                    this.waypointsFormatted.addAll(_waypointsFormatted)
-                    this.listViewAdapter.notifyDataSetChanged()
+        if (trip.waypoints != null) {
+            this.dragableItems.addAll(this.viewModel.waypoints.toDragableItems())
+            if (this.groupAdapter == null || this.tripWaypointsRecyclerView == null) {
+                this.groupAdapter = GroupAdapter<GroupieViewHolder>().apply {
+                    this.clear()
+                    this.addAll(this@TripInfoFragment.dragableItems)
+                }
+                this.tripWaypointsRecyclerView?.apply {
+                    layoutManager = LinearLayoutManager(this@TripInfoFragment.context)
+                    adapter = this@TripInfoFragment.groupAdapter
+                    this.isNestedScrollingEnabled = false
+                }
+                this.groupAdapter?.setOnItemClickListener { item, _ ->
+                    if (this.viewModel.waypoints.size > 0 && item is DragableItem && this.currentUser.idUserFirebase == this.currentTrip.author?.idUserFirebase) {
+                        this.viewModel.waypoints.remove(item.string)
+                        this.groupAdapter?.remove(item)
+                        this.groupAdapter?.notifyDataSetChanged()
+                        this.checkForUnsavedChanges()
+                    } else {
+                        val value = (item as DragableItem).string
+                        Dialog.Builder()
+                            .addMessage(getString(R.string.show_route_to) + value)
+                            .addPositiveButton("Tak") {
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    progress_bar.showProgressBar()
+                                    val latlng = this@TripInfoFragment.viewModel.geocodeAddress(value)
+                                        .results.first().geometry.location.toLatLng()
+                                    Intent(context, HomeActivity::class.java).also {
+                                        val bundle = Bundle()
+                                        bundle.putString(
+                                            ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name,
+                                            latlng.formatToApi()
+                                        )
+                                        it.putExtras(bundle)
+                                        context?.startActivity(it)
+                                    }
+                                    progress_bar.hideProgressBar()
+                                    it.dismiss()
+                                }
+                            }
+                            .addNegativeButton("Anuluj") {
+                                it.dismiss()
+                            }
+                            .build(parentFragmentManager, javaClass.simpleName)
+                    }
+                }
+                if (this.currentUser.idUserFirebase == this.currentTrip.author?.idUserFirebase) {
+                    this.setItemDragToRecyclerView(object : DragItemTouchHelperCallback.OnItemDragListener {
+                        override fun onItemDragged(indexFrom: Int, indexTo: Int) {
+                            if (indexFrom < indexTo) {
+                                for (i in indexFrom until indexTo) {
+                                    Collections.swap(this@TripInfoFragment.viewModel.waypoints, i, i + 1)
+                                    this@TripInfoFragment.groupAdapter?.notifyItemMoved(i, i + 1)
+                                }
+                            } else {
+                                for (i in indexFrom downTo indexTo + 1) {
+                                    Collections.swap(this@TripInfoFragment.viewModel.waypoints, i, i - 1)
+                                    this@TripInfoFragment.groupAdapter?.notifyItemMoved(i, i - 1)
+                                }
+                            }
+                        }
+
+                        override fun onDragEnd() {
+                            this@TripInfoFragment.checkForUnsavedChanges()
+                        }
+                    })
+                }
+            } else {
+                this.groupAdapter?.apply {
+                    this.clear()
+                    this.addAll(this@TripInfoFragment.dragableItems)
                 }
             }
         }
     }
+
+    private fun setItemDragToRecyclerView(onItemDrag: DragItemTouchHelperCallback.OnItemDragListener) {
+        val dragCallback = DragItemTouchHelperCallback
+            .Builder(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
+            .setDragEnabled(true)
+            .onItemDragListener(onItemDrag)
+            .build()
+        val itemTouchHelper = ItemTouchHelper(dragCallback)
+        itemTouchHelper.attachToRecyclerView(this.tripWaypointsRecyclerView)
+    }
+
+    private fun List<String>.toDragableItems(): List<DragableItem> {
+        return this.mapIndexed { _, s ->
+            DragableItem(s)
+        }
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -272,7 +442,7 @@ class TripInfoFragment : Fragment(), KodeinAware {
         this.tripTime = trip_time
         this.tripStartLocation = trip_start_location
         this.tripEndLocation = trip_end_location
-        this.tripProgressListView = trip_progress_list_view
+        this.tripWaypointsRecyclerView = trip_progress_list_view
         this.anotherPlacesLayout = another_places_layout
     }
 

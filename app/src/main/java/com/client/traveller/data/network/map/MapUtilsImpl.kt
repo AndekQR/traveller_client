@@ -155,7 +155,8 @@ class MapUtilsImpl(
         origin: String,
         destination: String,
         locations: List<String>?,
-        mode: TravelMode
+        mode: TravelMode,
+        clearAble: Boolean
     ) {
         val start = origin.trim().replace(" ", "+")
         val stop = destination.trim().replace(" ", "+")
@@ -164,9 +165,7 @@ class MapUtilsImpl(
         val result = if (waypoints == null) this.directionsApiService.getDirections(start, stop, mode.name)
         else directionsApiService.getDirectionsWithWaypoints(start, stop, mode.name, waypoints)
         val polyline =  this.drawRoute(result)
-        polyline?.let { this.polylinesOnMap.add(it) }
-
-
+        if (clearAble) polyline?.let { this.polylinesOnMap.add(it) }
     }
 
     private fun getWaypointsString(waypoints: List<String>?): String? {

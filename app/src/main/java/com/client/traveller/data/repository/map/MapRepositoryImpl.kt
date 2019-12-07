@@ -135,7 +135,7 @@ class MapRepositoryImpl(
         bitmap = this.getBitmapFromView(view)
         bitmap?.let { this.mapUtils.drawMarkerFromBitmap(latlng, it) }
 
-        this.mapUtils.drawRouteToLocation(startLatLng, endLatLng, waypointsLatLng, travelMode)
+        this.mapUtils.drawRouteToLocation(startLatLng, endLatLng, waypointsLatLng, travelMode, false)
     }
 
     override suspend fun drawNearbyPlaceMarkers(places: Set<NearbySearchResponse>) {

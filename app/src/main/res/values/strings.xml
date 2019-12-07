@@ -237,6 +237,9 @@
     <string name="end">Zakończenie:</string>
     <string name="no_trip_waypoints">Brak punktów wycieczki</string>
     <string name="load_more">Załaduj więcej</string>
+    <string name="show_route_to">\"Wyznaczyć drogę do \"</string>
+    <string name="no_trip">Brak wybranej wycieczki!</string>
+    <string name="update_trip">Zaktualizuj wycieczkę</string>
 
 
 </resources>

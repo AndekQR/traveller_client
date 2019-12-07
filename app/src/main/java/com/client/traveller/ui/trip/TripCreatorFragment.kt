@@ -14,6 +14,7 @@ import androidx.collection.arraySetOf
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
@@ -139,7 +140,8 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
                     if (viewModel.isTripParticipant(trip, currentUser)) {
                         add_trip_button.text = getString(R.string.choose_trip)
                         add_trip_button.setOnClickListener {
-                            this.jointTripButtonClick()
+                            viewModel.setTripAsActual(trip)
+                            view?.findNavController()?.navigateUp()
                         }
                     } else {
                         add_trip_button.visibility = View.GONE
@@ -149,7 +151,8 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
                 if (viewModel.isTripParticipant(trip, currentUser)) {
                     add_trip_button.text = getString(R.string.choose_trip)
                     add_trip_button.setOnClickListener {
-                        this.jointTripButtonClick()
+                        viewModel.setTripAsActual(trip)
+                        view?.findNavController()?.navigateUp()
                     }
                 }
             }
@@ -402,7 +405,6 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
     /**
      * Akcja po naciśnięciu przycisku "dodaj do wycieczki" w action bar
      */
-    // TODO trzeba zrobić powiadomienie do twórcy o tym że ktoś chce dołączyć do wycieczki i wszystko inne
     // Dla osoby w wycieczce ten przycsk nie powinien się pokazywać
     fun jointTripButtonClick() {
         if (this.tripView) {

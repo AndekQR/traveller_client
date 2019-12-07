@@ -3,6 +3,7 @@ package com.client.traveller.ui.nearby.placeDetails
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -21,13 +22,12 @@ import com.client.traveller.R
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Photo
 import com.client.traveller.data.network.api.places.response.placeDetailResponse.Location
 import com.client.traveller.data.network.api.places.response.placeDetailResponse.PlaceDetailResponse
+import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.nearby.NearbyPlacesViewModel
 import com.client.traveller.ui.nearby.NearbyPlacesViewModelFactory
-import com.client.traveller.ui.util.hideProgressBar
-import com.client.traveller.ui.util.showProgressBar
+import com.client.traveller.ui.util.*
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.material.button.MaterialButton
-import com.google.type.LatLng
 import kotlinx.android.synthetic.main.fragment_place_detail.*
 import kotlinx.android.synthetic.main.progress_bar.view.*
 import kotlinx.coroutines.launch
@@ -73,7 +73,7 @@ class PlaceDetailFragment : Fragment(), KodeinAware {
         this.updateName(result.name)
         this.updateSearchResults(result.name)
         this.updateMap(result.geometry.location)
-        this.initFab()
+        this.initFab(placeDetails.result.geometry.location)
         this.updatePhotos(result.photos)
         this.updateRating(result.rating)
         this.updateContactData(result.formattedAddress, result.website, result.formattedPhoneNumber)
@@ -189,9 +189,14 @@ class PlaceDetailFragment : Fragment(), KodeinAware {
         }
     }
 
-    private fun initFab() {
+    private fun initFab(location: Location) {
         fab.setOnClickListener {
-
+            Intent(context, HomeActivity::class.java).also {
+                val bundle = Bundle()
+                bundle.putString(ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name, location.toLatLng().formatToApi())
+                it.putExtras(bundle)
+                context?.startActivity(it)
+            }
         }
     }
 
@@ -284,3 +289,5 @@ class PlaceDetailFragment : Fragment(), KodeinAware {
     }
 
 }
+
+

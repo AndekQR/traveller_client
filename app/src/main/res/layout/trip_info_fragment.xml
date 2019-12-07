@@ -9,7 +9,7 @@
     android:background="@color/colorWhiteDarkMaterial"
     tools:context=".ui.tripInfo.TripInfoFragment">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="none"
@@ -19,182 +19,208 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             >
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/header"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/trip_item_background"
-                app:layout_constraintTop_toTopOf="parent"
-                android:layout_margin="4dp"
+                android:orientation="vertical"
+                android:id="@+id/cards"
                 >
-                <LinearLayout
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:background="@drawable/trip_item_background"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_margin="4dp"
                     >
-                    <TextView
-                        android:id="@+id/trip_name"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="10dp"
-                        android:textAlignment="center"
-                        android:textSize="25sp"
-                        android:textStyle="bold"
+                        android:orientation="vertical"
+                        >
+                        <TextView
+                            android:id="@+id/trip_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:textAlignment="center"
+                            android:textSize="25sp"
+                            android:textStyle="bold"
 
-                        />
+                            />
 
-                    <TextView
-                        android:id="@+id/trip_time"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="10dp"
-                        android:textAlignment="center"
-                        android:textSize="17sp"
-                        android:textStyle="bold"
-                        />
-                </LinearLayout>
+                        <TextView
+                            android:id="@+id/trip_time"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:textAlignment="center"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            />
+                    </LinearLayout>
 
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/trip_item_background"
-                android:layout_margin="4dp"
-                >
-                <LinearLayout
-                    android:id="@+id/linearLayout"
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorWhiteLightMaterial"
-                    android:orientation="vertical"
-                    android:padding="10dp"
-                    app:layout_constraintTop_toBottomOf="@id/header">
-
-                    <TextView
-                        android:id="@+id/trip_plane"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/trip_plan"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        />
-
+                    android:background="@drawable/trip_item_background"
+                    android:layout_margin="4dp"
+                    >
                     <LinearLayout
-                        android:id="@+id/trip_start_layout"
+                        android:id="@+id/linearLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:background="@color/colorWhiteLightMaterial"
+                        android:orientation="vertical"
+                        android:padding="10dp"
+                        app:layout_constraintTop_toBottomOf="@id/header">
 
                         <TextView
+                            android:id="@+id/trip_plane"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:padding="10dp"
-                            android:text="@string/begin"
-                            android:textSize="18sp" />
-
-                        <TextView
-                            android:id="@+id/trip_start_location"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:text="@string/trip_plan"
+                            android:textSize="20sp"
                             android:textStyle="bold"
-                            android:minHeight="40dp"
-                            android:background="@drawable/ic_rectangle_background"
-                            android:paddingStart="10dp"
-                            android:paddingEnd="10dp"
-                            android:gravity="center_vertical"
                             />
 
+                        <LinearLayout
+                            android:id="@+id/trip_start_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:text="@string/begin"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/trip_start_location"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:minHeight="40dp"
+                                android:background="@drawable/ic_rectangle_background"
+                                android:paddingStart="10dp"
+                                android:paddingEnd="10dp"
+                                android:gravity="center_vertical"
+                                />
+
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/trip_progress_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:text="@string/trip_progress"
+                                android:textSize="18sp" />
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/trip_progress_list_view"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:divider="@android:color/transparent"
+                                android:dividerHeight="7.0sp"
+
+                                />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/trip_end_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:text="@string/end"
+                                android:textSize="18sp" />
+                            <TextView
+                                android:id="@+id/trip_end_location"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:minHeight="40dp"
+                                android:paddingStart="10dp"
+                                android:paddingEnd="10dp"
+                                android:gravity="center_vertical"
+                                android:background="@drawable/ic_rectangle_background"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/another_places"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/trip_item_background"
+                    android:layout_margin="4dp"
+                    >
                     <LinearLayout
-                        android:id="@+id/trip_progress_layout"
+                        android:id="@+id/another_places_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:padding="10dp"
+                        >
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:padding="10dp"
-                            android:text="@string/trip_progress"
-                            android:textSize="18sp" />
-
-                        <com.client.traveller.ui.util.NonScrollListView
-                            android:id="@+id/trip_progress_list_view"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:divider="@android:color/transparent"
-                            android:dividerHeight="7.0sp"
-
-                            />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/trip_end_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="10dp"
-                            android:text="@string/end"
-                            android:textSize="18sp" />
-                        <TextView
-                            android:id="@+id/trip_end_location"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:minHeight="40dp"
-                            android:paddingStart="10dp"
-                            android:paddingEnd="10dp"
-                            android:gravity="center_vertical"
-                            android:background="@drawable/ic_rectangle_background"
+                            android:text="Miejsca w pobliżu..."
+                            android:textSize="20sp"
+                            android:paddingBottom="10dp"
                             android:textStyle="bold" />
 
+                        <ProgressBar
+                            android:id="@+id/another_places_progress_bar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:visibility="gone" />
+
+
                     </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/another_places"
+            <LinearLayout
+                android:id="@+id/no_trip_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/trip_item_background"
-                android:layout_margin="4dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone"
                 >
-                <LinearLayout
-                    android:id="@+id/another_places_layout"
+
+                <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="10dp"
-                    >
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Miejsca w pobliżu..."
-                        android:textSize="20sp"
-                        android:paddingBottom="10dp"
-                        android:textStyle="bold" />
-
-                    <ProgressBar
-                        android:id="@+id/another_places_progress_bar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:visibility="gone" />
-
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                    android:layout_height="match_parent"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:text="@string/no_trip"
+                    android:textStyle="bold"
+                    android:textSize="40sp"
+                    android:textAlignment="center"
+                    />
+            </LinearLayout>
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <include layout="@layout/progress_bar" />
 

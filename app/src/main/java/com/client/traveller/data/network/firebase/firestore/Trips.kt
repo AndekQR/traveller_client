@@ -34,6 +34,10 @@ class Trips {
             .update("persons", FieldValue.arrayUnion(*emails.toArray()))
     }
 
+    fun updateWaypoints(waypoints: ArrayList<String>, tripToUpdate: Trip) {
+        this.getTripsCollection().document(this.getDocumentName(tripToUpdate)).update("waypoints", waypoints)
+    }
+
     // nazwa to: nazwa_wycieczki_firebaseUidAuthor
     private fun getDocumentName(trip: Trip): String {
         return "${trip.name}_${trip.author?.idUserFirebase}"

@@ -1,7 +1,9 @@
 package com.client.traveller.ui.tripInfo
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.place.PlacesRepository
@@ -23,6 +25,9 @@ class TripInfoViewModel(
     val currentUser = userRepository.getCurrentUser()
     val currentTrip = tripRepository.getCurrentTrip()
 
+    val unsavedChanges = MutableLiveData<Boolean>()
+    var waypoints = mutableListOf<String>()
+
     fun logoutUser(mGoogleSignInClient: GoogleSignInClient) =
         userRepository.logoutUser(mGoogleSignInClient)
 
@@ -36,4 +41,7 @@ class TripInfoViewModel(
         places.shuffle()
         return places.toSet()
     }
+
+    suspend fun geocodeAddress(address: String) = this.mapRepository.geocodeAddress(address)
+    fun updateWaypoints(waypoints: List<String>, tripToUpdate: Trip) = this.tripRepository.updateWaypoints(waypoints, tripToUpdate)
 }
