@@ -208,6 +208,17 @@ class ChatActivity : AppCompatActivity(), KodeinAware {
         Handler().postDelayed({ doubleBack = false }, 2000)
     }
 
+    override fun onPause() {
+        super.onPause()
+        this.viewModel.stopLocationUpdates()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (this.viewModel.sendingLocationData())
+            this.viewModel.startLocationUpdates()
+    }
+
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
         // Sync the toggle state after onRestoreInstanceState has occurred.

@@ -106,6 +106,10 @@ class TripInfoFragment : Fragment(), KodeinAware {
         // this.groupAdapter jest czyszczony przy dodawaniu nowych elementów
     }
 
+    /**
+     * Wyszukiwanie miejsc w pobliżu punktów wycieczki
+     * Tworzy nagłówki i listview z tymi miejscami
+     */
     private fun bindAdminUI(trip: Trip) {
         another_places_progress_bar.visibility = View.VISIBLE
         this.initStartAddressPlaces(trip.startAddress!!)
@@ -254,6 +258,9 @@ class TripInfoFragment : Fragment(), KodeinAware {
         }
     }
 
+    /**
+     * akcja kliknięcia na item w wyszukanych miejscach
+     */
     private val onItemClickListener =
         AdapterView.OnItemClickListener { parent, _, position, _ ->
             val value = parent.adapter.getItem(position) as String
@@ -320,6 +327,11 @@ class TripInfoFragment : Fragment(), KodeinAware {
         return textView
     }
 
+    /**
+     * Wyświetla dane wycieczki
+     * gdy autor klika na punkt wycieczki to go usuwa
+     * gdy uczestnik klika może wyznaczy drogę do tego punktu
+     */
     private fun bindUI(trip: Trip) {
         this.tripName.text = trip.name?.trim()
         val date = "${trip.startDate} - ${trip.endDate}".replace("T", " ")
@@ -408,6 +420,9 @@ class TripInfoFragment : Fragment(), KodeinAware {
         }
     }
 
+    /**
+     * ustawia itemy w recyclerView jako dragable
+     */
     private fun setItemDragToRecyclerView(onItemDrag: DragItemTouchHelperCallback.OnItemDragListener) {
         val dragCallback = DragItemTouchHelperCallback
             .Builder(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)

@@ -49,6 +49,10 @@ class NearbyPlacesViewModel(
         _searchedPlaces.value = places
     }
 
+    fun startLocationUpdates() = mapRepository.startLocationUpdates()
+    fun stopLocationUpdates() = mapRepository.stopLocationUpdates()
+    fun sendingLocationData() = mapRepository.sendingLocationData()
+
     fun getPhoto(photoReference: String?, width: Int?): String? {
         if (photoReference == null || width == null)
             return null

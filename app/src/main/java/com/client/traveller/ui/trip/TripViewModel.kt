@@ -58,4 +58,8 @@ class TripViewModel(
 
     fun updateTripPersons(tripToUpdate: Trip, emails: List<String>) =
         tripRepository.updateTripPersons(tripToUpdate, emails)
+
+    fun startLocationUpdates() = mapRepository.startLocationUpdates()
+    fun stopLocationUpdates() = mapRepository.stopLocationUpdates()
+    fun sendingLocationData() = mapRepository.sendingLocationData()
 }

@@ -88,6 +88,16 @@ class TripActivity : AppCompatActivity(), KodeinAware, NavController.OnDestinati
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        this.viewModel.stopLocationUpdates()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (this.viewModel.sendingLocationData())
+            this.viewModel.startLocationUpdates()
+    }
 
     /**
      * jest wywoływane przed OnCreateOptionsMenu

@@ -28,20 +28,27 @@ import com.client.traveller.data.network.api.places.API_KEY
 import com.client.traveller.data.network.api.places.PlacesApiService
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
+import com.client.traveller.data.network.firebase.firestore.Map
+import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.ui.util.formatToApi
+import com.client.traveller.ui.util.toFlow
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import kotlinx.android.synthetic.main.my_place_map_marker.view.*
 import kotlinx.android.synthetic.main.my_simple_marker_view.view.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 
 class MapRepositoryImpl(
     private val mapUtils: MapUtils,
     private val locationProvider: LocationProvider,
-    private val geocoding: GeocodingApiService
+    private val geocoding: GeocodingApiService,
+    private val mapFirestore: Map
 ) : MapRepository {
 
     private lateinit var context: Context
@@ -189,5 +196,17 @@ class MapRepositoryImpl(
     override fun disableMapDragging() = this.mapUtils.disableMapDragging()
     override suspend fun geocodeAddress(address: String) = this.geocoding.geocode(address)
     override suspend fun reverseGeocoding(latlng: String) = this.geocoding.reverseGeocode(latlng)
+
+    override fun sendNewLocation(userLocalization: UserLocalization, trip: Trip) {
+
+    }
+
+    @ExperimentalCoroutinesApi
+    override suspend fun getTripUsersLocation(tripUid: String): Flow<List<UserLocalization>> {
+        return this.mapFirestore.getTripUsersLocation(tripUid).toFlow()
+            .map {
+                it.toObjects(UserLocalization::class.java)
+            }
+    }
 
 }

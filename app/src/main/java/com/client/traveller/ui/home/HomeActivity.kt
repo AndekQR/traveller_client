@@ -310,10 +310,8 @@ class HomeActivity : AppCompatActivity(),
      */
     override fun onResume() {
         super.onResume()
+        viewModel.startLocationUpdates()
 
-        if (viewModel.sendingLocationData()) {
-            viewModel.startLocationUpdates()
-        }
     }
 
     private val onNavigationItemSelected = NavigationView.OnNavigationItemSelectedListener { item ->
@@ -400,10 +398,8 @@ class HomeActivity : AppCompatActivity(),
      */
     override fun onPause() {
         super.onPause()
+        viewModel.stopLocationUpdates()
 
-        if (viewModel.sendingLocationData()) {
-            viewModel.stopLocationUpdates()
-        }
     }
 
     //TODO trzeba pprawić metodę

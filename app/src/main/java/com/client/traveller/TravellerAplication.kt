@@ -69,6 +69,7 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { AuthUtils() }
         bind() from provider { AuthProvider() }
         bind() from provider { Chats() }
+        bind() from provider { Map() }
         bind() from singleton { instance<AppDatabase>().userDao() }
         bind<UserRepository>() with singleton {
             UserRepositoryImpl(
@@ -85,6 +86,7 @@ class TravellerAplication : Application(), KodeinAware {
         }
         bind<MapRepository>() with singleton {
             MapRepositoryImpl(
+                instance(),
                 instance(),
                 instance(),
                 instance()
@@ -130,7 +132,7 @@ class TravellerAplication : Application(), KodeinAware {
         }
         bind() from provider { SettingsViewModelFactory(instance()) }
         bind() from provider { TripViewModelFactory(instance(), instance(), instance()) }
-        bind() from provider { ChatViewModelFactory(instance(), instance(), instance()) }
+        bind() from provider { ChatViewModelFactory(instance(), instance(), instance(), instance()) }
         bind() from provider { MesseageViewModelFactory(instance(), instance(), instance()) }
         bind() from provider {
             NearbyPlacesViewModelFactory(

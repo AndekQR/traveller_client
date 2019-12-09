@@ -5,6 +5,7 @@ import com.client.traveller.data.db.entities.Messeage
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.model.ChatFirestoreModel
+import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.message.MessagingRepository
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.user.UserRepository
@@ -15,7 +16,8 @@ import kotlinx.coroutines.launch
 class ChatViewModel(
     private val userRepository: UserRepository,
     private val messagingRepository: MessagingRepository,
-    private val tripRepository: TripRepository
+    private val tripRepository: TripRepository,
+    private val mapRepository: MapRepository
 ) : ViewModel() {
 
     var currentUser: LiveData<User> = userRepository.getCurrentUser()
@@ -59,4 +61,9 @@ class ChatViewModel(
 
         this.removeObservers()
     }
+
+
+    fun startLocationUpdates() = mapRepository.startLocationUpdates()
+    fun stopLocationUpdates() = mapRepository.stopLocationUpdates()
+    fun sendingLocationData() = mapRepository.sendingLocationData()
 }

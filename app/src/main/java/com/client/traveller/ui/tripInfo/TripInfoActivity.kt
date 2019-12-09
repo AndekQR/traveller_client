@@ -214,4 +214,15 @@ class TripInfoActivity : AppCompatActivity(), KodeinAware {
     return false
     }
 
+    override fun onPause() {
+        super.onPause()
+        this.viewModel.stopLocationUpdates()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (this.viewModel.sendingLocationData())
+            this.viewModel.startLocationUpdates()
+    }
+
 }

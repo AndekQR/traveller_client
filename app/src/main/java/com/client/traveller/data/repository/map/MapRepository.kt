@@ -10,10 +10,12 @@ import com.client.traveller.data.network.api.geocoding.response.geocodingRespons
 import com.client.traveller.data.network.api.geocoding.response.reverseGeocodingResponse.ReverseGeocodingResponse
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
+import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
+import kotlinx.coroutines.flow.Flow
 
 interface MapRepository {
     fun initializeMap(
@@ -55,4 +57,6 @@ interface MapRepository {
     fun disableMapDragging()
     suspend fun geocodeAddress(address: String): GeocodingResponse
     suspend fun reverseGeocoding(latlng: String): ReverseGeocodingResponse
+    fun sendNewLocation(userLocalization: UserLocalization, trip: Trip)
+    suspend fun getTripUsersLocation(tripUid: String): Flow<List<UserLocalization>>
 }

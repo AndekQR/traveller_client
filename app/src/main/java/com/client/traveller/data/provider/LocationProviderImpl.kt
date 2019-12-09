@@ -100,7 +100,7 @@ class LocationProviderImpl(
 
                 currentLocation = locationResult.lastLocation
                 lastUpdateTime = DateFormat.getTimeInstance().format(Date())
-                updateLocationUI()
+                centerOnMyLocation()
 
 //                if (!preferenceProvider.getPreferenceState(SEND_LOCATION))
 //                    return
@@ -108,6 +108,7 @@ class LocationProviderImpl(
 
             }
         }
+
         locationRequest = LocationRequest.create()?.apply {
             interval = updateIntervalMs
             fastestInterval = fastestUpdateIntervalMs
@@ -164,7 +165,7 @@ class LocationProviderImpl(
      * Za każdą aktualizacją lokalizacji następuje zmiana kamery na tą lokalizacje jeśli
      * kamera śledząca jest aktywna
      */
-    fun updateLocationUI() = Coroutines.main {
+    fun centerOnMyLocation() = Coroutines.main {
         if (preferenceProvider.getCameraTracking() && currentLocation != null) {
             val cameraPosition = CameraPosition.Builder().zoom(17F).tilt(50F).target(
                 LatLng(
@@ -185,13 +186,11 @@ class LocationProviderImpl(
         requestingLocationUpdates = true
         settingsClient?.checkLocationSettings(locationSettingsRequest)
             ?.addOnSuccessListener(context as Activity) {
-
                 fusedLocationClient.requestLocationUpdates(
                     locationRequest,
                     locationCallback, Looper.myLooper()
                 )
-
-                updateLocationUI()
+                centerOnMyLocation()
             }
             ?.addOnFailureListener(context as Activity) { e ->
                 when ((e as ApiException).statusCode) {
@@ -202,17 +201,12 @@ class LocationProviderImpl(
                         } catch (sie: IntentSender.SendIntentException) {
                             Log.i(javaClass.simpleName, sie.message)
                         }
-
                     }
                     LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
-                        val errorMessage =
-                            "Location settings are inadequate, and cannot be " + "fixed here. Fix in Settings."
-                        Log.e(javaClass.simpleName, errorMessage)
-
-                        Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Opcje lokazliacji muszą zostać zmienione w ustawieniach", Toast.LENGTH_LONG).show()
                     }
                 }
-                updateLocationUI()
+                centerOnMyLocation()
             }
     }
 
@@ -245,6 +239,10 @@ class LocationProviderImpl(
         }
     }
 
+    /**
+     * jeżeli w ustawieniach użytkownik zaznaczy że chce wysyłać dane to metoda zwraca true
+     * w przeciwnym wypadku zwaraca false
+     */
     override fun sendingLocationData(): Boolean {
         if (!requestingLocationUpdates && preferenceProvider.getSendLocation()) {
             return true

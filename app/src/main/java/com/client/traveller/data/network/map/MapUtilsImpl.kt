@@ -22,6 +22,7 @@ import com.google.maps.android.clustering.ClusterManager
 /**
  * Klasa do zarządzania mapą w [HomeFragment]
  * @param locationProvider wstrzykiwany przez kodein, używany do pobrania mapy i jej widoku
+ * @param directionsApiService wyszukiwanie miejsc
  */
 class MapUtilsImpl(
     private val locationProvider: LocationProvider,
