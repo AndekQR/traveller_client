@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import com.bumptech.glide.Glide
@@ -30,6 +31,7 @@ import com.client.traveller.data.network.api.places.response.nearbySearchRespons
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.network.firebase.firestore.Map
 import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
+import com.client.traveller.data.network.map.LocationBroadcastReceiver
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.ui.util.formatToApi
@@ -48,10 +50,15 @@ class MapRepositoryImpl(
     private val mapUtils: MapUtils,
     private val locationProvider: LocationProvider,
     private val geocoding: GeocodingApiService,
-    private val mapFirestore: Map
+    private val mapFirestore: Map,
+    private val locationBroadcastReceiver: LocationBroadcastReceiver
 ) : MapRepository {
 
     private lateinit var context: Context
+
+    init {
+        Log.e(javaClass.simpleName," mapRepo init ${locationBroadcastReceiver.value}")
+    }
 
     /**
      * Inicjalzacja mapy oraz jej składników

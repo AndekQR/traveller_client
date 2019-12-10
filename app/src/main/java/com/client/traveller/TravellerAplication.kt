@@ -12,6 +12,7 @@ import com.client.traveller.data.network.firebase.auth.*
 import com.client.traveller.data.network.firebase.firestore.*
 import com.client.traveller.data.network.firebase.messaging.CloudMessaging
 import com.client.traveller.data.network.firebase.storage.Avatars
+import com.client.traveller.data.network.map.LocationBroadcastReceiver
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.network.map.MapUtilsImpl
 import com.client.traveller.data.provider.LocationProvider
@@ -50,6 +51,7 @@ class TravellerAplication : Application(), KodeinAware {
     override val kodein = Kodein.lazy {
         import(androidXModule(this@TravellerAplication))
 
+        bind() from singleton { LocationBroadcastReceiver() }
         bind() from provider { LocationServices.getFusedLocationProviderClient(instance<Context>()) }
         bind() from singleton { PreferenceProvider(instance()) }
         bind() from singleton { DirectionsApiService() }
@@ -86,6 +88,7 @@ class TravellerAplication : Application(), KodeinAware {
         }
         bind<MapRepository>() with singleton {
             MapRepositoryImpl(
+                instance(),
                 instance(),
                 instance(),
                 instance(),

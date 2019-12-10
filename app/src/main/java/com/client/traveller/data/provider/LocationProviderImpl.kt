@@ -188,7 +188,8 @@ class LocationProviderImpl(
             ?.addOnSuccessListener(context as Activity) {
                 fusedLocationClient.requestLocationUpdates(
                     locationRequest,
-                    locationCallback, Looper.myLooper()
+                    locationCallback,
+                    Looper.myLooper()
                 )
                 centerOnMyLocation()
             }

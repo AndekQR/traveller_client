@@ -1,4 +1,5 @@
 <resources>
+    <string name="launch_activity">Uruchom aktywność</string>
     <string name="app_name">traveller</string>
     <string name="title_activity_login">Zaloguj się</string>
     <string name="prompt_email">E-mail</string>
@@ -240,6 +241,10 @@
     <string name="show_route_to">\"Wyznaczyć drogę do \"</string>
     <string name="no_trip">Brak wybranej wycieczki!</string>
     <string name="update_trip">Zaktualizuj wycieczkę</string>
+    <string name="remove_location_updates">Zatrzymaj aktualizacje lokacji</string>
+    <string name="location_updated">Lokalizacja zaktualizowana</string>
+    <string name="permission_denied_explanation">Aby aplikacja działa ze wszystkimi funkcjiami musisz udzielić jej uprawnień</string>
+    <string name="settings">Ustawienia</string>
 
 
 </resources>

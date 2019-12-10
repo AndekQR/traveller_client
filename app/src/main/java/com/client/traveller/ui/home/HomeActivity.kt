@@ -1,11 +1,12 @@
 package com.client.traveller.ui.home
 
-import android.content.Context
-import android.content.Intent
+import android.Manifest
+import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.IBinder
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
@@ -13,19 +14,25 @@ import android.view.Gravity
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.NavHostFragment
 import com.client.traveller.BuildConfig
 import com.client.traveller.R
+import com.client.traveller.data.network.map.LocationBroadcastReceiver
 import com.client.traveller.data.provider.PlacesClientProvider
+import com.client.traveller.data.provider.PreferenceProvider
+import com.client.traveller.data.services.MyLocationService
 import com.client.traveller.data.services.UploadService
+import com.client.traveller.data.services.Utils
 import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.chat.ChatActivity
@@ -42,6 +49,7 @@ import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.paulrybitskyi.persistentsearchview.PersistentSearchView
@@ -72,6 +80,37 @@ class HomeActivity : AppCompatActivity(),
     private lateinit var navController: NavController
     private lateinit var bottomNavigation: BottomNavigationView
 
+    companion object {
+        private const val REQUEST_PERMISSIONS_REQUEST_CODE = 34
+    }
+
+    var locationService: MyLocationService? = null
+    /**
+     * do śledzenia stanu serwisu
+     * true = serwis działa, nie jest wymagane powiadomienie bo apikacja też działa i jest na pierwszym planie
+     * false = serwis powinien działać, w serwisie tworzone jest powiadomienie aby serwis działał w tle
+     */
+    var mBound = false
+    private var receiver: BroadcastReceiver? = null
+
+    private val locationServiceConnection = object : ServiceConnection {
+        override fun onServiceDisconnected(name: ComponentName?) {
+            this@HomeActivity.locationService = null
+            mBound = false
+        }
+
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as MyLocationService.LocalBinder
+            this@HomeActivity.locationService = binder.service
+            mBound = true
+            if (!checkPermissions()) {
+                requestPermissions()
+            } else {
+                locationService?.startLocationUpdates()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
@@ -89,6 +128,20 @@ class HomeActivity : AppCompatActivity(),
         if (intent != null)
             this.getDynamicLinks()
 
+        this.initUI()
+        this.checkForActions()
+
+        // jeżeli nie ma uprawnień do lokalizacji, poproś o uprawnienia
+        if (PreferenceProvider(this).getSendLocation()) {
+            if (!checkPermissions()) {
+                requestPermissions()
+            }
+        }
+        this.receiver = LocationBroadcastReceiver()
+
+    }
+
+    private fun initUI() {
         drawer = drawer_layout
 
         bottomNavigation = bottom_navigation
@@ -104,26 +157,62 @@ class HomeActivity : AppCompatActivity(),
         val host = nav_host_fragment_home as NavHostFragment
         this.navController = host.navController
         this.navController.addOnDestinationChangedListener(this)
+    }
 
-        this.checkForActions()
+
+    override fun onStart() {
+        super.onStart()
+
+        if (!checkPermissions()) {
+            requestPermissions()
+        } else {
+            locationService?.startLocationUpdates()
+        }
+
+        /**
+         * Powiadomienie dla serwisu o tym że aplikacja jest na pierwszym planie
+         * więc serwis może usunąc powiadomienie
+         */
+        this.bindService(
+            Intent(this, MyLocationService::class.java), locationServiceConnection,
+            Context.BIND_AUTO_CREATE
+        )
+    }
+
+    override fun onStop() {
+        super.onStop()
+        /**
+         * Powiadomienie dla serwisu o tym że aplikacja nie jest na pierwszym planie
+         * serwis musi utworzyć powaidomienie przez które nie zostanie zamknięty
+         */
+        this.unbindService(locationServiceConnection)
+        mBound = false
     }
 
     /**
      * sprawdza czy aktywność została uruchomiona z dodatkowymi argumentami
      * które trzeba obsłużyć
      */
-    private fun checkForActions(){
+    private fun checkForActions() {
         val extras = intent.extras
         extras?.let {
-            if (it.containsKey(ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name)){
+            if (it.containsKey(ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name)) {
                 val latlng = it.getString(ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name)
                 lifecycleScope.launch(Dispatchers.Main) {
-                    latlng?.let {location -> this@HomeActivity.viewModel.drawRouteToLocation(destination = location, locations = null)
-                        this@HomeActivity.viewModel.centerRoad(this@HomeActivity.viewModel.getCurrentLocation().format(), null, location)
+                    latlng?.let { location ->
+                        this@HomeActivity.viewModel.drawRouteToLocation(
+                            destination = location,
+                            locations = null
+                        )
+                        this@HomeActivity.viewModel.centerRoad(
+                            this@HomeActivity.viewModel.getCurrentLocation().format(),
+                            null,
+                            location
+                        )
                     }
                 }
             }
-            if (it.containsKey(ActivitiesAction.HOME_ACTIVITY_OPEN_PROFILE.name)){
+            if (it.containsKey(ActivitiesAction.HOME_ACTIVITY_OPEN_PROFILE.name)) {
                 Navigation.findNavController(
                     this,
                     R.id.nav_host_fragment_home
@@ -244,6 +333,7 @@ class HomeActivity : AppCompatActivity(),
         }
     }
 
+    //TODO chyba nie potrzebne
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
@@ -268,27 +358,24 @@ class HomeActivity : AppCompatActivity(),
         Handler().postDelayed({ doubleBack = false }, 2000)
     }
 
-    /**
-     * Uprawnienia lokalizacji są także sprawdzane w [LocationProviderImpl] z kodem 121
-     * tutaj jest sprawdzane czy te uprawnienia zostały przyznane
-     * jeżeli tak to zostaje wywołana metoda startLocationUpdates
-     * jeżeli nie zostają otworzone ustawienia gdzie możemy zmienić uprawnienia [openSettings]
-     */
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<out String>,
+        permissions: Array<String>,
         grantResults: IntArray
     ) {
-        when (requestCode) {
-            121 -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    viewModel.startLocationUpdates()
-                } else {
-                    openSettings()
-                }
-            }
-            else -> {
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                this.locationService?.startLocationUpdates()
+            } else { // brak uprawnień
+                Snackbar.make(
+                    window.decorView.rootView,
+                    R.string.permission_denied_explanation,
+                    Snackbar.LENGTH_INDEFINITE
+                )
+                    .setAction(R.string.settings) {
+                        this.openSettings()
+                    }
+                    .show()
             }
         }
     }
@@ -310,8 +397,14 @@ class HomeActivity : AppCompatActivity(),
      */
     override fun onResume() {
         super.onResume()
-        viewModel.startLocationUpdates()
 
+        /**
+         * rejestracja klasy LocationBroadcastReceiver jako klasy która odbiera dane z MyLocationService
+         */
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            receiver!!,
+            IntentFilter(MyLocationService.ACTION_BROADCAST)
+        )
     }
 
     private val onNavigationItemSelected = NavigationView.OnNavigationItemSelectedListener { item ->
@@ -398,7 +491,10 @@ class HomeActivity : AppCompatActivity(),
      */
     override fun onPause() {
         super.onPause()
-        viewModel.stopLocationUpdates()
+        /**
+         * dane z serwisu nie są już potrzebne bo aplikacja przeszła na inny plan
+         */
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver!!)
 
     }
 
@@ -474,6 +570,42 @@ class HomeActivity : AppCompatActivity(),
                         .build(supportFragmentManager, javaClass.simpleName)
                 }
 
+        }
+    }
+
+    private fun checkPermissions(): Boolean {
+        return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+    }
+
+    private fun requestPermissions() {
+        val shouldShowRequestPermissionRationale =
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        if (shouldShowRequestPermissionRationale) {
+            Snackbar.make(
+                window.decorView.rootView,
+                R.string.permission_denied_explanation,
+                Snackbar.LENGTH_INDEFINITE
+            )
+                .setAction(R.string.settings) {
+                    ActivityCompat.requestPermissions(
+                        this@HomeActivity,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        REQUEST_PERMISSIONS_REQUEST_CODE
+                    )
+                }
+                .show()
+        } else {
+            ActivityCompat.requestPermissions(
+                this@HomeActivity,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_PERMISSIONS_REQUEST_CODE
+            )
         }
     }
 

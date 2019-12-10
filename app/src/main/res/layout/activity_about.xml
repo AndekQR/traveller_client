@@ -16,5 +16,10 @@
         android:layout_height="wrap_content"
         android:text="Icon made by Eucalyp from www.flaticon.com" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Icon made by Icon Pond from www.flaticon.com" />
+
 
 </LinearLayout>

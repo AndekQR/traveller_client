@@ -37,6 +37,7 @@ class SettingsActivity : AppCompatActivity(), KodeinAware {
 
     class SettingsFragment(private val locationProvider: LocationProvider) :
         PreferenceFragmentCompat() {
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
         }
