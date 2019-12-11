@@ -1,5 +1,6 @@
 package com.client.traveller.ui.trip
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -32,7 +33,7 @@ class TripViewModel(
         this@TripViewModel.allTrips = this@TripViewModel.tripRepository.getAllTrips()
     }
 
-    suspend fun addTrip(trip: Trip) = tripRepository.newTrip(trip)
+    suspend fun addTrip(trip: Trip, context: Context) = tripRepository.newTrip(trip, context)
 
     suspend fun tripDistance(
         origin: String,
@@ -51,15 +52,12 @@ class TripViewModel(
     }
 
     fun isTripParticipant(trip: Trip, user: User) = tripRepository.isTripParticipant(trip, user)
-    fun setTripAsActual(trip: Trip) = viewModelScope.launch {
-        tripRepository.saveTripToLocalDB(trip)
+    fun setTripAsActual(trip: Trip, context: Context) = viewModelScope.launch {
+        tripRepository.saveTripToLocalDB(trip, context)
         tripRepository.initCurrentTripUpdates()
     }
 
     fun updateTripPersons(tripToUpdate: Trip, emails: List<String>) =
         tripRepository.updateTripPersons(tripToUpdate, emails)
 
-    fun startLocationUpdates() = mapRepository.startLocationUpdates()
-    fun stopLocationUpdates() = mapRepository.stopLocationUpdates()
-    fun sendingLocationData() = mapRepository.sendingLocationData()
 }

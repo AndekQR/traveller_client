@@ -1,6 +1,7 @@
 package com.client.traveller.ui.nearby
 
 import android.content.Intent
+import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -177,7 +178,9 @@ class NearbyPlacesActivity : BaseActivity(), KodeinAware,
         true
     }
 
-
+    override fun onNewLocation(location: Location) {
+        this.viewModel.currentLocation = location
+    }
 
     private val onBottomNavigationItemSelected =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->

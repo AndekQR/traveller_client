@@ -18,17 +18,13 @@ import com.google.android.gms.maps.model.Polyline
 import kotlinx.coroutines.flow.Flow
 
 interface MapRepository {
+
     fun initializeMap(
         mapFragment: SupportMapFragment,
         context: Context,
         savedInstanceState: Bundle?
     )
 
-    fun startLocationUpdates()
-    fun stopLocationUpdates()
-    fun sendingLocationData(): Boolean
-
-    fun centerCurrentLocation()
     suspend fun getDistance(
         origin: String,
         destination: String,
@@ -36,10 +32,9 @@ interface MapRepository {
         mode: TravelMode
     ): Distance?
 
-    fun getCurrentLocation(): Location
     fun clearMap()
 
-    suspend fun drawRouteToMainMarker(): Polyline?
+    suspend fun drawRouteToMainMarker(location: Location): Polyline?
     suspend fun drawRouteToLocation(
         origin: String,
         destination: String,

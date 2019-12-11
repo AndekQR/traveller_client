@@ -1,5 +1,6 @@
 package com.client.traveller.data.services
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
@@ -9,9 +10,15 @@ import android.os.*
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.client.traveller.R
+import com.client.traveller.data.network.firebase.firestore.Map
+import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
 import com.client.traveller.data.provider.PreferenceProvider
 import com.client.traveller.ui.home.HomeActivity
+import com.client.traveller.ui.util.toLatLng
 import com.google.android.gms.location.*
+import com.google.firebase.auth.FirebaseAuth
+import java.text.DateFormat
+import java.util.*
 
 
 class MyLocationService : Service() {
@@ -24,7 +31,7 @@ class MyLocationService : Service() {
         const val EXTRA_LOCATION = "$PACKAGE_NAME.location"
         private const val EXTRA_STARTED_FROM_NOTIFICATION = "$PACKAGE_NAME.started_from_notification"
 
-        private const val UPDATE_INTERVAL_MS: Long = 10000
+        private const val UPDATE_INTERVAL_MS: Long = 30000
         private const val FASTEST_UPDATE_INTERVAL_MS = UPDATE_INTERVAL_MS / 2
 
         private const val NOTIFICATION_ID = 12345678
@@ -129,7 +136,7 @@ class MyLocationService : Service() {
     }
 
     fun startLocationUpdates() {
-        Utils.setRequestingLocationUpdates(this, true)
+//        Utils.setRequestingLocationUpdates(this, true)
         this.startService(Intent(applicationContext, MyLocationService::class.java))
         this.fusedLocationClient!!.requestLocationUpdates(
             locationRequest,
@@ -137,13 +144,14 @@ class MyLocationService : Service() {
         )
     }
 
-    fun stopLocationUpdates() {
+    private fun stopLocationUpdates() {
         this.fusedLocationClient?.removeLocationUpdates(locationCallback)
     }
 
+    @SuppressLint("StringFormatInvalid")
     private fun getNotification(): Notification {
         val intent = Intent(this, MyLocationService::class.java)
-        val text = Utils.getLocationText(this.currentLocation)
+        val text ="(" + this.currentLocation?.latitude + ", " + this.currentLocation?.longitude + ")"
         intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val servicePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
@@ -152,7 +160,10 @@ class MyLocationService : Service() {
             .addAction(R.drawable.ic_launch, getString(R.string.launch_activity), activityPendingIntent)
             .addAction(R.drawable.ic_exit, getString(R.string.remove_location_updates), servicePendingIntent)
             .setContentText(text)
-            .setContentTitle(Utils.getLocationTitle(this))
+            .setContentTitle(getString(
+                R.string.location_updated,
+                DateFormat.getDateTimeInstance().format(Date())
+            ))
             .setOngoing(true)
             .setPriority(Notification.PRIORITY_HIGH)
             .setSmallIcon(R.drawable.ic_traveller_icon)
@@ -188,6 +199,22 @@ class MyLocationService : Service() {
                 NOTIFICATION_ID,
                 this.getNotification()
             )
+        }
+
+        this.sendToFirestore(location)
+    }
+
+    /**
+     * wysyłanie dofirestore aktualnej lokalizacji użytkownika
+     * dziękiczemu pozostali uczestnicy tej samej wycieczki ogę go zobaczyćna mapie
+     */
+    private fun sendToFirestore(location: Location) {
+        val currentTripUid = PreferenceProvider(this).getCurrentTravelUid()
+        currentTripUid?.let {tripUid ->
+            val userUid = FirebaseAuth.getInstance().currentUser?.uid
+            userUid?.let { id ->
+                Map.sendNewLocation(UserLocalization(location.toLatLng(), id), tripUid)
+            }
         }
     }
 

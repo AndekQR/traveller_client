@@ -2,6 +2,7 @@ package com.client.traveller.ui.home
 
 import android.content.Context
 import android.content.Intent
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -110,7 +111,9 @@ class HomeActivity : BaseActivity(),
         this.navController.addOnDestinationChangedListener(this)
     }
 
-
+    override fun onNewLocation(location: Location) {
+        this.viewModel.currentLocation = location
+    }
 
 
     /**
@@ -124,15 +127,18 @@ class HomeActivity : BaseActivity(),
                 val latlng = it.getString(ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name)
                 lifecycleScope.launch(Dispatchers.Main) {
                     latlng?.let { location ->
-                        this@HomeActivity.viewModel.drawRouteToLocation(
-                            destination = location,
-                            locations = null
-                        )
-                        this@HomeActivity.viewModel.centerRoad(
-                            this@HomeActivity.viewModel.getCurrentLocation().format(),
-                            null,
-                            location
-                        )
+                        this@HomeActivity.currentLocation?.let { currentLocation ->
+                            this@HomeActivity.viewModel.drawRouteToLocation(
+                                origin = currentLocation.format(),
+                                destination = location,
+                                locations = null
+                            )
+                            this@HomeActivity.viewModel.centerRoad(
+                                currentLocation.format(),
+                                null,
+                                location
+                            )
+                        }
                     }
                 }
             }
@@ -162,8 +168,10 @@ class HomeActivity : BaseActivity(),
         searchView.setOnSearchConfirmedListener { _, query ->
             try {
                 lifecycleScope.launch {
-                    viewModel.clearMap()
-                    viewModel.drawRouteToLocation(destination = query, locations = arrayListOf())
+                    this@HomeActivity.currentLocation?.let {
+                        viewModel.clearMap()
+                        viewModel.drawRouteToLocation(origin =  it.format(),destination = query, locations = arrayListOf())
+                    }
                 }
             } catch (ex: NoCurrentLocationException) {
                 Dialog.Builder()
@@ -188,11 +196,14 @@ class HomeActivity : BaseActivity(),
                 lifecycleScope.launch {
                     viewModel.clearMap()
                     val destination = suggestion?.itemModel?.text
-                    if (destination != null)
-                        viewModel.drawRouteToLocation(
-                            destination = destination,
-                            locations = arrayListOf()
-                        )
+                    if (destination != null )
+                        this@HomeActivity.currentLocation?.let {
+                            viewModel.drawRouteToLocation(
+                                origin = it.format(),
+                                destination = destination,
+                                locations = arrayListOf()
+                            )
+                        }
                 }
             } catch (ex: NoCurrentLocationException) {
                 Dialog.Builder()

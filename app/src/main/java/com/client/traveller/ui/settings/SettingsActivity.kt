@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.client.traveller.R
-import com.client.traveller.data.provider.LocationProvider
 import kotlinx.android.synthetic.main.settings_activity.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -27,7 +26,7 @@ class SettingsActivity : AppCompatActivity(), KodeinAware {
         setSupportActionBar(toolbar)
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.settings, SettingsFragment(viewModel.locationProvider))
+            .replace(R.id.settings, SettingsFragment())
             .commit()
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -35,7 +34,7 @@ class SettingsActivity : AppCompatActivity(), KodeinAware {
 
     }
 
-    class SettingsFragment(private val locationProvider: LocationProvider) :
+    class SettingsFragment:
         PreferenceFragmentCompat() {
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -48,8 +47,6 @@ class SettingsActivity : AppCompatActivity(), KodeinAware {
                 getString(R.string.title_activity_settings)
             (activity as? AppCompatActivity)?.supportActionBar?.subtitle = null
 
-            val sendingLocation = findPreference<SwitchPreference>("SEND_LOCATION")
-            sendingLocation?.onPreferenceChangeListener = locationProvider
         }
     }
 }

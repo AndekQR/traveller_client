@@ -31,7 +31,7 @@ abstract class BaseActivity : AppCompatActivity() {
      * false = serwis powinien działać, w serwisie tworzone jest powiadomienie aby serwis działał w tle
      */
     var mBound = false
-    private var currentLocation: Location? = null
+    var currentLocation: Location? = null
 
     private val locationServiceConnection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -55,7 +55,7 @@ abstract class BaseActivity : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             val location: Location? = intent.getParcelableExtra(MyLocationService.EXTRA_LOCATION)
             this@BaseActivity.currentLocation = location
-            Log.e(javaClass.simpleName, this@BaseActivity.currentLocation.toString())
+            if (location != null) this@BaseActivity.onNewLocation(location)
         }
 
     }
@@ -88,6 +88,8 @@ abstract class BaseActivity : AppCompatActivity() {
             Context.BIND_AUTO_CREATE
         )
     }
+
+    abstract fun onNewLocation(location: Location)
 
     override fun onStop() {
         super.onStop()

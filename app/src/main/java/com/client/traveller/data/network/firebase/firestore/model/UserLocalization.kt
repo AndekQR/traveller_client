@@ -5,5 +5,5 @@ import com.google.android.gms.maps.model.LatLng
 
 data class UserLocalization(
     var latlng: LatLng? = null,
-    var user: User? = null
+    var userUidFirebase: String? = null
 )

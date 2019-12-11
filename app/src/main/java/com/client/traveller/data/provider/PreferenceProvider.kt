@@ -3,6 +3,7 @@ package com.client.traveller.data.provider
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import com.client.traveller.ui.util.Constants
 
 class PreferenceProvider(context: Context) {
 
@@ -57,5 +58,12 @@ class PreferenceProvider(context: Context) {
         return null
     }
 
+    fun putCurrentTravelUid(uid: String) {
+        preferences.edit().putString(Constants.CURRENT_TRIP_UID_PREFERENCES, uid).apply()
+    }
+
+    fun getCurrentTravelUid(): String? {
+        return preferences.getString(Constants.CURRENT_TRIP_UID_PREFERENCES, "")
+    }
 
 }

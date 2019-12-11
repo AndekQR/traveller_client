@@ -1,6 +1,7 @@
 package com.client.traveller.ui.tripInfo
 
 import android.content.Intent
+import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
@@ -149,6 +150,8 @@ class TripInfoActivity : BaseActivity(), KodeinAware {
         this.drawerLayout.closeDrawer(GravityCompat.START)
         true
     }
+
+    override fun onNewLocation(location: Location) {}
 
     private val onBottomNavigationItemSelected =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->

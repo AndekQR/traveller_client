@@ -5,41 +5,26 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.request.transition.Transition
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.network.api.geocoding.GeocodingApiService
-import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.GeocodingResponse
 import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.Location
-import com.client.traveller.data.network.api.geocoding.response.reverseGeocodingResponse.ReverseGeocodingResponse
 import com.client.traveller.data.network.api.places.API_KEY
 import com.client.traveller.data.network.api.places.PlacesApiService
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.network.firebase.firestore.Map
 import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
-import com.client.traveller.data.network.map.LocationBroadcastReceiver
 import com.client.traveller.data.network.map.MapUtils
-import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.ui.util.formatToApi
 import com.client.traveller.ui.util.toFlow
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import kotlinx.android.synthetic.main.my_place_map_marker.view.*
 import kotlinx.android.synthetic.main.my_simple_marker_view.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -48,10 +33,8 @@ import kotlinx.coroutines.flow.map
 
 class MapRepositoryImpl(
     private val mapUtils: MapUtils,
-    private val locationProvider: LocationProvider,
     private val geocoding: GeocodingApiService,
-    private val mapFirestore: Map,
-    private val locationBroadcastReceiver: LocationBroadcastReceiver
+    private val mapFirestore: Map
 ) : MapRepository {
 
     private lateinit var context: Context
@@ -67,15 +50,9 @@ class MapRepositoryImpl(
         savedInstanceState: Bundle?
     ) {
         this.context = context
-        locationProvider.init(mapFragment, context, savedInstanceState) {
-            mapUtils.initializeMap(context)
-        }
-    }
+        mapUtils.initializeMap(context, mapFragment)
 
-    override fun startLocationUpdates() = locationProvider.startLocationUpdates()
-    override fun stopLocationUpdates() = locationProvider.stopLocationUpdates()
-    override fun sendingLocationData() = locationProvider.sendingLocationData()
-    override fun centerCurrentLocation() = mapUtils.centerCurrentLocation()
+    }
 
     override suspend fun getDistance(
         origin: String,
@@ -86,8 +63,8 @@ class MapRepositoryImpl(
         return mapUtils.getDistance(origin, destination, waypoints)
     }
 
-    override suspend fun drawRouteToMainMarker() =
-        this.mapUtils.drawRouteToMarker(this.mapUtils.getMarkerFromMap())
+    override suspend fun drawRouteToMainMarker(location: android.location.Location) =
+        this.mapUtils.drawRouteToMarker(location, this.mapUtils.getMarkerFromMap())
 
     override suspend fun drawRouteToLocation(
         origin: String,
@@ -98,7 +75,6 @@ class MapRepositoryImpl(
         mapUtils.drawRouteToLocation(origin, destination, locations, mode)
     }
 
-    override fun getCurrentLocation() = mapUtils.getCurrentLocation()
 
     override fun clearMap() = this.mapUtils.clearMap()
 

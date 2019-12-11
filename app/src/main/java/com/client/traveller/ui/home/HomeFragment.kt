@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.ui.util.ScopedFragment
+import com.client.traveller.ui.util.toLatLng
 import com.google.android.gms.maps.SupportMapFragment
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.coroutines.Dispatchers
@@ -68,7 +69,11 @@ class HomeFragment : ScopedFragment(), KodeinAware {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        my_location.setOnClickListener { viewModel.centerOnMe() }
+        my_location.setOnClickListener {
+            this.viewModel.currentLocation?.let {
+                viewModel.centerCameraOnLocation(it.toLatLng())
+            }
+        }
         clear_button.setOnClickListener { this.viewModel.clearMap() }
         center_road_button.setOnClickListener {
             if (::currentTrip.isInitialized)
@@ -89,7 +94,7 @@ class HomeFragment : ScopedFragment(), KodeinAware {
             lifecycleScope.launch(Dispatchers.Main) {
                 draw_route_button.visibility = View.INVISIBLE
                 draw_route_button_progress_bar.visibility = View.VISIBLE
-                this@HomeFragment.viewModel.drawRouteToMainMarker()
+                this@HomeFragment.viewModel.currentLocation?.let { this@HomeFragment.viewModel.drawRouteToMainMarker(it) }
                 draw_route_button.visibility = View.VISIBLE
                 draw_route_button_progress_bar.visibility = View.GONE
             }

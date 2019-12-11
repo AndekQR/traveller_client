@@ -47,7 +47,4 @@ class TripInfoViewModel(
     suspend fun geocodeAddress(address: String) = this.mapRepository.geocodeAddress(address)
     fun updateWaypoints(waypoints: List<String>, tripToUpdate: Trip) = this.tripRepository.updateWaypoints(waypoints, tripToUpdate)
 
-    fun startLocationUpdates() = mapRepository.startLocationUpdates()
-    fun stopLocationUpdates() = mapRepository.stopLocationUpdates()
-    fun sendingLocationData() = mapRepository.sendingLocationData()
 }

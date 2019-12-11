@@ -11,10 +11,11 @@ import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Directions
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
-import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.ui.util.NoCurrentLocationException
 import com.client.traveller.ui.util.format
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.clustering.ClusterManager
@@ -25,12 +26,12 @@ import com.google.maps.android.clustering.ClusterManager
  * @param directionsApiService wyszukiwanie miejsc
  */
 class MapUtilsImpl(
-    private val locationProvider: LocationProvider,
     private val directionsApiService: DirectionsApiService
 ) : MapUtils {
 
     private lateinit var context: Context
     private lateinit var clusterManager: ClusterManager<NearbyPlaceClusterItem>
+    private var mMap: GoogleMap? = null
 
     private var mainMarker: Marker? = null
     private val polylinesOnMap = mutableListOf<Polyline>()
@@ -41,27 +42,35 @@ class MapUtilsImpl(
      * isBuildingEnabled = włącza wyświetlanie budynków 3D
      *
      */
-    override fun initializeMap(context: Context) {
+    override fun initializeMap(
+        context: Context,
+        mapFragment: SupportMapFragment
+    ) {
         this.context = context
-        locationProvider.mMap?.setOnMapClickListener(this)
-        locationProvider.mMap?.setOnMapLongClickListener(this)
+        mapFragment.getMapAsync(this)
+    }
 
-        val ui = locationProvider.mMap?.uiSettings
+    override fun onMapReady(googleMap: GoogleMap) {
+        this.mMap = googleMap
+        this.mMap?.isMyLocationEnabled = true
+        this.mMap?.setOnMapClickListener(this)
+        this.mMap?.setOnMapLongClickListener(this)
+
+        val ui = this.mMap?.uiSettings
         ui?.isMyLocationButtonEnabled = false
         ui?.isCompassEnabled = false
         ui?.isMapToolbarEnabled = false
-        locationProvider.mMap?.isBuildingsEnabled = true
+        this.mMap?.isBuildingsEnabled = true
 
         this.setupClasterer()
-
     }
 
     private fun setupClasterer() {
-        this.clusterManager = ClusterManager(this.context, this.locationProvider.mMap)
-        this.locationProvider.mMap?.setOnCameraIdleListener(this.clusterManager)
-        this.locationProvider.mMap?.setOnMarkerClickListener(this.clusterManager)
+        this.clusterManager = ClusterManager(this.context, this.mMap)
+        this.mMap?.setOnCameraIdleListener(this.clusterManager)
+        this.mMap?.setOnMarkerClickListener(this.clusterManager)
         this.clusterManager.renderer = MyClusterItemRenderer(this.context,
-            this.locationProvider.mMap!!, this.clusterManager)
+            this.mMap!!, this.clusterManager)
     }
 
     override fun onMarkerClick(marker: Marker?): Boolean {
@@ -81,7 +90,7 @@ class MapUtilsImpl(
             .position(position)
             .draggable(false)
             .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
-        val marker = locationProvider.mMap?.addMarker(markerOptions)
+        val marker = this.mMap?.addMarker(markerOptions)
         if (toClear && marker != null) this.markers.add(marker)
     }
 
@@ -100,7 +109,7 @@ class MapUtilsImpl(
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags))
             .draggable(false)
 
-          return locationProvider.mMap?.addMarker(defaultMarker)
+          return this.mMap?.addMarker(defaultMarker)
 
     }
 
@@ -149,16 +158,13 @@ class MapUtilsImpl(
         return waypoints?.map { it.trim() }?.joinToString("|")
     }
 
-    override suspend fun drawRouteToMarker(marker: Marker?): Polyline? {
-        if (locationProvider.currentLocation == null || marker == null)
-            return null
-
+    override suspend fun drawRouteToMarker(location: Location, marker: Marker?): Polyline? {
         val origin: String
         val destination: String
 
         try {
-            origin = locationProvider.currentLocation!!.format()
-            destination = marker.position!!.format()
+            origin = location.format()
+            destination = marker?.position?.format()!!
 
             val result = directionsApiService.getDirections(origin, destination)
             return this.drawRoute(result)
@@ -176,7 +182,7 @@ class MapUtilsImpl(
             pointList.forEach {
                 lineOptions.add(it)
             }
-            return locationProvider.mMap?.addPolyline(lineOptions)
+            return this.mMap?.addPolyline(lineOptions)
         }
         return null
     }
@@ -197,25 +203,6 @@ class MapUtilsImpl(
         this.polylinesOnMap.clear()
     }
 
-    /**
-     * Centruje kamerę na aktualnej lokalizacji
-     *
-     * Na początku locationProvider.currentLocation może być nullem
-     */
-    override fun centerCurrentLocation() {
-        var currentLocation: LatLng? = null
-        try {
-            currentLocation = LatLng(
-                locationProvider.currentLocation?.latitude!!,
-                locationProvider.currentLocation?.longitude!!
-            )
-        } catch (ex: NullPointerException) {
-        }
-        currentLocation?.let {
-            this.centerCameraOnLocation(it)
-        }
-    }
-
     override fun centerCameraOnRoute(
         startAddress: LatLng,
         waypoints: ArrayList<LatLng?>?,
@@ -229,7 +216,7 @@ class MapUtilsImpl(
         latLngBoundsBuilder.include(endAddress)
         val bounds = latLngBoundsBuilder.build()
         val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 170)
-        locationProvider.mMap?.animateCamera(cameraUpdate)
+        this.mMap?.animateCamera(cameraUpdate)
     }
 
     override fun centerCameraOnLocation(location: LatLng) {
@@ -239,7 +226,7 @@ class MapUtilsImpl(
             .tilt(50F)
             .build()
         val cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition)
-        locationProvider.mMap?.animateCamera(cameraUpdate)
+        this.mMap?.animateCamera(cameraUpdate)
     }
 
     /**
@@ -268,17 +255,6 @@ class MapUtilsImpl(
     }
 
     /**
-     * Zwraca ostatnią pozycję użytkownika
-     */
-    override fun getCurrentLocation(): Location {
-        val currentLocation = locationProvider.currentLocation
-        if (currentLocation != null)
-            return currentLocation
-        else
-            throw NoCurrentLocationException()
-    }
-
-    /**
      * sprawdza czy na mappie znajdują się elementy które można wyczyścić
      */
     override fun elementsOnMap(): Boolean {
@@ -288,10 +264,10 @@ class MapUtilsImpl(
     }
 
     override fun disableMapDragging() {
-        this.locationProvider.mMap?.uiSettings?.isScrollGesturesEnabled = false
+        this.mMap?.uiSettings?.isScrollGesturesEnabled = false
     }
 
     override fun enableMapDragging() {
-        this.locationProvider.mMap?.uiSettings?.isScrollGesturesEnabled = true
+        this.mMap?.uiSettings?.isScrollGesturesEnabled = true
     }
 }

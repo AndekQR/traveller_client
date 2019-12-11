@@ -10,12 +10,11 @@ import com.google.firebase.firestore.FirebaseFirestore
  * Kolekcja przechowuje lokalizacje każdego użytkownika
  * Lokalizacje są podzielone weług uid wycieczek
  */
-class Map {
+object Map {
 
-    companion object {
-        private const val COLLECTION_NAME = "map"
-        private const val TRIPS_USERS_LOCALIZATION = "trips_users_localization"
-    }
+    private const val COLLECTION_NAME = "map"
+    private const val TRIPS_USERS_LOCALIZATION = "trips_users_localization"
+
 
     private fun getMapCollection(): CollectionReference {
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME)
@@ -25,8 +24,9 @@ class Map {
         return this.getMapCollection().document(tripUid).collection(TRIPS_USERS_LOCALIZATION)
     }
 
-    fun sendNewLocation(userLocalization: UserLocalization, trip: Trip) {
-        this.getTripUsersLocalizationCollection(tripUid = trip.uid!!).document(userLocalization.user?.idUserFirebase!!).set(userLocalization)
+    fun sendNewLocation(userLocalization: UserLocalization, tripUid: String) {
+        this.getTripUsersLocalizationCollection(tripUid)
+            .document(userLocalization.userUidFirebase!!).set(userLocalization)
     }
 
     fun getTripUsersLocation(tripUid: String): CollectionReference {

@@ -1,6 +1,7 @@
 package com.client.traveller.ui.home
 
 import android.content.Context
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -18,6 +19,7 @@ import com.client.traveller.ui.util.format
 import com.client.traveller.ui.util.formatToApi
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 
@@ -31,6 +33,7 @@ class HomeViewModel(
 
     val currentUser: LiveData<User> = this.userRepository.getCurrentUser()
     val currentTrip: LiveData<Trip> = this.tripRepository.getCurrentTrip()
+    var currentLocation: Location? = null
 
     init {
         viewModelScope.launch { messagingRepository.refreshToken() }
@@ -52,12 +55,8 @@ class HomeViewModel(
         savedInstanceState: Bundle?
     ) = mapRepository.initializeMap(map, context, savedInstanceState)
 
-    fun startLocationUpdates() = mapRepository.startLocationUpdates()
-    fun stopLocationUpdates() = mapRepository.stopLocationUpdates()
-    fun sendingLocationData() = mapRepository.sendingLocationData()
-    fun centerOnMe() = mapRepository.centerCurrentLocation()
     suspend fun drawRouteToLocation(
-        origin: String = mapRepository.getCurrentLocation().format(),
+        origin: String ,
         destination: String,
         locations: List<String>?,
         mode: TravelMode = TravelMode.driving
@@ -98,6 +97,6 @@ class HomeViewModel(
             this.mapRepository.drawNearbyPlaceMarkers(nearbyPlaces)
         }
     }
-    suspend fun drawRouteToMainMarker() = this.mapRepository.drawRouteToMainMarker()
-    fun getCurrentLocation() = this.mapRepository.getCurrentLocation()
+    suspend fun drawRouteToMainMarker(location: Location) = this.mapRepository.drawRouteToMainMarker(location)
+    fun centerCameraOnLocation(location: LatLng) = this.mapRepository.centerCameraOnLocation(location)
 }

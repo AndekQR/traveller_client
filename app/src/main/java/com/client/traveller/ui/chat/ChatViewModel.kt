@@ -62,8 +62,4 @@ class ChatViewModel(
         this.removeObservers()
     }
 
-
-    fun startLocationUpdates() = mapRepository.startLocationUpdates()
-    fun stopLocationUpdates() = mapRepository.stopLocationUpdates()
-    fun sendingLocationData() = mapRepository.sendingLocationData()
 }

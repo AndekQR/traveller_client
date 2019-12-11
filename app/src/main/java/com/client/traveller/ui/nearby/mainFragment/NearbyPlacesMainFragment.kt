@@ -12,9 +12,7 @@ import com.client.traveller.R
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.ui.nearby.NearbyPlacesViewModel
 import com.client.traveller.ui.nearby.NearbyPlacesViewModelFactory
-import com.client.traveller.ui.util.ScopedFragment
-import com.client.traveller.ui.util.hideProgressBar
-import com.client.traveller.ui.util.showProgressBar
+import com.client.traveller.ui.util.*
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
@@ -53,23 +51,29 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
 
 
         launch(Dispatchers.Main) {
-            val nearbySearchResponses = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces()
-            val listofPlaces = mutableSetOf<Result>()
-            nearbySearchResponses.forEach {
-                listofPlaces.addAll(it.results)
-            }
-            this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(listofPlaces)
-        }
-        this.bindUI()
-
-        swipe_to_refresh_layout.setOnRefreshListener {
-            launch(Dispatchers.Main) {
-                val nearbySearchResponses = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces()
+            val currentLatLng = this@NearbyPlacesMainFragment.viewModel.currentLocation
+            currentLatLng?.let {location ->
+                val nearbySearchResponses = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces(location.toLatLng().formatToApi())
                 val listofPlaces = mutableSetOf<Result>()
                 nearbySearchResponses.forEach {
                     listofPlaces.addAll(it.results)
                 }
                 this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(listofPlaces)
+            }
+        }
+        this.bindUI()
+
+        swipe_to_refresh_layout.setOnRefreshListener {
+            launch(Dispatchers.Main) {
+                val currentLatLng = this@NearbyPlacesMainFragment.viewModel.currentLocation
+                currentLatLng?.let { location ->
+                    val nearbySearchResponses = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces(location.toLatLng().formatToApi())
+                    val listofPlaces = mutableSetOf<Result>()
+                    nearbySearchResponses.forEach {
+                        listofPlaces.addAll(it.results)
+                    }
+                    this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(listofPlaces)
+                }
                 swipe_to_refresh_layout.isRefreshing = false
             }
         }
@@ -81,14 +85,14 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
         this@NearbyPlacesMainFragment.viewModel.searchedPlaces.observe(
             viewLifecycleOwner,
             Observer { places ->
-                if (::searchedPlaces.isInitialized && places == this@NearbyPlacesMainFragment.searchedPlaces) return@Observer
-                if (places.isEmpty()) {
-                    progress_bar.showProgressBar()
+                if (::searchedPlaces.isInitialized &&
+                    this@NearbyPlacesMainFragment.searchedPlaces.isNotEmpty() &&
+                    places == this@NearbyPlacesMainFragment.searchedPlaces ) return@Observer
+                if (places.isEmpty() || places == null) {
                     nothing_to_display.visibility = View.VISIBLE
                     recycler_view.visibility = View.GONE
                     progress_bar.hideProgressBar()
                 } else {
-                    progress_bar.showProgressBar()
                     recycler_view.visibility = View.VISIBLE
                     nothing_to_display.visibility = View.GONE
                     this@NearbyPlacesMainFragment.viewModel.initOriginalListOfPlaces(places)

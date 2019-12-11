@@ -5,18 +5,15 @@ import androidx.core.text.HtmlCompat
 import com.client.traveller.data.network.api.places.API_KEY
 import com.client.traveller.data.network.api.places.PlacesApiService
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
-import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.network.api.places.response.placeDetailResponse.PlaceDetailResponse
 import com.client.traveller.data.network.api.wikipedia.WikipediaApiService
 import com.client.traveller.data.network.api.wikipedia.model.Section
 import com.client.traveller.data.network.api.wikipedia.response.wikipediaPageSummaryResponse.WikipediaPageSummaryResponse
 import com.client.traveller.data.network.api.wikipedia.response.wikipediaPrefixSearchResponse.WikipediaPrefixSearchResponse
-import com.client.traveller.data.provider.LocationProvider
 import com.client.traveller.data.provider.PreferenceProvider
 import java.util.*
 
 class PlacesRepositoryImpl(
-    private val locationProvider: LocationProvider,
     private val placesApiClient: PlacesApiService,
     private val wikipediaApiService: WikipediaApiService,
     private val preferencesProvider: PreferenceProvider
@@ -40,15 +37,13 @@ class PlacesRepositoryImpl(
     )
 
     //TODO switch map lokalna baza i places api, trzeba dodać jakiś interceptor czy jest internet
-    override suspend fun getNearbyPlaces(latlng: String?, radius: Int?): Set<NearbySearchResponse> {
-        val location = latlng
-            ?: "${locationProvider.currentLocation?.latitude},${locationProvider.currentLocation?.longitude}"
+    override suspend fun getNearbyPlaces(latlng: String, radius: Int?): Set<NearbySearchResponse> {
         val listofNearbyResponse = mutableSetOf<NearbySearchResponse>()
         this.searchedTypes.forEach { type ->
             val myRadius = radius ?: preferencesProvider.getNearbyPlacesSearchDistance()
             val response: NearbySearchResponse
-            response = if (myRadius != null) this.placesApiClient.findNearbyPlaces(latlng = location, type = type, radius = myRadius)
-            else this.placesApiClient.findNearbyPlaces(latlng = location, type = type)
+            response = if (myRadius != null) this.placesApiClient.findNearbyPlaces(latlng = latlng, type = type, radius = myRadius)
+            else this.placesApiClient.findNearbyPlaces(latlng = latlng, type = type)
             listofNearbyResponse.add(response)
         }
         return listofNearbyResponse.toSet()

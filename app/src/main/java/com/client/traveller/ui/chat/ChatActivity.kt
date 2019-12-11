@@ -2,6 +2,7 @@ package com.client.traveller.ui.chat
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
@@ -195,6 +196,8 @@ class ChatActivity : BaseActivity(), KodeinAware {
             }
             true
         }
+
+    override fun onNewLocation(location: Location) {}
 
     override fun onBackPressed() {
         if (doubleBack) {

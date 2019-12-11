@@ -10,5 +10,7 @@ class Constants {
         // profileFragment
         const val KEY_FILE_URI = "key_file_uri"
         const val READ_REQUEST_CODE = 42
+
+        const val CURRENT_TRIP_UID_PREFERENCES = "current_trip_uid"
     }
 }

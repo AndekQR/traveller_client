@@ -1,5 +1,6 @@
 package com.client.traveller.ui.trip
 
+import android.location.Location
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -88,6 +89,7 @@ class TripActivity : BaseActivity(), KodeinAware, NavController.OnDestinationCha
         }
     }
 
+    override fun onNewLocation(location: Location) {}
 
     /**
      * jest wywoływane przed OnCreateOptionsMenu

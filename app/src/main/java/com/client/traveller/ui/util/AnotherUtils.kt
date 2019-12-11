@@ -115,6 +115,10 @@ fun com.client.traveller.data.network.api.places.response.placeDetailResponse.Lo
     return LatLng(this.lat, this.lng)
 }
 
+fun Location.toLatLng() : LatLng {
+    return LatLng(this.latitude, this.longitude)
+}
+
 
 /**
  * sprawdza czy jakikolwiek element z pierwszej listy jest taki sam jak jakikolwiek element z drugiej listy

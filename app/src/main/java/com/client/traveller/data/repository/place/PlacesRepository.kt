@@ -9,7 +9,7 @@ import com.client.traveller.data.network.api.wikipedia.response.wikipediaPrefixS
 
 interface PlacesRepository {
 
-    suspend fun getNearbyPlaces(latlng: String? = null, radius: Int? = null): Set<NearbySearchResponse>
+    suspend fun getNearbyPlaces(latlng: String, radius: Int? = null): Set<NearbySearchResponse>
     fun getPhotoUrl(reference: String, width: Int): String
     fun getSearchedTypes(): List<String>
     suspend fun getPlaceDetail(placeId: String): PlaceDetailResponse

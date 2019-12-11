@@ -1,6 +1,7 @@
 package com.client.traveller.ui.nearby
 
 import android.content.Context
+import android.location.Location
 import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -23,6 +24,7 @@ class NearbyPlacesViewModel(
 
     val currentUser = userRepository.getCurrentUser()
     val currentTrip = tripRepository.getCurrentTrip()
+    var currentLocation: Location? = null
 
     // fraza w wyszukiwarce
     val searchQuery = MutableLiveData<String>()
@@ -30,14 +32,14 @@ class NearbyPlacesViewModel(
     var checkedItems = this.getPlacesSearchedTypes().map { false }.toMutableList()
 
     // miejsca zwrócone przez places api
-    private var _searchedPlaces: MutableLiveData<Set<Result>> = MutableLiveData()
+    private var _searchedPlaces: MutableLiveData<Set<Result>> = MutableLiveData(emptySet())
     val searchedPlaces: LiveData<Set<Result>>
         get() = _searchedPlaces
 
     private var originalListOfPlaces: Set<Result> = setOf()
 
     // pobieranie miejsc w poblizu z places api
-    suspend fun findNearbyPlaces() = placesRepository.getNearbyPlaces()
+    suspend fun findNearbyPlaces(latlng: String) = placesRepository.getNearbyPlaces(latlng)
 
     fun logoutUser(mGoogleSignInClient: GoogleSignInClient) =
         userRepository.logoutUser(mGoogleSignInClient)
@@ -49,9 +51,6 @@ class NearbyPlacesViewModel(
         _searchedPlaces.value = places
     }
 
-    fun startLocationUpdates() = mapRepository.startLocationUpdates()
-    fun stopLocationUpdates() = mapRepository.stopLocationUpdates()
-    fun sendingLocationData() = mapRepository.sendingLocationData()
 
     fun getPhoto(photoReference: String?, width: Int?): String? {
         if (photoReference == null || width == null)

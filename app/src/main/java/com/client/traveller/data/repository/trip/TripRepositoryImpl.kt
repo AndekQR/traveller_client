@@ -1,11 +1,13 @@
 package com.client.traveller.data.repository.trip
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import com.client.traveller.data.db.TripDao
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.firebase.firestore.Trips
+import com.client.traveller.data.provider.PreferenceProvider
 import com.client.traveller.ui.util.Coroutines.io
 import com.client.traveller.ui.util.toFlow
 import kotlinx.coroutines.*
@@ -78,14 +80,14 @@ class TripRepositoryImpl(
      *
      * @param trip wycieczka do zapisania
      */
-    override suspend fun newTrip(trip: Trip) = withContext(Dispatchers.IO) {
+    override suspend fun newTrip(trip: Trip, context: Context) = withContext(Dispatchers.IO) {
         suspendCoroutine<Void?> { continuation ->
             trips.addNewTrip(trip).addOnCompleteListener {
                 if (!it.isSuccessful) {
                     continuation.resumeWith(Result.failure(it.exception!!))
                     return@addOnCompleteListener
                 } else {
-                    io { this@TripRepositoryImpl.saveTripToLocalDB(trip) }
+                    io { this@TripRepositoryImpl.saveTripToLocalDB(trip, context) }
                     continuation.resumeWith(Result.success(it.result))
                     return@addOnCompleteListener
                 }
@@ -93,8 +95,14 @@ class TripRepositoryImpl(
         }
     }
 
+    /**
+     * z uid aktualnej wycieczki korzysta MyLocationService
+     * pobiera to uid żeby zapisać aktualną lokalizacje dofirestore
+     * wfirestore uid aktualnej wycieczki jest nazwą kolekcji
+     */
     @ExperimentalCoroutinesApi
-    override suspend fun saveTripToLocalDB(trip: Trip) {
+    override suspend fun saveTripToLocalDB(trip: Trip, context: Context) {
+        PreferenceProvider(context).putCurrentTravelUid(trip.uid!!)
         this.tripDao.upsert(trip)
         this.initCurrentTripUpdates()
     }

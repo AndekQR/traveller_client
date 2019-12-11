@@ -140,7 +140,7 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
                     if (viewModel.isTripParticipant(trip, currentUser)) {
                         add_trip_button.text = getString(R.string.choose_trip)
                         add_trip_button.setOnClickListener {
-                            viewModel.setTripAsActual(trip)
+                            viewModel.setTripAsActual(trip, context!!)
                             view?.findNavController()?.navigateUp()
                         }
                     } else {
@@ -151,7 +151,7 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
                 if (viewModel.isTripParticipant(trip, currentUser)) {
                     add_trip_button.text = getString(R.string.choose_trip)
                     add_trip_button.setOnClickListener {
-                        viewModel.setTripAsActual(trip)
+                        viewModel.setTripAsActual(trip, context!!)
                         view?.findNavController()?.navigateUp()
                     }
                 }
@@ -227,7 +227,7 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
      */
     private suspend fun addTripShowResult(trip: Trip) {
         try {
-            viewModel.addTrip(trip)
+            viewModel.addTrip(trip, context!!)
         } catch (ex: Exception) {
             com.client.traveller.ui.dialog.Dialog.Builder()
                 .addMessage(ex.message!!)
@@ -408,12 +408,12 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
     // Dla osoby w wycieczce ten przycsk nie powinien się pokazywać
     fun jointTripButtonClick() {
         if (this.tripView) {
-            viewedTripViewId?.let { viewId ->
+            viewedTripViewId?.let {
                 // dodanie email osoby do tej wycieczki
                 this.viewedTrip?.let {
                     launch(Dispatchers.IO) {
                         viewModel.updateTripPersons(it, listOf(currentUser.email!!))
-                        viewModel.setTripAsActual(it)
+                        viewModel.setTripAsActual(it, context!!)
                     }
                 }
             }
