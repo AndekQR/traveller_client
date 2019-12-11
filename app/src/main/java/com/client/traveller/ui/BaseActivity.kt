@@ -1,22 +1,24 @@
-package com.client.traveller
+package com.client.traveller.ui
 
 import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.client.traveller.data.network.map.LocationBroadcastReceiver
+import com.client.traveller.BuildConfig
+import com.client.traveller.R
 import com.client.traveller.data.provider.PreferenceProvider
 import com.client.traveller.data.services.MyLocationService
 import com.google.android.material.snackbar.Snackbar
-import org.kodein.di.KodeinAware
 
-abstract class BaseActivity : AppCompatActivity(), KodeinAware {
+abstract class BaseActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_PERMISSIONS_REQUEST_CODE = 34
@@ -29,7 +31,7 @@ abstract class BaseActivity : AppCompatActivity(), KodeinAware {
      * false = serwis powinien działać, w serwisie tworzone jest powiadomienie aby serwis działał w tle
      */
     var mBound = false
-    private var receiver: BroadcastReceiver? = null
+    private var currentLocation: Location? = null
 
     private val locationServiceConnection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -49,16 +51,23 @@ abstract class BaseActivity : AppCompatActivity(), KodeinAware {
         }
     }
 
+    private val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val location: Location? = intent.getParcelableExtra(MyLocationService.EXTRA_LOCATION)
+            this@BaseActivity.currentLocation = location
+            Log.e(javaClass.simpleName, this@BaseActivity.currentLocation.toString())
+        }
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // jeżeli nie ma uprawnień do lokalizacji, poproś o uprawnienia
         if (PreferenceProvider(this).getSendLocation()) {
             if (!checkPermissions()) {
                 requestPermissions()
             }
         }
-        this.receiver = LocationBroadcastReceiver()
     }
 
     override fun onStart() {
@@ -134,7 +143,7 @@ abstract class BaseActivity : AppCompatActivity(), KodeinAware {
          * rejestracja klasy LocationBroadcastReceiver jako klasy która odbiera dane z MyLocationService
          */
         LocalBroadcastManager.getInstance(this).registerReceiver(
-            receiver!!,
+            this.broadcastReceiver,
             IntentFilter(MyLocationService.ACTION_BROADCAST)
         )
     }
@@ -147,7 +156,7 @@ abstract class BaseActivity : AppCompatActivity(), KodeinAware {
         /**
          * dane z serwisu nie są już potrzebne bo aplikacja przeszła na inny plan
          */
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver!!)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
 
     }
 

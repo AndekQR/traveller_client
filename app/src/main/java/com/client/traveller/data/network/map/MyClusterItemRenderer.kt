@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import kotlinx.android.synthetic.main.my_place_map_marker.view.*
+import java.lang.IllegalArgumentException
 
 class MyClusterItemRenderer(
     private val context: Context,
@@ -38,7 +39,6 @@ class MyClusterItemRenderer(
         if (item?.place?.photos != null && item.place.photos.isNotEmpty()) {
             val placePhotoReference = item.place.photos.first().photoReference
             val placePhotoUrl = this.getPhotoUrl(placePhotoReference, 100)
-            Log.e(javaClass.simpleName, placePhotoUrl)
             Glide
                 .with(baseView)
                 .asBitmap()
@@ -53,21 +53,28 @@ class MyClusterItemRenderer(
                 ) {
                     baseView.place_photo.setImageBitmap(resource)
                     val bitmap = this@MyClusterItemRenderer.getBitmapFromView(baseView)
-                    Log.e(javaClass.simpleName, bitmap?.height.toString())
-                    marker?.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                    try {
+                        marker?.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                    } catch (ex: IllegalArgumentException) {
+                        Log.e(javaClass.simpleName, ex.message.toString())
+                    }
                 }
 
             })
         } else {
             baseView.place_photo.setImageResource(R.drawable.ic_default_home)
             val bitmap = this.getBitmapFromView(baseView)
-            marker?.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
+            try {
+                marker?.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
+            } catch (ex: IllegalArgumentException) {
+                Log.e(javaClass.simpleName, ex.message.toString())
+            }
         }
     }
 
-
-
-
+    /**
+     * konwersja widoku (view) na bitmape
+     */
     private fun getBitmapFromView(view: View): Bitmap? {
         view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
         view.layout(0, 0, view.measuredWidth, view.measuredHeight)
@@ -80,6 +87,9 @@ class MyClusterItemRenderer(
         return bitmap
     }
 
+    /**
+     * konwersja photoReference na url
+     */
     private fun getPhotoUrl(reference: String, width: Int): String {
         return "${PlacesApiService.BASE_URL}photo?maxwidth=${width}&photoreference=${reference}&key=$API_KEY"
     }

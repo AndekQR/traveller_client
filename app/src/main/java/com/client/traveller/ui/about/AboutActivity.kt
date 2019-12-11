@@ -1,10 +1,10 @@
 package com.client.traveller.ui.about
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import com.client.traveller.ui.BaseActivity
 import com.client.traveller.R
 
-class AboutActivity : AppCompatActivity() {
+class AboutActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

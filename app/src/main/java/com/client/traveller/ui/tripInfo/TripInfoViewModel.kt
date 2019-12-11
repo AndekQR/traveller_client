@@ -32,8 +32,10 @@ class TripInfoViewModel(
         userRepository.logoutUser(mGoogleSignInClient)
 
     suspend fun getNearbyPlaces(location: String): Set<Result> {
-        val latlngLocation = this@TripInfoViewModel.mapRepository.geocodeAddress(location).results.first().geometry.location.toLatLng()
+        val geocodeResult = this@TripInfoViewModel.mapRepository.geocodeAddress(location).results
+        val latlngLocation = if (geocodeResult.isNotEmpty()) geocodeResult.first().geometry.location.toLatLng() else return emptySet()
         val placesResponse = this@TripInfoViewModel.placesRepository.getNearbyPlaces(latlngLocation.formatToApi(), 1000)
+        if (placesResponse.isEmpty()) return emptySet()
         val places = mutableListOf<Result>()
         placesResponse.forEach {
             places.addAll(it.results)

@@ -3,7 +3,6 @@ package com.client.traveller.ui.trip
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -11,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
+import com.client.traveller.ui.BaseActivity
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.User
 import kotlinx.android.synthetic.main.activity_trip.*
@@ -19,7 +19,7 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
 // TODO trzeba sprawdzać czywycieczka o tej samej nazwie już istnieje i pytać czy nadpisać
-class TripActivity : AppCompatActivity(), KodeinAware, NavController.OnDestinationChangedListener {
+class TripActivity : BaseActivity(), KodeinAware, NavController.OnDestinationChangedListener {
 
     override val kodein by kodein()
     private val factory: TripViewModelFactory by instance()
@@ -88,16 +88,6 @@ class TripActivity : AppCompatActivity(), KodeinAware, NavController.OnDestinati
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        this.viewModel.stopLocationUpdates()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (this.viewModel.sendingLocationData())
-            this.viewModel.startLocationUpdates()
-    }
 
     /**
      * jest wywoływane przed OnCreateOptionsMenu

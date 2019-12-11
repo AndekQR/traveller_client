@@ -1,10 +1,8 @@
 package com.client.traveller.ui.tripInfo
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -14,9 +12,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
+import com.client.traveller.ui.BaseActivity
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.ui.about.AboutActivity
@@ -24,8 +22,6 @@ import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.chat.ChatActivity
 import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.nearby.NearbyPlacesActivity
-import com.client.traveller.ui.nearby.NearbyPlacesViewModel
-import com.client.traveller.ui.nearby.NearbyPlacesViewModelFactory
 import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
 import com.client.traveller.ui.util.Coroutines
@@ -39,7 +35,7 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-class TripInfoActivity : AppCompatActivity(), KodeinAware {
+class TripInfoActivity : BaseActivity(), KodeinAware {
 
     override val kodein by kodein()
     private val factory: TripInfoViewModelFactory by instance()
@@ -214,15 +210,5 @@ class TripInfoActivity : AppCompatActivity(), KodeinAware {
     return false
     }
 
-    override fun onPause() {
-        super.onPause()
-        this.viewModel.stopLocationUpdates()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (this.viewModel.sendingLocationData())
-            this.viewModel.startLocationUpdates()
-    }
 
 }

@@ -61,7 +61,7 @@ class MyLocationService : Service() {
             val mChannel = NotificationChannel(
                 CHANNEL_ID,
                 getString(R.string.app_name),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_LOW
             )
             this.notificationManager?.createNotificationChannel(mChannel)
         }
@@ -145,6 +145,7 @@ class MyLocationService : Service() {
         val intent = Intent(this, MyLocationService::class.java)
         val text = Utils.getLocationText(this.currentLocation)
         intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val servicePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         val activityPendingIntent = PendingIntent.getActivity(this, 0, Intent(this, HomeActivity::class.java), 0)
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)

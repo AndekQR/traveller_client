@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
+import com.client.traveller.ui.BaseActivity
 import com.client.traveller.R
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.ui.about.AboutActivity
@@ -28,7 +29,6 @@ import com.client.traveller.ui.settings.SettingsActivity
 import com.client.traveller.ui.trip.TripActivity
 import com.client.traveller.ui.tripInfo.TripInfoActivity
 import com.client.traveller.ui.util.Coroutines
-import com.client.traveller.ui.util.ScopedAppActivity
 import com.client.traveller.ui.util.contains
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -41,7 +41,7 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.util.*
 
-class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware,
+class NearbyPlacesActivity : BaseActivity(), KodeinAware,
     NavController.OnDestinationChangedListener {
 
     override val kodein by kodein()
@@ -177,16 +177,7 @@ class NearbyPlacesActivity : ScopedAppActivity(), KodeinAware,
         true
     }
 
-    override fun onPause() {
-        super.onPause()
-        this.viewModel.stopLocationUpdates()
-    }
 
-    override fun onResume() {
-        super.onResume()
-        if (this.viewModel.sendingLocationData())
-            this.viewModel.startLocationUpdates()
-    }
 
     private val onBottomNavigationItemSelected =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->

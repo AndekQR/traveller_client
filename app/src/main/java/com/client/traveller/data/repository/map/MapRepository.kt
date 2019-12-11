@@ -59,4 +59,5 @@ interface MapRepository {
     suspend fun reverseGeocoding(latlng: String): ReverseGeocodingResponse
     fun sendNewLocation(userLocalization: UserLocalization, trip: Trip)
     suspend fun getTripUsersLocation(tripUid: String): Flow<List<UserLocalization>>
+
 }

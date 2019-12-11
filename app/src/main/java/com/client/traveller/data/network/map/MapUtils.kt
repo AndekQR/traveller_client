@@ -14,11 +14,10 @@ import com.google.android.gms.maps.model.Polyline
 interface MapUtils : GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener,
     GoogleMap.OnMapLongClickListener {
     fun initializeMap(context: Context)
-    fun lastKnownLocation()
     suspend fun drawRouteToMarker(marker: Marker?): Polyline?
     suspend fun drawRouteToLocation(
-        origin: String,
-        destination: String,
+        origin: String?,
+        destination: String?,
         locations: List<String>?,
         mode: TravelMode,
         clearAble: Boolean = true
@@ -37,7 +36,7 @@ interface MapUtils : GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListen
     fun drawMarkerFromBitmap(position: LatLng, bitmap: Bitmap, toClear: Boolean = false)
     fun getMarkerFromMap(): Marker?
     fun centerCameraOnLocation(location: LatLng)
-    fun centerCameraOnRoute(startAddress: LatLng, waypoints: ArrayList<LatLng>?, endAddress: LatLng)
+    fun centerCameraOnRoute(startAddress: LatLng, waypoints: ArrayList<LatLng?>?, endAddress: LatLng)
     fun elementsOnMap(): Boolean
     fun drawPlaceMarkersInCluster(places: Set<Result>)
     fun disableMapDragging()

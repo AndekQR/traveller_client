@@ -59,7 +59,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val sentTo = message.data["sentTo"]
         val currentUser = FirebaseAuth.getInstance().currentUser
         val am = applicationContext.getSystemService(Activity.ACTIVITY_SERVICE) as ActivityManager
-        val currentActivity = am.appTasks.first().taskInfo.topActivity
         if (currentUser != null && sentTo == currentUser.uid)
             sendNotification(message)
     }

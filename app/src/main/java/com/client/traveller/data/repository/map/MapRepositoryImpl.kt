@@ -56,9 +56,6 @@ class MapRepositoryImpl(
 
     private lateinit var context: Context
 
-    init {
-        Log.e(javaClass.simpleName," mapRepo init ${locationBroadcastReceiver.value}")
-    }
 
     /**
      * Inicjalzacja mapy oraz jej składników
@@ -106,9 +103,9 @@ class MapRepositoryImpl(
     override fun clearMap() = this.mapUtils.clearMap()
 
     override suspend fun drawTripRoute(trip: Trip, travelMode: TravelMode) {
-        val startLatLng: String
+        var startLatLng: String? = null
         val waypointsLatLng = mutableListOf<String>()
-        val endLatLng: String
+        var endLatLng: String? = null
 
         val view =
             (this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
@@ -118,23 +115,27 @@ class MapRepositoryImpl(
         view.marker_text.text = "S"
         var bitmap = this.getBitmapFromView(view)
         var address = geocoding.geocode(trip.startAddress!!)
-        var latlng = address.results.first().geometry.location.toLatLng()
-        startLatLng = latlng.formatToApi()
-        bitmap?.let {
-            mapUtils.drawMarkerFromBitmap(
-                latlng,
-                it
-            )
-        }
+       if (address.results.isNotEmpty()) {
+           val latlng = address.results.first().geometry.location.toLatLng()
+           startLatLng = latlng.formatToApi()
+           bitmap?.let {
+               mapUtils.drawMarkerFromBitmap(
+                   latlng,
+                   it
+               )
+           }
+       }
 
         //waypoints
         trip.waypoints?.forEachIndexed { index, waypointAddress ->
             view.marker_text.text = "${index + 1}"
             val address = geocoding.geocode(waypointAddress)
-            val latlng = address.results.first().geometry.location.toLatLng()
-            waypointsLatLng.add(latlng.formatToApi())
-            val bitmap = this.getBitmapFromView(view)
-            bitmap?.let { this.mapUtils.drawMarkerFromBitmap(latlng, bitmap) }
+            if (address.results.isNotEmpty()) {
+                val latlng = address.results.first().geometry.location.toLatLng()
+                waypointsLatLng.add(latlng.formatToApi())
+                val bitmap = this.getBitmapFromView(view)
+                bitmap?.let { this.mapUtils.drawMarkerFromBitmap(latlng, bitmap) }
+            }
         }
 
         //stop
@@ -144,10 +145,12 @@ class MapRepositoryImpl(
             view.marker_text.text = "E"
         }
         address = geocoding.geocode(trip.endAddress!!)
-        latlng = address.results.first().geometry.location.toLatLng()
-        endLatLng = latlng.formatToApi()
-        bitmap = this.getBitmapFromView(view)
-        bitmap?.let { this.mapUtils.drawMarkerFromBitmap(latlng, it) }
+        if (address.results.isNotEmpty()) {
+            val latlng = address.results.first().geometry.location.toLatLng()
+            endLatLng = latlng.formatToApi()
+            bitmap = this.getBitmapFromView(view)
+            bitmap?.let { this.mapUtils.drawMarkerFromBitmap(latlng, it) }
+        }
 
         this.mapUtils.drawRouteToLocation(startLatLng, endLatLng, waypointsLatLng, travelMode, false)
     }
@@ -190,12 +193,22 @@ class MapRepositoryImpl(
         waypoints: ArrayList<String>?,
         endAddress: String
     ) {
-        val startAddressLatLng = this.geocoding.geocode(startAddress).results.first().geometry.location.toLatLng()
+        val startAddressLatLng = this.getLatLng(startAddress)
         val waypointsLatLng = waypoints?.map {
-            this.geocoding.geocode(it).results.first().geometry.location.toLatLng()
+            this.getLatLng(it)
         }?.toCollection(ArrayList())
-        val endAddressLatLng = this.geocoding.geocode(endAddress).results.first().geometry.location.toLatLng()
+        val endAddressLatLng = this.getLatLng(endAddress)
+        if (startAddressLatLng == null || endAddressLatLng == null) return
         this.mapUtils.centerCameraOnRoute(startAddressLatLng, waypointsLatLng, endAddressLatLng)
+    }
+
+    private suspend fun getLatLng(address: String): LatLng? {
+        val result = this.geocoding.geocode(address).results
+        return if (result.isNotEmpty()) {
+            result.first().geometry.location.toLatLng()
+        } else {
+            null
+        }
     }
 
     override fun elementOnMap() = this.mapUtils.elementsOnMap()

@@ -54,16 +54,6 @@ class MapUtilsImpl(
 
         this.setupClasterer()
 
-        // zmiana lokalizacji przycisku do centrowania lokalizacji na prawy dół
-//        val locationButton =
-//            (locationProvider.mapFragment?.view?.findViewById<View>(Integer.parseInt("1"))?.parent as View).findViewById<View>(
-//                Integer.parseInt("2")
-//            )
-//        val rlp = locationButton.layoutParams as (RelativeLayout.LayoutParams)
-//        rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0)
-//        rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE)
-//        rlp.setMargins(0, 0, 30, 30)
-
     }
 
     private fun setupClasterer() {
@@ -130,21 +120,6 @@ class MapUtilsImpl(
         }
     }
 
-    override fun lastKnownLocation() {
-        try {
-            val latlng = LatLng(
-                locationProvider.currentLocation?.latitude!!,
-                locationProvider.currentLocation?.longitude!!
-            )
-            locationProvider.mMap?.addMarker(MarkerOptions().position(latlng).title("Last location"))
-            locationProvider.mMap?.moveCamera(CameraUpdateFactory.newLatLng(latlng))
-            locationProvider.mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 12.0f))
-        } catch (ex: NullPointerException) {
-            Log.e(javaClass.simpleName, ex.message)
-        }
-    }
-
-
     private fun getDefaultPolyline(): PolylineOptions {
         return PolylineOptions()
             .width(12F)
@@ -153,12 +128,13 @@ class MapUtilsImpl(
     }
 
     override suspend fun drawRouteToLocation(
-        origin: String,
-        destination: String,
+        origin: String?,
+        destination: String?,
         locations: List<String>?,
         mode: TravelMode,
         clearAble: Boolean
     ) {
+        if (origin == null || destination == null) return
         val start = origin.trim().replace(" ", "+")
         val stop = destination.trim().replace(" ", "+")
         val waypoints = this.getWaypointsString(waypoints = locations)
@@ -242,13 +218,13 @@ class MapUtilsImpl(
 
     override fun centerCameraOnRoute(
         startAddress: LatLng,
-        waypoints: ArrayList<LatLng>?,
+        waypoints: ArrayList<LatLng?>?,
         endAddress: LatLng
     ) {
         val latLngBoundsBuilder = LatLngBounds.Builder()
         latLngBoundsBuilder.include(startAddress)
         waypoints?.forEach {
-            latLngBoundsBuilder.include(it)
+            it?.let { latLngBoundsBuilder.include(it) }
         }
         latLngBoundsBuilder.include(endAddress)
         val bounds = latLngBoundsBuilder.build()

@@ -7,13 +7,13 @@ import android.os.Handler
 import android.view.Menu
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
+import com.client.traveller.ui.BaseActivity
 import com.client.traveller.R
 import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
@@ -37,7 +37,7 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-class ChatActivity : AppCompatActivity(), KodeinAware {
+class ChatActivity : BaseActivity(), KodeinAware {
 
     override val kodein by kodein()
     private val factory: ChatViewModelFactory by instance()
@@ -208,16 +208,6 @@ class ChatActivity : AppCompatActivity(), KodeinAware {
         Handler().postDelayed({ doubleBack = false }, 2000)
     }
 
-    override fun onPause() {
-        super.onPause()
-        this.viewModel.stopLocationUpdates()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (this.viewModel.sendingLocationData())
-            this.viewModel.startLocationUpdates()
-    }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
