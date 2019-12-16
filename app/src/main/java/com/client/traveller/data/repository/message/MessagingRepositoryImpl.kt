@@ -32,11 +32,6 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class MessagingRepositoryImpl(
-    private val tokens: Tokens,
-    private val cloudMessaging: CloudMessaging,
-    private val messeages: Messeages,
-    private val users: Users,
-    private val chats: Chats,
     private val messeageDao: MesseageDao
 ) : MessagingRepository {
 
@@ -48,15 +43,15 @@ class MessagingRepositoryImpl(
     private var lastChatUidMessagesInitilized: String = ""
 
     override suspend fun refreshToken() = withContext(Dispatchers.IO) {
-        val token = tokens.getCurrentToken()
-        token?.let { tokens.saveToken(it) }
+        val token = Tokens.getCurrentToken()
+        token?.let { Tokens.saveToken(it) }
     }
 
     /**
      * zapisuje wiadomość do wybranego czatu
      */
     override suspend fun saveMesseage(chat: ChatFirestoreModel, messeage: Messeage) {
-        this.messeages.saveMesseage(chat.uid!!, messeage)
+        Messeages.saveMesseage(chat.uid!!, messeage)
         this.sendNotifications(chat, messeage)
     }
 
@@ -84,7 +79,7 @@ class MessagingRepositoryImpl(
      */
     override suspend fun getUsersTokens(userIds: List<String>?): List<Token>? {
         return userIds?.map {
-            this.tokens.getUserToken(it)
+            Tokens.getUserToken(it)
         }
     }
 
@@ -103,7 +98,7 @@ class MessagingRepositoryImpl(
             uid = randomUid()
         )
         return suspendCoroutine { continuation ->
-            chats.addChat(chat).addOnCompleteListener { task ->
+            Chats.addChat(chat).addOnCompleteListener { task ->
                 if (task.isSuccessful) continuation.resumeWith(Result.success(true))
                 else continuation.resumeWith(Result.success(false))
             }
@@ -118,7 +113,7 @@ class MessagingRepositoryImpl(
     override suspend fun findChat(participants: ArrayList<String>, tripUid: String) =
         withContext(Dispatchers.IO) {
             suspendCoroutine<ChatFirestoreModel> { continuation ->
-                chats.getChatByParticipantsFiltrSize(participants, tripUid).get()
+                Chats.getChatByParticipantsFiltrSize(participants, tripUid).get()
                     .addOnSuccessListener { query ->
                         if (query.size() > 0) {
                             val chat =
@@ -139,7 +134,7 @@ class MessagingRepositoryImpl(
     override fun getUsersChats(
         userId: String,
         tripUid: String
-    ) = this.chats.getUserAllChats(userId, tripUid)
+    ) = Chats.getUserAllChats(userId, tripUid)
         .toFlow()
         .map {
             it.toObjects(ChatFirestoreModel::class.java).toList()
@@ -150,7 +145,7 @@ class MessagingRepositoryImpl(
      */
     override suspend fun findChatByUid(uid: String) = withContext(Dispatchers.IO) {
         suspendCoroutine<ChatFirestoreModel> { continuation ->
-            chats.getChatByUid(uid).get().addOnSuccessListener { snapshot ->
+            Chats.getChatByUid(uid).get().addOnSuccessListener { snapshot ->
                 snapshot?.let {
                     if (it.size() == 1) {
                         val chat = it.first().toObject(ChatFirestoreModel::class.java)
@@ -178,7 +173,7 @@ class MessagingRepositoryImpl(
     @ExperimentalCoroutinesApi
     override fun initChatMessages(chatUid: String): Flow<List<Messeage>> {
 //        if (this.isTheSameChat(chatUid)) return this.messeageDao.getAll().asFlow()
-        return this@MessagingRepositoryImpl.messeages.getMesseages(chatUid).orderBy(
+        return Messeages.getMesseages(chatUid).orderBy(
             "sendDate",
             Query.Direction.ASCENDING
         )
@@ -201,7 +196,7 @@ class MessagingRepositoryImpl(
      * Jeżeli ktoś wyśle nową wiadomość do podanego czatu to zotaje wywołany
      */
     override fun initChatLastMesseage(chatUid: String) {
-        val observer = this@MessagingRepositoryImpl.messeages.getMesseages(chatUid)
+        val observer = Messeages.getMesseages(chatUid)
             .orderBy("sendDate", Query.Direction.DESCENDING).limit(1)
             .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, exception ->
                 exception?.let { return@EventListener }
@@ -210,7 +205,7 @@ class MessagingRepositoryImpl(
                     val message = querySnapshot.first()?.toObject(Messeage::class.java)
                     message?.let {
                         this._lastChatsMessageData[chatUid] = message
-                        this.chats.setChatUnSeen(chatUid)
+                        Chats.setChatUnSeen(chatUid)
                     }
                     this._lastChatsMessage.value = this._lastChatsMessageData
                 }

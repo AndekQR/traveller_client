@@ -7,10 +7,12 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.location.Location
 import android.os.*
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.client.traveller.R
 import com.client.traveller.data.network.firebase.firestore.Map
+import com.client.traveller.data.network.firebase.firestore.model.MyLatLng
 import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
 import com.client.traveller.data.provider.PreferenceProvider
 import com.client.traveller.ui.home.HomeActivity
@@ -212,17 +214,18 @@ class MyLocationService : Service() {
         val currentTripUid = PreferenceProvider(this).getCurrentTravelUid()
         currentTripUid?.let {tripUid ->
             val userUid = FirebaseAuth.getInstance().currentUser?.uid
-            userUid?.let { id ->
-                Map.sendNewLocation(UserLocalization(location.toLatLng(), id), tripUid)
+            if(userUid != null && tripUid.isNotEmpty()) {
+                val myLatLng = MyLatLng(location.latitude, location.longitude)
+                Map.sendNewLocation(UserLocalization(myLatLng, userUid), tripUid)
             }
         }
     }
 
     private fun initLocationrequest() {
         locationRequest = LocationRequest()
-        locationRequest!!.interval = UPDATE_INTERVAL_MS
-        locationRequest!!.fastestInterval = FASTEST_UPDATE_INTERVAL_MS
-        locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest?.interval = UPDATE_INTERVAL_MS
+        locationRequest?.fastestInterval = FASTEST_UPDATE_INTERVAL_MS
+        locationRequest?.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
     /**

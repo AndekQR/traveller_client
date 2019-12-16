@@ -12,11 +12,11 @@ import com.google.firebase.firestore.Query
 /**
  * Klasa zarządza użytkownikami w firestore
  */
-class Users {
+object Users {
 
-    companion object {
-        const val COLLECTION_NAME = "users"
-    }
+
+    const val COLLECTION_NAME = "users"
+
 
     private fun getUsersCollection(): CollectionReference {
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME)

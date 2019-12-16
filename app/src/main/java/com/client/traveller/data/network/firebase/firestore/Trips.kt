@@ -7,11 +7,11 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
-class Trips {
+object Trips {
 
-    companion object {
-        private const val COLLECTION_NAME = "trips"
-    }
+
+    private const val COLLECTION_NAME = "trips"
+
 
     private fun getTripsCollection(): CollectionReference {
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME)
@@ -35,7 +35,8 @@ class Trips {
     }
 
     fun updateWaypoints(waypoints: ArrayList<String>, tripToUpdate: Trip) {
-        this.getTripsCollection().document(this.getDocumentName(tripToUpdate)).update("waypoints", waypoints)
+        this.getTripsCollection().document(this.getDocumentName(tripToUpdate))
+            .update("waypoints", waypoints)
     }
 
     // nazwa to: nazwa_wycieczki_firebaseUidAuthor

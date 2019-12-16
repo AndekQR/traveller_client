@@ -3,9 +3,11 @@ package com.client.traveller.data.network.map
 import android.content.Context
 import android.graphics.Bitmap
 import android.location.Location
+import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
+import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -44,4 +46,8 @@ interface MapUtils : GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListen
     fun drawPlaceMarkersInCluster(places: Set<Result>)
     fun disableMapDragging()
     fun enableMapDragging()
+    fun updateUserPositionMarker(
+        data: UserLocalization,
+        currentUser: User?
+    )
 }

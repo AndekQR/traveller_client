@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+<!--    android 6-->
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+
     <application
         android:name=".TravellerAplication"
         android:allowBackup="false"
@@ -31,7 +34,10 @@
         <activity
             android:name=".ui.chat.ChatActivity"
             android:theme="@style/AppTheme.StatusBar.Transparent" />
-        <activity android:name=".ui.about.AboutActivity" />
+        <activity android:name=".ui.about.AboutActivity"
+            android:parentActivityName=".ui.home.HomeActivity"
+            android:theme="@style/AppTheme.StatusBar.Transparent"
+            />
         <activity
             android:name=".ui.trip.TripActivity"
             android:parentActivityName=".ui.home.HomeActivity"

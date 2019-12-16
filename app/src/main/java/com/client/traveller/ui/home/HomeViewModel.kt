@@ -99,4 +99,7 @@ class HomeViewModel(
     }
     suspend fun drawRouteToMainMarker(location: Location) = this.mapRepository.drawRouteToMainMarker(location)
     fun centerCameraOnLocation(location: LatLng) = this.mapRepository.centerCameraOnLocation(location)
+    fun drawTripParticipants(trip: Trip, currentUser: User?) {
+        this.mapRepository.drawTripUsersLocation(trip.uid!!, currentUser)
+    }
 }

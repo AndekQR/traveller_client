@@ -24,8 +24,6 @@ import kotlin.coroutines.suspendCoroutine
 class UserRepositoryImpl(
     private val userDao: UserDao,
     private val tripDao: TripDao,
-    private val usersFirestore: Users,
-    private val avatars: Avatars,
     private val authNormal: AuthNormal,
     private val authGoogle: AuthGoogle,
     private val authFacebook: AuthFacebook,
@@ -50,10 +48,10 @@ class UserRepositoryImpl(
 
             //funkcje firebase gwarantują przynajmniej jedno prawidłowe wykonanie
             ////wykonuje się to gdy użytkownik jest już alogowany
-            avatars.getDefaultAvatarImageReference().downloadUrl.addOnCompleteListener {
+            Avatars.getDefaultAvatarImageReference().downloadUrl.addOnCompleteListener {
                 if (it.isSuccessful) {
                     if (user.image == null) user.image = it.result.toString()
-                    usersFirestore.createUser(user).addOnCompleteListener { result ->
+                    Users.createUser(user).addOnCompleteListener { result ->
                         if (result.isSuccessful) {
                             // aktualizacja avatara
                             updateLocalUserDataAsync(user)
@@ -95,7 +93,7 @@ class UserRepositoryImpl(
                 if (it.isSuccessful) {
                     val user = it.result?.user
                     user?.let {
-                        usersFirestore.getUserByUid(user.uid).addOnCompleteListener {
+                        Users.getUserByUid(user.uid).addOnCompleteListener {
                             if (!it.result?.exists()!!) {
                                 // createUser
                                 this.registerUser(user.toLocalUser(), function)
@@ -119,7 +117,7 @@ class UserRepositoryImpl(
             if (it.isSuccessful) {
                 val user = it.result?.user
                 user?.let {
-                    usersFirestore.getUserByUid(user.uid).addOnCompleteListener {
+                    Users.getUserByUid(user.uid).addOnCompleteListener {
                         if (!it.result?.exists()!!) {
                             // createUser
                             this.registerUser(user.toLocalUser(), function)
@@ -140,7 +138,7 @@ class UserRepositoryImpl(
      */
     // TODO mogło popsuć avatary
     override fun updateLocalUserDataAsync(user: User) {
-        usersFirestore.getUserByUid(user.idUserFirebase!!).addOnSuccessListener { snapshot ->
+        Users.getUserByUid(user.idUserFirebase!!).addOnSuccessListener { snapshot ->
             val userFirestore = snapshot.toObject(User::class.java)
             userFirestore?.let { io { userDao.upsert(it) } }
         }
@@ -208,14 +206,14 @@ class UserRepositoryImpl(
 
         FirebaseAuth.getInstance().currentUser?.updateEmail(user.email!!)
         FirebaseAuth.getInstance().currentUser?.updateProfile(profileUpdates)
-        usersFirestore.updateEmail(user.idUserFirebase!!, user.email!!)
-        usersFirestore.updateImage(user.idUserFirebase!!, user.image!!)
-        usersFirestore.updateUsername(user.idUserFirebase!!, user.displayName!!)
+        Users.updateEmail(user.idUserFirebase!!, user.email!!)
+        Users.updateImage(user.idUserFirebase!!, user.image!!)
+        Users.updateUsername(user.idUserFirebase!!, user.displayName!!)
         this.updateLocalUserDataAsync(user)
     }
 
     override fun updateAvatar(user: User, imageUri: String) {
-        usersFirestore.updateImage(user.idUserFirebase!!, user.image!!)
+        Users.updateImage(user.idUserFirebase!!, user.image!!)
             .addOnFailureListener {
                 Log.e(javaClass.simpleName, it.localizedMessage)
             }
@@ -241,7 +239,7 @@ class UserRepositoryImpl(
     override fun setEmailVerifiedAsync() {
         io {
             userDao.setEmailVerified()
-            usersFirestore.changeVerifiedStatus(state = true)
+            Users.changeVerifiedStatus(state = true)
         }
     }
 
@@ -256,7 +254,7 @@ class UserRepositoryImpl(
             val users = mutableListOf<User>()
             for ((index, value) in emails.withIndex()) {
                 if (index == emails.size - 1) {
-                    usersFirestore.getUserByEmail(value).get().addOnCompleteListener { task ->
+                    Users.getUserByEmail(value).get().addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             var user: User? = null
                             try {
@@ -272,7 +270,7 @@ class UserRepositoryImpl(
                         }
                     }
                 } else {
-                    usersFirestore.getUserByEmail(value).get().addOnCompleteListener { task ->
+                    Users.getUserByEmail(value).get().addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             var user: User? = null
                             try {
@@ -293,7 +291,7 @@ class UserRepositoryImpl(
 
     override suspend fun getUserByFirestoreId(id: String) = withContext(Dispatchers.IO) {
         suspendCoroutine<User> { continuation ->
-            usersFirestore.getUserByUid(id).addOnSuccessListener {
+            Users.getUserByUid(id).addOnSuccessListener {
                 val user = it.toObject(User::class.java)
                 user?.let { userNotNull -> continuation.resumeWith(Result.success(userNotNull)) }
             }
@@ -305,7 +303,7 @@ class UserRepositoryImpl(
             val users = mutableListOf<User>()
             for ((index, value) in ids.withIndex()) {
                 if (index == ids.size - 1) {
-                    usersFirestore.getUserByUid(value).addOnCompleteListener { task ->
+                    Users.getUserByUid(value).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             var user: User? = null
                             try {
@@ -321,7 +319,7 @@ class UserRepositoryImpl(
                         }
                     }
                 } else {
-                    usersFirestore.getUserByUid(value).addOnCompleteListener { task ->
+                    Users.getUserByUid(value).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             var user: User? = null
                             try {
@@ -342,7 +340,7 @@ class UserRepositoryImpl(
 
     override suspend fun getUserName(uid: String) = withContext(Dispatchers.IO) {
         suspendCoroutine<String> { continuation ->
-            usersFirestore.getUserByUid(uid).addOnSuccessListener {
+            Users.getUserByUid(uid).addOnSuccessListener {
                 val name = it.getString("displayName")
                 name?.let { s -> continuation.resumeWith(Result.success(s)) }
             }

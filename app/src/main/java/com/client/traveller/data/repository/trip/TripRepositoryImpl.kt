@@ -17,7 +17,6 @@ import kotlin.coroutines.suspendCoroutine
 
 @ExperimentalCoroutinesApi
 class TripRepositoryImpl(
-    private val trips: Trips,
     private val tripDao: TripDao
 ) : TripRepository {
 
@@ -35,7 +34,7 @@ class TripRepositoryImpl(
     @ExperimentalCoroutinesApi
     private fun initAllTrips() {
         this.tripList =
-            this.trips.getAllTrips().toFlow().map { it.toObjects(Trip::class.java) }.asLiveData()
+            Trips.getAllTrips().toFlow().map { it.toObjects(Trip::class.java) }.asLiveData()
     }
 
     /**
@@ -46,7 +45,7 @@ class TripRepositoryImpl(
     override suspend fun initCurrentTripUpdates() {
         val currentTripUid = this.tripDao.getCurrentTripNonLive()?.uid
         currentTripUid?.let {
-            this.trips.getTrip(it).toFlow().map { it.toObjects(Trip::class.java).toList() }
+            Trips.getTrip(it).toFlow().map { it.toObjects(Trip::class.java).toList() }
                 .collect { list ->
                     this.tripDao.upsert(list.first())
                 }
@@ -82,7 +81,7 @@ class TripRepositoryImpl(
      */
     override suspend fun newTrip(trip: Trip, context: Context) = withContext(Dispatchers.IO) {
         suspendCoroutine<Void?> { continuation ->
-            trips.addNewTrip(trip).addOnCompleteListener {
+            Trips.addNewTrip(trip).addOnCompleteListener {
                 if (!it.isSuccessful) {
                     continuation.resumeWith(Result.failure(it.exception!!))
                     return@addOnCompleteListener
@@ -117,12 +116,12 @@ class TripRepositoryImpl(
     }
 
     override fun updateTripPersons(trip: Trip, emails: List<String>) {
-        this.trips.updateTripPersons(trip, ArrayList(emails))
+        Trips.updateTripPersons(trip, ArrayList(emails))
     }
 
     override suspend fun getTripByUid(tripUid: String) = withContext(Dispatchers.IO) {
         suspendCoroutine<Trip> { continuation ->
-            trips.getTrip(tripUid).get().addOnSuccessListener { querySnapshot ->
+            Trips.getTrip(tripUid).get().addOnSuccessListener { querySnapshot ->
                 val trip = querySnapshot.first().toObject(Trip::class.java)
                 continuation.resumeWith(Result.success(trip))
             }
@@ -130,7 +129,7 @@ class TripRepositoryImpl(
     }
 
     override fun updateWaypoints(waypoints: List<String>, tripToUpdate: Trip) {
-        this.trips.updateWaypoints(ArrayList(waypoints), tripToUpdate)
+        Trips.updateWaypoints(ArrayList(waypoints), tripToUpdate)
     }
 
 }

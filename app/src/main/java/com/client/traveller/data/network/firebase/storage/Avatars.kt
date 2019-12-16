@@ -4,12 +4,12 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
 // TODO zdjęcie z serwisów społcznościowych dodaje się w słabej rozdzielczości
-class Avatars {
+object Avatars {
 
-    companion object {
+
         internal const val AVATARS = "users_image"
         private const val DEFAULT_AVATAR = "avatar_default.png"
-    }
+
 
     private fun getAvatarsReference(): StorageReference {
         return FirebaseStorage.getInstance().reference.child(AVATARS)

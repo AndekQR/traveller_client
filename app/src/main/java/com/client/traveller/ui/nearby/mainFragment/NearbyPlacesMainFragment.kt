@@ -32,7 +32,7 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
 
     private lateinit var groupAdapter: GroupAdapter<GroupieViewHolder>
 
-    private lateinit var searchedPlaces: Set<Result>
+    private var searchedPlaces = setOf<Result>()
     private var searchQuery: String = ""
 
     override fun onCreateView(
@@ -49,32 +49,25 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
             ViewModelProvider(this, factory).get(NearbyPlacesViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
+        this.bindUI()
 
+        swipe_to_refresh_layout.setOnRefreshListener {
+            this.updatePlaces()
+            swipe_to_refresh_layout.isRefreshing = false
+        }
+    }
+
+    private fun updatePlaces() {
         launch(Dispatchers.Main) {
             val currentLatLng = this@NearbyPlacesMainFragment.viewModel.currentLocation
-            currentLatLng?.let {location ->
-                val nearbySearchResponses = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces(location.toLatLng().formatToApi())
+            currentLatLng?.let { location ->
+                val nearbySearchResponses =
+                    this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces(location.toLatLng().formatToApi())
                 val listofPlaces = mutableSetOf<Result>()
                 nearbySearchResponses.forEach {
                     listofPlaces.addAll(it.results)
                 }
                 this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(listofPlaces)
-            }
-        }
-        this.bindUI()
-
-        swipe_to_refresh_layout.setOnRefreshListener {
-            launch(Dispatchers.Main) {
-                val currentLatLng = this@NearbyPlacesMainFragment.viewModel.currentLocation
-                currentLatLng?.let { location ->
-                    val nearbySearchResponses = this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces(location.toLatLng().formatToApi())
-                    val listofPlaces = mutableSetOf<Result>()
-                    nearbySearchResponses.forEach {
-                        listofPlaces.addAll(it.results)
-                    }
-                    this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(listofPlaces)
-                }
-                swipe_to_refresh_layout.isRefreshing = false
             }
         }
     }
@@ -84,11 +77,15 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
         progress_bar.showProgressBar()
         this@NearbyPlacesMainFragment.viewModel.searchedPlaces.observe(
             viewLifecycleOwner,
-            Observer { places ->
-                if (::searchedPlaces.isInitialized &&
-                    this@NearbyPlacesMainFragment.searchedPlaces.isNotEmpty() &&
-                    places == this@NearbyPlacesMainFragment.searchedPlaces ) return@Observer
-                if (places.isEmpty() || places == null) {
+            Observer { places: Set<Result> ->
+                // nowe miejsca są takie same -> nie ma co aktualizować
+                if (this@NearbyPlacesMainFragment.searchedPlaces.isNotEmpty() &&
+                            places.isNotEmpty() &&
+                            places == this@NearbyPlacesMainFragment.searchedPlaces
+                ) {
+                    return@Observer
+                }
+                if (places.isEmpty()) {
                     nothing_to_display.visibility = View.VISIBLE
                     recycler_view.visibility = View.GONE
                     progress_bar.hideProgressBar()
@@ -101,6 +98,7 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
                     progress_bar.hideProgressBar()
                 }
             })
+        this@NearbyPlacesMainFragment.updatePlaces()
     }
 
     private fun updateItems(items: List<NearbyPlacesListItem>) = launch(Dispatchers.Main) {

@@ -245,6 +245,8 @@
     <string name="location_updated">Lokalizacja zaktualizowana</string>
     <string name="permission_denied_explanation">Aby aplikacja działa ze wszystkimi funkcjiami musisz udzielić jej uprawnień</string>
     <string name="settings">Ustawienia</string>
+    <string name="contact_author">Kontakt z autorem</string>
+    <string name="thanks_to">Podziękowania</string>
 
 
 </resources>

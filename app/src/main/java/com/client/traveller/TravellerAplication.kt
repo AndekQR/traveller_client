@@ -54,25 +54,17 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from singleton { PlacesApiService() }
         bind() from singleton { GeocodingApiService() }
         bind() from singleton { WikipediaApiService() }
-//        bind<LocationProvider>() with singleton { LocationProviderImpl(instance(), instance()) }
         bind<MapUtils>() with singleton { MapUtilsImpl(instance()) }
         bind() from singleton { AppDatabase(instance()) }
-        bind() from singleton { Users() }
-        bind() from provider { Avatars() }
-        bind() from provider { Tokens() }
         bind() from provider { CloudMessaging() }
         bind() from provider { AuthNormal() }
         bind() from provider { AuthGoogle() }
         bind() from provider { AuthFacebook() }
         bind() from provider { AuthUtils() }
         bind() from provider { AuthProvider() }
-        bind() from provider { Chats() }
-        bind() from provider { Map() }
         bind() from singleton { instance<AppDatabase>().userDao() }
         bind<UserRepository>() with singleton {
             UserRepositoryImpl(
-                instance(),
-                instance(),
                 instance(),
                 instance(),
                 instance(),
@@ -85,27 +77,18 @@ class TravellerAplication : Application(), KodeinAware {
         bind<MapRepository>() with singleton {
             MapRepositoryImpl(
                 instance(),
-                instance(),
                 instance()
             )
         }
-        bind() from provider { Trips() }
         bind() from singleton { instance<AppDatabase>().tripDao() }
         bind<TripRepository>() with singleton {
             TripRepositoryImpl(
-                instance(),
                 instance()
             )
         }
-        bind() from provider { Messeages() }
         bind() from singleton { instance<AppDatabase>().messeageDao() }
         bind<MessagingRepository>() with singleton {
             MessagingRepositoryImpl(
-                instance(),
-                instance(),
-                instance(),
-                instance(),
-                instance(),
                 instance()
             )
         }

@@ -6,10 +6,12 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
+import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.network.api.geocoding.GeocodingApiService
@@ -22,23 +24,21 @@ import com.client.traveller.data.network.firebase.firestore.Map
 import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.ui.util.formatToApi
-import com.client.traveller.ui.util.toFlow
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.android.synthetic.main.my_simple_marker_view.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 
 class MapRepositoryImpl(
     private val mapUtils: MapUtils,
-    private val geocoding: GeocodingApiService,
-    private val mapFirestore: Map
+    private val geocoding: GeocodingApiService
 ) : MapRepository {
 
     private lateinit var context: Context
-
+    private var tripUsersLocationListener: ListenerRegistration? = null
 
     /**
      * Inicjalzacja mapy oraz jej składników
@@ -91,16 +91,16 @@ class MapRepositoryImpl(
         view.marker_text.text = "S"
         var bitmap = this.getBitmapFromView(view)
         var address = geocoding.geocode(trip.startAddress!!)
-       if (address.results.isNotEmpty()) {
-           val latlng = address.results.first().geometry.location.toLatLng()
-           startLatLng = latlng.formatToApi()
-           bitmap?.let {
-               mapUtils.drawMarkerFromBitmap(
-                   latlng,
-                   it
-               )
-           }
-       }
+        if (address.results.isNotEmpty()) {
+            val latlng = address.results.first().geometry.location.toLatLng()
+            startLatLng = latlng.formatToApi()
+            bitmap?.let {
+                mapUtils.drawMarkerFromBitmap(
+                    latlng,
+                    it
+                )
+            }
+        }
 
         //waypoints
         trip.waypoints?.forEachIndexed { index, waypointAddress ->
@@ -128,7 +128,13 @@ class MapRepositoryImpl(
             bitmap?.let { this.mapUtils.drawMarkerFromBitmap(latlng, it) }
         }
 
-        this.mapUtils.drawRouteToLocation(startLatLng, endLatLng, waypointsLatLng, travelMode, false)
+        this.mapUtils.drawRouteToLocation(
+            startLatLng,
+            endLatLng,
+            waypointsLatLng,
+            travelMode,
+            false
+        )
     }
 
     override suspend fun drawNearbyPlaceMarkers(places: Set<NearbySearchResponse>) {
@@ -197,12 +203,41 @@ class MapRepositoryImpl(
 
     }
 
+    /**
+     * rysuje na mapie markery osób z tej samej wycieczki
+     * @return obiekty typu [UserLocalization] w flow
+     */
     @ExperimentalCoroutinesApi
-    override suspend fun getTripUsersLocation(tripUid: String): Flow<List<UserLocalization>> {
-        return this.mapFirestore.getTripUsersLocation(tripUid).toFlow()
-            .map {
-                it.toObjects(UserLocalization::class.java)
-            }
+    override fun drawTripUsersLocation(tripUid: String, currentUser: User?) {
+        if (this.tripUsersLocationListener != null) this.tripUsersLocationListener?.remove()
+        this.tripUsersLocationListener =
+            Map.getUserLocalizationCollection(tripUid)
+                .addSnapshotListener { querySnapshot, exception ->
+                    exception?.let {
+                        return@addSnapshotListener
+                    }
+                    querySnapshot?.let { snapshot ->
+                        for (dc in snapshot.documentChanges) {
+                            when (dc.type) {
+                                DocumentChange.Type.ADDED -> {
+                                    // wywoływane na początku, inicjalizacja bo na początku cache zapytania jest pusty
+                                    val data = dc.document.toObject(UserLocalization::class.java)
+                                    Log.e(javaClass.simpleName, "ADDED")
+                                    this@MapRepositoryImpl.mapUtils.updateUserPositionMarker(data, currentUser)
+
+                                }
+                                DocumentChange.Type.MODIFIED -> {
+                                    val data = dc.document.toObject(UserLocalization::class.java)
+                                    Log.e(javaClass.simpleName, "MODIFIED")
+                                    this@MapRepositoryImpl.mapUtils.updateUserPositionMarker(data, currentUser)
+                                }
+                                DocumentChange.Type.REMOVED -> {
+                                    Log.i(javaClass.simpleName, "REMOVED")
+                                }
+                            }
+                        }
+                    }
+                }
     }
 
 }

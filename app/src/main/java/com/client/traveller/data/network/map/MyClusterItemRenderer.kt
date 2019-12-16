@@ -19,24 +19,66 @@ import com.client.traveller.data.network.api.places.PlacesApiService
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Marker
+import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import kotlinx.android.synthetic.main.my_place_map_marker.view.*
-import java.lang.IllegalArgumentException
 
-class MyClusterItemRenderer(
+
+class MyClusterItemRenderer <T : ClusterItem>(
     private val context: Context,
     map: GoogleMap,
-    clusterManager: ClusterManager<NearbyPlaceClusterItem>
-) : DefaultClusterRenderer<NearbyPlaceClusterItem>(context.applicationContext, map, clusterManager) {
+    clusterManager: ClusterManager<T>
+) : DefaultClusterRenderer<T>(context.applicationContext, map, clusterManager) {
 
 
+    override fun onClusterItemRendered(item: T, marker: Marker) {
+        if (item is NearbyPlaceClusterItem) {
+            this.nearbyPlaceItem(item, marker)
+        } else if (item is UserLocationClusterItem) {
+            this.userLocationItem(item, marker)
+        }
+    }
 
-    override fun onClusterItemRendered(item: NearbyPlaceClusterItem?, marker: Marker?) {
+    private fun userLocationItem(item: UserLocationClusterItem, marker: Marker) {
         val baseView = (this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
             R.layout.my_place_map_marker, null
         )
-        if (item?.place?.photos != null && item.place.photos.isNotEmpty()) {
+        val imageUrl = item.user.image!!
+        try {
+            Glide
+                .with(baseView)
+                .asBitmap()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .thumbnail(0.1f)
+                .load(imageUrl)
+                .into(object : CustomTarget<Bitmap>() {
+                    override fun onLoadCleared(placeholder: Drawable?) {}
+                    override fun onResourceReady(
+                        resource: Bitmap,
+                        transition: Transition<in Bitmap>?
+                    ) {
+                        baseView.place_photo.setImageBitmap(resource)
+                        val bitmap = this@MyClusterItemRenderer.getBitmapFromView(baseView)
+                        try {
+                            marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                        } catch (ex: IllegalArgumentException) {
+                            Log.e(javaClass.simpleName, ex.message.toString())
+                        }
+                    }
+
+                })
+        } catch (ex: java.lang.IllegalArgumentException) {
+            Log.e(javaClass.simpleName, ex.message)
+        }
+    }
+
+    private fun nearbyPlaceItem(item: NearbyPlaceClusterItem, marker: Marker) {
+        val baseView = (this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
+            R.layout.my_place_map_marker, null
+        )
+        if (item.place.photos == null) return
+        if (item.place.photos.isNotEmpty()) {
             val placePhotoReference = item.place.photos.first().photoReference
             val placePhotoUrl = this.getPhotoUrl(placePhotoReference, 100)
             Glide
@@ -46,26 +88,26 @@ class MyClusterItemRenderer(
                 .thumbnail(0.1f)
                 .load(placePhotoUrl)
                 .into(object : CustomTarget<Bitmap>() {
-                override fun onLoadCleared(placeholder: Drawable?) {}
-                override fun onResourceReady(
-                    resource: Bitmap,
-                    transition: Transition<in Bitmap>?
-                ) {
-                    baseView.place_photo.setImageBitmap(resource)
-                    val bitmap = this@MyClusterItemRenderer.getBitmapFromView(baseView)
-                    try {
-                        marker?.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
-                    } catch (ex: IllegalArgumentException) {
-                        Log.e(javaClass.simpleName, ex.message.toString())
+                    override fun onLoadCleared(placeholder: Drawable?) {}
+                    override fun onResourceReady(
+                        resource: Bitmap,
+                        transition: Transition<in Bitmap>?
+                    ) {
+                        baseView.place_photo.setImageBitmap(resource)
+                        val bitmap = this@MyClusterItemRenderer.getBitmapFromView(baseView)
+                        try {
+                            marker?.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                        } catch (ex: IllegalArgumentException) {
+                            Log.e(javaClass.simpleName, ex.message.toString())
+                        }
                     }
-                }
 
-            })
+                })
         } else {
             baseView.place_photo.setImageResource(R.drawable.ic_default_home)
             val bitmap = this.getBitmapFromView(baseView)
             try {
-                marker?.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
             } catch (ex: IllegalArgumentException) {
                 Log.e(javaClass.simpleName, ex.message.toString())
             }

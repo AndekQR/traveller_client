@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.Location
 import android.os.Bundle
 import com.client.traveller.data.db.entities.Trip
+import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.GeocodingResponse
@@ -15,6 +16,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
+import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.flow.Flow
 
 interface MapRepository {
@@ -53,6 +55,6 @@ interface MapRepository {
     suspend fun geocodeAddress(address: String): GeocodingResponse
     suspend fun reverseGeocoding(latlng: String): ReverseGeocodingResponse
     fun sendNewLocation(userLocalization: UserLocalization, trip: Trip)
-    suspend fun getTripUsersLocation(tripUid: String): Flow<List<UserLocalization>>
+    fun drawTripUsersLocation(tripUid: String, currentUser: User? = null)
 
 }

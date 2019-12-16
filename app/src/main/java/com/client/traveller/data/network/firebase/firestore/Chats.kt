@@ -6,11 +6,11 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
-class Chats {
+object Chats {
 
-    companion object {
-        const val COLLECTION_NAME = "chats"
-    }
+
+    const val COLLECTION_NAME = "chats"
+
 
     private fun getCollectionReference(): CollectionReference {
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME)

@@ -7,11 +7,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 /**
  * chat zawiera serię wiadomości (messeages)
  */
-class Messeages {
+object Messeages {
 
-    companion object {
-        private const val COLLECTION_NAME = "messeages"
-    }
+
+    private const val COLLECTION_NAME = "messeages"
+
 
     private fun getCollectionReference(chatUid: String): CollectionReference {
         return FirebaseFirestore.getInstance().collection(Chats.COLLECTION_NAME).document(chatUid)

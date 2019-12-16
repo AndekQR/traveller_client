@@ -11,10 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.suspendCoroutine
 
-class Tokens {
-    companion object {
-        const val COLLECTION_NAME = "messaging_tokens"
-    }
+object Tokens {
+
+    const val COLLECTION_NAME = "messaging_tokens"
+
 
     private var token: Token? = null
 

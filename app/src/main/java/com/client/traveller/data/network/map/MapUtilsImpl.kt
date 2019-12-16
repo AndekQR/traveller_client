@@ -6,12 +6,14 @@ import android.graphics.Color
 import android.location.Location
 import android.util.Log
 import com.client.traveller.R
+import com.client.traveller.data.db.entities.User
 import com.client.traveller.data.network.api.directions.DirectionsApiService
 import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Directions
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
-import com.client.traveller.ui.util.NoCurrentLocationException
+import com.client.traveller.data.network.firebase.firestore.Users
+import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
 import com.client.traveller.ui.util.format
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -30,13 +32,15 @@ class MapUtilsImpl(
 ) : MapUtils {
 
     private lateinit var context: Context
-    private lateinit var clusterManager: ClusterManager<NearbyPlaceClusterItem>
+    private lateinit var nearbyPlacesClusterManager: ClusterManager<NearbyPlaceClusterItem>
+    private lateinit var usersPositionClusterManager: ClusterManager<UserLocationClusterItem>
     private var mMap: GoogleMap? = null
 
     private var mainMarker: Marker? = null
     private val polylinesOnMap = mutableListOf<Polyline>()
     private val markers = mutableListOf<Marker>()
-    private val clusterItems = mutableListOf<NearbyPlaceClusterItem>()
+    private val nearbyPlacesClusterItems = mutableListOf<NearbyPlaceClusterItem>()
+    private val usersPositionClusterItems = mutableListOf<UserLocationClusterItem>()
 
     /**
      * isBuildingEnabled = włącza wyświetlanie budynków 3D
@@ -66,11 +70,23 @@ class MapUtilsImpl(
     }
 
     private fun setupClasterer() {
-        this.clusterManager = ClusterManager(this.context, this.mMap)
-        this.mMap?.setOnCameraIdleListener(this.clusterManager)
-        this.mMap?.setOnMarkerClickListener(this.clusterManager)
-        this.clusterManager.renderer = MyClusterItemRenderer(this.context,
-            this.mMap!!, this.clusterManager)
+        //nearby cluster manager
+        this.nearbyPlacesClusterManager = ClusterManager(this.context, this.mMap)
+        this.nearbyPlacesClusterManager.renderer = MyClusterItemRenderer(this.context,
+            this.mMap!!, this.nearbyPlacesClusterManager)
+
+        // user location cluster manager
+        this.usersPositionClusterManager = ClusterManager(this.context, this.mMap)
+        this.usersPositionClusterManager.renderer = MyClusterItemRenderer(this.context, this.mMap!!, this.usersPositionClusterManager)
+
+        this.mMap?.setOnCameraIdleListener {
+            this.usersPositionClusterManager.onCameraIdle()
+            this.nearbyPlacesClusterManager.onCameraIdle()
+        }
+        this.mMap?.setOnMarkerClickListener {
+            this.usersPositionClusterManager.onMarkerClick(it)
+            this.nearbyPlacesClusterManager.onMarkerClick(it)
+        }
     }
 
     override fun onMarkerClick(marker: Marker?): Boolean {
@@ -97,10 +113,10 @@ class MapUtilsImpl(
     override fun drawPlaceMarkersInCluster(places: Set<Result>) {
         places.forEach {
             val item = NearbyPlaceClusterItem(it)
-            this.clusterItems.add(item)
-            this.clusterManager.addItem(item)
+            this.nearbyPlacesClusterItems.add(item)
+            this.nearbyPlacesClusterManager.addItem(item)
         }
-        this.clusterManager.cluster()
+        this.nearbyPlacesClusterManager.cluster()
     }
 
     override fun drawMainMarker(position: LatLng): Marker? {
@@ -195,12 +211,16 @@ class MapUtilsImpl(
         this.markers.forEach {
             it.remove()
         }
-        this.clusterItems.forEach {
-            this.clusterManager.removeItem(it)
+        this.nearbyPlacesClusterItems.forEach {
+            this.nearbyPlacesClusterManager.removeItem(it)
+        }
+        this.usersPositionClusterItems.forEach {
+            this.usersPositionClusterManager.removeItem(it)
         }
         this.markers.clear()
-        this.clusterItems.clear()
+        this.nearbyPlacesClusterItems.clear()
         this.polylinesOnMap.clear()
+        this.usersPositionClusterItems.clear()
     }
 
     override fun centerCameraOnRoute(
@@ -270,4 +290,38 @@ class MapUtilsImpl(
     override fun enableMapDragging() {
         this.mMap?.uiSettings?.isScrollGesturesEnabled = true
     }
+
+    override fun updateUserPositionMarker(
+        data: UserLocalization,
+        currentUser: User?
+    ) {
+        // nie rysujemy markera dla aktualnego zalogowanego użytkownika
+        if (data.userUidFirebase == currentUser?.idUserFirebase) return
+        Users.getUserByUid(data.userUidFirebase!!).addOnSuccessListener { documentSnapshot ->
+            val user = documentSnapshot.toObject(User::class.java)
+            user?.let {
+                val latlng = LatLng(data.latlng?.latitude!!, data.latlng?.longitude!!)
+                this.drawUsersLocationClusterItem(latlng, it)
+            }
+        }
+    }
+
+    private fun drawUsersLocationClusterItem(latLng: LatLng, user: User) {
+        val item = UserLocationClusterItem(latLng, user)
+        this.removeLastMarker(user)
+        this.usersPositionClusterItems.add(item)
+        this.usersPositionClusterManager.addItem(item)
+        this.usersPositionClusterManager.cluster()
+    }
+
+    private fun removeLastMarker(user: User) {
+        val lastItem = this.usersPositionClusterItems.find { userLocationClusterItem ->
+            userLocationClusterItem.user.idUserFirebase == user.idUserFirebase
+        }
+        lastItem?.let {
+            this.usersPositionClusterItems.remove(it)
+            this.usersPositionClusterManager.removeItem(it)
+        }
+    }
+
 }

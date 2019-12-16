@@ -56,14 +56,17 @@ class HomeFragment : ScopedFragment(), KodeinAware {
             }
         }
 
-        this.viewModel.currentTrip.observe(viewLifecycleOwner, Observer { trip ->
-            if (trip == null) return@Observer
-            launch {
-                this@HomeFragment.viewModel.drawTripRoute(trip)
-            }
-            this.currentTrip = trip
+        this.viewModel.currentUser.observe(viewLifecycleOwner, Observer userObserver@ { user ->
+            if (user == null) return@userObserver
+            this.viewModel.currentTrip.observe(viewLifecycleOwner, Observer tripObserver@ { trip ->
+                if (trip == null) return@tripObserver
+                launch {
+                    this@HomeFragment.viewModel.drawTripRoute(trip)
+                    this@HomeFragment.viewModel.drawTripParticipants(trip, user)
+                }
+                this.currentTrip = trip
+            })
         })
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
