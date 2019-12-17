@@ -47,11 +47,11 @@ class MapRepositoryImpl(
     override fun initializeMap(
         mapFragment: SupportMapFragment,
         context: Context,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
+        locationToCenter: LatLng?
     ) {
         this.context = context
-        mapUtils.initializeMap(context, mapFragment)
-
+        mapUtils.initMainMap(context, mapFragment, locationToCenter)
     }
 
     override suspend fun getDistance(
@@ -72,7 +72,7 @@ class MapRepositoryImpl(
         locations: List<String>?,
         mode: TravelMode
     ) {
-        mapUtils.drawRouteToLocation(origin, destination, locations, mode)
+        mapUtils.drawRouteToLocation(origin, destination, locations, mode, randomColor = true)
     }
 
 
@@ -239,5 +239,8 @@ class MapRepositoryImpl(
                     }
                 }
     }
+
+    override fun drawMarker(position: LatLng) = this.mapUtils.drawMarker(position)
+    override fun clearLastRoad() = this.mapUtils.clearLastRoad()
 
 }

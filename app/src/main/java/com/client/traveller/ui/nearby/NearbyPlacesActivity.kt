@@ -180,6 +180,7 @@ class NearbyPlacesActivity : BaseActivity(), KodeinAware,
 
     override fun onNewLocation(location: Location) {
         this.viewModel.currentLocation = location
+        this.viewModel.updatePlaces()
     }
 
     private val onBottomNavigationItemSelected =
@@ -191,7 +192,7 @@ class NearbyPlacesActivity : BaseActivity(), KodeinAware,
                         this.finish()
                     }
                 }
-                R.id.map -> {
+                R.id.map_place_details -> {
                     Intent(this, HomeActivity::class.java).also {
                         startActivity(it)
                         this.finish()

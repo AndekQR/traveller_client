@@ -31,17 +31,6 @@
                 app:iconSpaceReserved="false"
         />
 
-        <androidx.preference.ListPreference
-                android:key="SENDING_DATA_INTERVAL"
-                android:title="@string/interval_send_data"
-                android:summary="%s"
-                android:dependency="SEND_LOCATION"
-                app:iconSpaceReserved="false"
-                android:disableDependentsState="true"
-                android:entries="@array/intervals"
-                android:entryValues="@array/intervals_values"
-                android:defaultValue="2"
-                />
 
         <androidx.preference.SwitchPreference
             android:key="CAMERA_TRACKING"
@@ -53,16 +42,6 @@
             app:iconSpaceReserved="false"
             />
 
-        <androidx.preference.ListPreference
-            android:key="TRAVEL_MODE"
-            android:title="@string/travel_mode"
-            android:summary="%s"
-            app:iconSpaceReserved="false"
-            android:disableDependentsState="true"
-            android:entries="@array/travel_modes_keys"
-            android:entryValues="@array/travel_modes_values"
-            android:defaultValue="driving"
-        />
 
         <androidx.preference.EditTextPreference
             android:key="NEARBY_PLACES_DISTANCE_SEARCH"

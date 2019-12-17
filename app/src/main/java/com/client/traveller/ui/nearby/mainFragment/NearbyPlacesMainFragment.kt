@@ -52,32 +52,18 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
         this.bindUI()
 
         swipe_to_refresh_layout.setOnRefreshListener {
-            this.updatePlaces()
+            this.viewModel.updatePlaces()
             swipe_to_refresh_layout.isRefreshing = false
         }
     }
 
-    private fun updatePlaces() {
-        launch(Dispatchers.Main) {
-            val currentLatLng = this@NearbyPlacesMainFragment.viewModel.currentLocation
-            currentLatLng?.let { location ->
-                val nearbySearchResponses =
-                    this@NearbyPlacesMainFragment.viewModel.findNearbyPlaces(location.toLatLng().formatToApi())
-                val listofPlaces = mutableSetOf<Result>()
-                nearbySearchResponses.forEach {
-                    listofPlaces.addAll(it.results)
-                }
-                this@NearbyPlacesMainFragment.viewModel.updateSearchedPlaces(listofPlaces)
-            }
-        }
-    }
 
-
-    private fun bindUI() = launch(Dispatchers.Main) {
+    private fun bindUI() {
         progress_bar.showProgressBar()
         this@NearbyPlacesMainFragment.viewModel.searchedPlaces.observe(
             viewLifecycleOwner,
-            Observer { places: Set<Result> ->
+            Observer { places: Set<Result>? ->
+                if (places == null) return@Observer
                 // nowe miejsca są takie same -> nie ma co aktualizować
                 if (this@NearbyPlacesMainFragment.searchedPlaces.isNotEmpty() &&
                             places.isNotEmpty() &&
@@ -98,7 +84,7 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
                     progress_bar.hideProgressBar()
                 }
             })
-        this@NearbyPlacesMainFragment.updatePlaces()
+//        this@NearbyPlacesMainFragment.viewModel.updatePlaces()
     }
 
     private fun updateItems(items: List<NearbyPlacesListItem>) = launch(Dispatchers.Main) {

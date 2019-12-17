@@ -21,6 +21,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.clustering.ClusterManager
+import kotlin.random.Random
 
 /**
  * Klasa do zarządzania mapą w [HomeFragment]
@@ -42,31 +43,37 @@ class MapUtilsImpl(
     private val nearbyPlacesClusterItems = mutableListOf<NearbyPlaceClusterItem>()
     private val usersPositionClusterItems = mutableListOf<UserLocationClusterItem>()
 
+    companion object {
+        private const val BITMAP_MARKER = "bitmap_marker"
+    }
+
     /**
      * isBuildingEnabled = włącza wyświetlanie budynków 3D
      *
      */
-    override fun initializeMap(
+    override fun initMainMap(
         context: Context,
-        mapFragment: SupportMapFragment
+        mapFragment: SupportMapFragment,
+        locationToCenter: LatLng?
     ) {
         this.context = context
-        mapFragment.getMapAsync(this)
-    }
+        mapFragment.getMapAsync {googleMap ->
+            this.mMap = googleMap
+            this.mMap?.isMyLocationEnabled = true
+            this.mMap?.setOnMapLongClickListener(this)
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        this.mMap = googleMap
-        this.mMap?.isMyLocationEnabled = true
-        this.mMap?.setOnMapClickListener(this)
-        this.mMap?.setOnMapLongClickListener(this)
-
-        val ui = this.mMap?.uiSettings
-        ui?.isMyLocationButtonEnabled = false
-        ui?.isCompassEnabled = false
-        ui?.isMapToolbarEnabled = false
-        this.mMap?.isBuildingsEnabled = true
-
-        this.setupClasterer()
+            val ui = this.mMap?.uiSettings
+            ui?.isMyLocationButtonEnabled = false
+            ui?.isCompassEnabled = false
+            ui?.isMapToolbarEnabled = false
+            this.mMap?.isBuildingsEnabled = true
+            locationToCenter?.let {
+                this.drawMarker(it)
+                this.centerCameraOnLocation(it)
+                this.disableMapDragging()
+            }
+            this.setupClasterer()
+        }
     }
 
     private fun setupClasterer() {
@@ -107,6 +114,7 @@ class MapUtilsImpl(
             .draggable(false)
             .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
         val marker = this.mMap?.addMarker(markerOptions)
+        marker?.tag = BITMAP_MARKER
         if (toClear && marker != null) this.markers.add(marker)
     }
 
@@ -129,13 +137,15 @@ class MapUtilsImpl(
 
     }
 
-    override fun onMapClick(position: LatLng) {
-        // TODO do zaimplementowania, po kliknięci wyskakuje menu z tym miejscem i z informacjami o nim, jeżeli nie ma w danym miejscu nic to obiekty w pobliżu
-        // znacznik czyszczony po po otwrciu menu
-        // mmenu się
-//        markerOnMap?.remove()
-//        this.drawMarker(position)
+    override fun drawMarker(position: LatLng) {
+        val markerOptions = MarkerOptions()
+            .position(position)
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags))
+            .draggable(false)
+        val marker = this.mMap?.addMarker(markerOptions)
+        marker?.let { this.markers.add(it) }
     }
+
 
     override fun onMapLongClick(position: LatLng) {
         val marker = this.drawMainMarker(position)
@@ -145,36 +155,45 @@ class MapUtilsImpl(
         }
     }
 
-    private fun getDefaultPolyline(): PolylineOptions {
+    private fun getDefaultPolyline(color: Int = Color.rgb(124, 77, 255)): PolylineOptions {
         return PolylineOptions()
             .width(12F)
-            .color(Color.rgb(124, 77, 255))
+            .color(color)
             .geodesic(true)
     }
 
+    /**
+     * paramtry mogą być stringami jako nazwami lokacji np. kielce rynek lub też współrzędnymi latlng w stringu
+     */
     override suspend fun drawRouteToLocation(
         origin: String?,
         destination: String?,
         locations: List<String>?,
         mode: TravelMode,
-        clearAble: Boolean
+        clearAble: Boolean,
+        randomColor: Boolean
     ) {
         if (origin == null || destination == null) return
+        // przygotowanie nazwa pod api
         val start = origin.trim().replace(" ", "+")
         val stop = destination.trim().replace(" ", "+")
         val waypoints = this.getWaypointsString(waypoints = locations)
 
         val result = if (waypoints == null) this.directionsApiService.getDirections(start, stop, mode.name)
         else directionsApiService.getDirectionsWithWaypoints(start, stop, mode.name, waypoints)
-        val polyline =  this.drawRoute(result)
-        if (clearAble) polyline?.let { this.polylinesOnMap.add(it) }
+        // droga z losowym kolorem
+        val polyline =  if (randomColor) this.drawRoute(result, Color.rgb(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256))) else
+            this.drawRoute(result)
+        if (clearAble) {
+            polyline?.let { this.polylinesOnMap.add(it) }
+        }
     }
 
     private fun getWaypointsString(waypoints: List<String>?): String? {
         return waypoints?.map { it.trim() }?.joinToString("|")
     }
 
-    override suspend fun drawRouteToMarker(location: Location, marker: Marker?): Polyline? {
+    override suspend fun drawRouteToMarker(location: Location, marker: Marker?) {
         val origin: String
         val destination: String
 
@@ -183,17 +202,17 @@ class MapUtilsImpl(
             destination = marker?.position?.format()!!
 
             val result = directionsApiService.getDirections(origin, destination)
-            return this.drawRoute(result)
+            val route = this.drawRoute(result, Color.rgb(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)))
+            route?.let { this.polylinesOnMap.add(it) }
 
         } catch (ex: Exception) {
             Log.e(javaClass.simpleName, ex.message)
         }
-        return null
     }
 
-    private fun drawRoute(result: Directions): Polyline? {
+    private fun drawRoute(result: Directions, color: Int? = null): Polyline? {
         if (result.status == "OK") {
-            val lineOptions = this.getDefaultPolyline()
+            val lineOptions = if (color == null) this.getDefaultPolyline() else this.getDefaultPolyline(color)
             val pointList = PolyUtil.decode(result.routes.first().overviewPolyline.points)
             pointList.forEach {
                 lineOptions.add(it)
@@ -214,13 +233,9 @@ class MapUtilsImpl(
         this.nearbyPlacesClusterItems.forEach {
             this.nearbyPlacesClusterManager.removeItem(it)
         }
-        this.usersPositionClusterItems.forEach {
-            this.usersPositionClusterManager.removeItem(it)
-        }
         this.markers.clear()
         this.nearbyPlacesClusterItems.clear()
         this.polylinesOnMap.clear()
-        this.usersPositionClusterItems.clear()
     }
 
     override fun centerCameraOnRoute(
@@ -321,6 +336,21 @@ class MapUtilsImpl(
         lastItem?.let {
             this.usersPositionClusterItems.remove(it)
             this.usersPositionClusterManager.removeItem(it)
+        }
+    }
+
+    override fun clearLastRoad() {
+        if (this.polylinesOnMap.size > 0) {
+            val polyline = this.polylinesOnMap.last()
+            polyline.remove()
+            this.polylinesOnMap.remove(polyline)
+            if (this.markers.size > 0) {
+                val marker = this.markers.findLast { it.tag != BITMAP_MARKER }
+                marker?.let {
+                    it.remove()
+                    this.markers.remove(it)
+                }
+            }
         }
     }
 

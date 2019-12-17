@@ -47,6 +47,7 @@ abstract class BaseActivity : AppCompatActivity() {
                 requestPermissions()
             } else {
                 locationService?.startLocationUpdates()
+                this@BaseActivity.currentLocation = locationService?.getLastCurrentLocation()
             }
         }
     }

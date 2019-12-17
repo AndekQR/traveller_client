@@ -15,19 +15,21 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 
-interface MapUtils : GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener,
-    GoogleMap.OnMapLongClickListener, OnMapReadyCallback {
-    fun initializeMap(
+interface MapUtils :  GoogleMap.OnMarkerClickListener,
+    GoogleMap.OnMapLongClickListener {
+    fun initMainMap(
         context: Context,
-        mapFragment: SupportMapFragment
+        mapFragment: SupportMapFragment,
+        locationToCenter: LatLng?
     )
-    suspend fun drawRouteToMarker(location: Location, marker: Marker?): Polyline?
+    suspend fun drawRouteToMarker(location: Location, marker: Marker?)
     suspend fun drawRouteToLocation(
         origin: String?,
         destination: String?,
         locations: List<String>?,
         mode: TravelMode,
-        clearAble: Boolean = true
+        clearAble: Boolean = true,
+        randomColor: Boolean = false
     )
 
     fun clearMap()
@@ -50,4 +52,6 @@ interface MapUtils : GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListen
         data: UserLocalization,
         currentUser: User?
     )
+    fun drawMarker(position: LatLng)
+    fun clearLastRoad()
 }

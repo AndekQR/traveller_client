@@ -24,7 +24,8 @@ interface MapRepository {
     fun initializeMap(
         mapFragment: SupportMapFragment,
         context: Context,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
+        locationToCenter: LatLng? = null
     )
 
     suspend fun getDistance(
@@ -36,7 +37,7 @@ interface MapRepository {
 
     fun clearMap()
 
-    suspend fun drawRouteToMainMarker(location: Location): Polyline?
+    suspend fun drawRouteToMainMarker(location: Location)
     suspend fun drawRouteToLocation(
         origin: String,
         destination: String,
@@ -56,5 +57,7 @@ interface MapRepository {
     suspend fun reverseGeocoding(latlng: String): ReverseGeocodingResponse
     fun sendNewLocation(userLocalization: UserLocalization, trip: Trip)
     fun drawTripUsersLocation(tripUid: String, currentUser: User? = null)
+    fun drawMarker(position: LatLng)
+    fun clearLastRoad()
 
 }

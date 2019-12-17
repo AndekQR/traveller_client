@@ -23,6 +23,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.client.traveller.ui.BaseActivity
 import com.client.traveller.R
 import com.client.traveller.data.provider.PlacesClientProvider
+import com.client.traveller.data.provider.PreferenceProvider
 import com.client.traveller.data.services.UploadService
 import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
@@ -88,9 +89,6 @@ class HomeActivity : BaseActivity(),
             this.getDynamicLinks()
 
         this.initUI()
-        this.checkForActions()
-
-
     }
 
     private fun initUI() {
@@ -98,7 +96,7 @@ class HomeActivity : BaseActivity(),
 
         bottomNavigation = bottom_navigation
         bottomNavigation.setOnNavigationItemSelectedListener(onBottomNavigationItemSelected)
-        bottomNavigation.selectedItemId = R.id.map
+        bottomNavigation.selectedItemId = R.id.map_place_details
 
         searchView = persistentSearchView
         initSearchView()
@@ -113,6 +111,17 @@ class HomeActivity : BaseActivity(),
 
     override fun onNewLocation(location: Location) {
         this.viewModel.currentLocation = location
+        if (PreferenceProvider(this).getCameraTracking()) {
+            this.viewModel.centerCameraOnLocation(location.toLatLng())
+        }
+    }
+
+    /**
+     * tutaj sprawdzamy akcje ponieważ od tego momentu mamy dostępną lokaliacje usera
+     */
+    override fun onStart() {
+        super.onStart()
+        this.checkForActions()
     }
 
 
@@ -124,19 +133,21 @@ class HomeActivity : BaseActivity(),
         val extras = intent.extras
         extras?.let {
             if (it.containsKey(ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name)) {
-                val latlng = it.getString(ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name)
+                val latlngString = it.getString(ActivitiesAction.HOME_ACTIVITY_DRAW_ROAD.name)
                 lifecycleScope.launch(Dispatchers.Main) {
-                    latlng?.let { location ->
+                    latlngString?.let { locationString ->
                         this@HomeActivity.currentLocation?.let { currentLocation ->
                             this@HomeActivity.viewModel.drawRouteToLocation(
                                 origin = currentLocation.format(),
-                                destination = location,
+                                destination = locationString,
                                 locations = null
                             )
+                            val latlng = locationString.toLatLng()
+                            latlng?.let { this@HomeActivity.viewModel.drawMarker(latlng) }
                             this@HomeActivity.viewModel.centerRoad(
                                 currentLocation.format(),
                                 null,
-                                location
+                                locationString
                             )
                         }
                     }

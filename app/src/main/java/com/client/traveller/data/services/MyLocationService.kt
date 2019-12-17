@@ -28,12 +28,12 @@ class MyLocationService : Service() {
     companion object {
         private const val PACKAGE_NAME = "com.client.traveller.data.services.MyLocationService"
         private val TAG = MyLocationService::class.java.simpleName
-        private const val CHANNEL_ID = "channel_01"
+        private const val CHANNEL_ID = "myChannel"
         const val ACTION_BROADCAST = "$PACKAGE_NAME.broadcast"
         const val EXTRA_LOCATION = "$PACKAGE_NAME.location"
-        private const val EXTRA_STARTED_FROM_NOTIFICATION = "$PACKAGE_NAME.started_from_notification"
+        private const val EXTRA_STARTED_FROM_NOTIFICATION = "$PACKAGE_NAME.notification"
 
-        private const val UPDATE_INTERVAL_MS: Long = 30000
+        private const val UPDATE_INTERVAL_MS: Long = 15000
         private const val FASTEST_UPDATE_INTERVAL_MS = UPDATE_INTERVAL_MS / 2
 
         private const val NOTIFICATION_ID = 12345678
@@ -204,6 +204,10 @@ class MyLocationService : Service() {
         }
 
         this.sendToFirestore(location)
+    }
+
+    fun getLastCurrentLocation(): Location? {
+        return this.currentLocation
     }
 
     /**

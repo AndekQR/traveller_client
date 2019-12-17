@@ -156,7 +156,7 @@ class TripInfoActivity : BaseActivity(), KodeinAware {
     private val onBottomNavigationItemSelected =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.map -> {
+                R.id.map_place_details -> {
                     Intent(this, HomeActivity::class.java).also {
                         startActivity(it)
                         this.finish()

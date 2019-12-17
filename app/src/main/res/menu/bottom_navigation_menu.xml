@@ -10,7 +10,7 @@
         android:icon="@drawable/ic_chat" />
     <item
         android:title="@string/map"
-        android:id="@+id/map"
+        android:id="@+id/map_place_details"
         android:icon="@drawable/ic_map" />
     <item
         android:title="@string/nearby"

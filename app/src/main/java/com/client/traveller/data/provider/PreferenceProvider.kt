@@ -38,9 +38,6 @@ class PreferenceProvider(context: Context) {
         return preferences.getBoolean(CAMERA_TRACKING, true)
     }
 
-    fun getTravelMode(): String? {
-        return preferences.getString(TRAVEL_MODE, "driving")
-    }
 
     fun getNearbyPlacesSearchDistance(): Int? {
         val distance = preferences.getString(NEARBY_PLACES_DISTANCE_SEARCH, "3000")

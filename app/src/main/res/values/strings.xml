@@ -1,6 +1,6 @@
 <resources>
     <string name="launch_activity">Uruchom aktywność</string>
-    <string name="app_name">traveller</string>
+    <string name="app_name">Traveller</string>
     <string name="title_activity_login">Zaloguj się</string>
     <string name="prompt_email">E-mail</string>
     <string name="prompt_password">Hasło</string>

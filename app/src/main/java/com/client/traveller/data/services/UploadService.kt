@@ -86,7 +86,6 @@ class UploadService : BaseTaskService() {
                 avatarRef.downloadUrl
             }.addOnSuccessListener { downloadUri ->
                 this.broadcastUploadFinished(downloadUri, fileUri)
-//            this.showUploadFinishedNotification(downloadUri, fileUri)
                 dismissProgressNotification()
                 taskCompleted()
             }

@@ -32,10 +32,10 @@ class MyClusterItemRenderer <T : ClusterItem>(
 ) : DefaultClusterRenderer<T>(context.applicationContext, map, clusterManager) {
 
 
-    override fun onClusterItemRendered(item: T, marker: Marker) {
-        if (item is NearbyPlaceClusterItem) {
+    override fun onClusterItemRendered(item: T, marker: Marker?) {
+        if (item is NearbyPlaceClusterItem && marker != null) {
             this.nearbyPlaceItem(item, marker)
-        } else if (item is UserLocationClusterItem) {
+        } else if (item is UserLocationClusterItem && marker != null) {
             this.userLocationItem(item, marker)
         }
     }
@@ -61,7 +61,7 @@ class MyClusterItemRenderer <T : ClusterItem>(
                         baseView.place_photo.setImageBitmap(resource)
                         val bitmap = this@MyClusterItemRenderer.getBitmapFromView(baseView)
                         try {
-                            marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                             marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
                         } catch (ex: IllegalArgumentException) {
                             Log.e(javaClass.simpleName, ex.message.toString())
                         }
@@ -77,6 +77,7 @@ class MyClusterItemRenderer <T : ClusterItem>(
         val baseView = (this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
             R.layout.my_place_map_marker, null
         )
+        // czasami jednak jest nullem :O
         if (item.place.photos == null) return
         if (item.place.photos.isNotEmpty()) {
             val placePhotoReference = item.place.photos.first().photoReference
@@ -96,7 +97,7 @@ class MyClusterItemRenderer <T : ClusterItem>(
                         baseView.place_photo.setImageBitmap(resource)
                         val bitmap = this@MyClusterItemRenderer.getBitmapFromView(baseView)
                         try {
-                            marker?.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                             marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
                         } catch (ex: IllegalArgumentException) {
                             Log.e(javaClass.simpleName, ex.message.toString())
                         }
@@ -107,7 +108,7 @@ class MyClusterItemRenderer <T : ClusterItem>(
             baseView.place_photo.setImageResource(R.drawable.ic_default_home)
             val bitmap = this.getBitmapFromView(baseView)
             try {
-                marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                 marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
             } catch (ex: IllegalArgumentException) {
                 Log.e(javaClass.simpleName, ex.message.toString())
             }

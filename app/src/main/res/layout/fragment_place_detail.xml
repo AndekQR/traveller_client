@@ -104,8 +104,8 @@
 
 
 
-            <fragment
-                android:id="@+id/map"
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/map_place_details"
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
@@ -120,7 +120,7 @@
                 android:id="@+id/rating"
                 android:textStyle="bold"
                 android:textSize="19sp"
-                app:layout_constraintTop_toBottomOf="@id/map"
+                app:layout_constraintTop_toBottomOf="@id/map_place_details"
                 app:layout_constraintLeft_toLeftOf="parent"
                 />
 

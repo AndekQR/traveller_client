@@ -212,14 +212,13 @@ class PlaceDetailFragment : Fragment(), KodeinAware {
 
 
     private fun updateMap(location: Location) {
-        (childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?)?.let {
+        val map = childFragmentManager.findFragmentById(R.id.map_place_details) as SupportMapFragment?
+        map?.let {
             activity?.let { activity ->
-                viewModel.initMap(it, activity, null)
+                val latlng = com.google.android.gms.maps.model.LatLng(location.lat, location.lng)
+                viewModel.initMap(it, activity, null, latlng)
             }
         }
-        val latlng = com.google.android.gms.maps.model.LatLng(location.lat, location.lng)
-        this.viewModel.centerOnLocation(latlng, true)
-        this.viewModel.disableMapDragging()
     }
 
     private fun updateSearchResults(name: String) = lifecycleScope.launch {
@@ -258,6 +257,8 @@ class PlaceDetailFragment : Fragment(), KodeinAware {
             }
             search_result_layout.progress_bar.hideProgressBar()
             link_buttons.visibility = View.VISIBLE
+        } else { // restauracji itp. nie ma w wikipedii więc usuwamy layout z wynikami wyszukiwania
+            search_result_layout.visibility = View.GONE
         }
     }
 

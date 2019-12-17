@@ -6,14 +6,19 @@ import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.repository.map.MapRepository
 import com.client.traveller.data.repository.place.PlacesRepository
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.user.UserRepository
+import com.client.traveller.ui.util.formatToApi
+import com.client.traveller.ui.util.toLatLng
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class NearbyPlacesViewModel(
     private val placesRepository: PlacesRepository,
@@ -32,7 +37,7 @@ class NearbyPlacesViewModel(
     var checkedItems = this.getPlacesSearchedTypes().map { false }.toMutableList()
 
     // miejsca zwrócone przez places api
-    private var _searchedPlaces: MutableLiveData<Set<Result>> = MutableLiveData(emptySet())
+    private var _searchedPlaces: MutableLiveData<Set<Result>> = MutableLiveData()
     val searchedPlaces: LiveData<Set<Result>>
         get() = _searchedPlaces
 
@@ -58,6 +63,21 @@ class NearbyPlacesViewModel(
         return placesRepository.getPhotoUrl(photoReference, width)
     }
 
+    fun updatePlaces() {
+        viewModelScope.launch(Dispatchers.Main) {
+            val currentLatLng = this@NearbyPlacesViewModel.currentLocation
+            currentLatLng?.let { location ->
+                val nearbySearchResponses =
+                    this@NearbyPlacesViewModel.findNearbyPlaces(location.toLatLng().formatToApi())
+                val listofPlaces = mutableSetOf<Result>()
+                nearbySearchResponses.forEach {
+                    listofPlaces.addAll(it.results)
+                }
+                this@NearbyPlacesViewModel.updateSearchedPlaces(listofPlaces)
+            }
+        }
+    }
+
     /**
      * Zwraca listę typów miejsc, jakie były brane pod uwagę przy wyszukiwaniu miejsc
      */
@@ -77,8 +97,9 @@ class NearbyPlacesViewModel(
     fun initMap(
         map: SupportMapFragment,
         context: Context,
-        savedInstanceState: Bundle?
-    ) = mapRepository.initializeMap(map, context, savedInstanceState)
+        savedInstanceState: Bundle?,
+        centerOnLocation: LatLng
+    ) = mapRepository.initializeMap(map, context, savedInstanceState, centerOnLocation)
 
     suspend fun getWikipediaPrefixes(query: String) = this.placesRepository.getPrefixes(query)
     suspend fun getWikipediaPageSummary(pageTitle: String) =

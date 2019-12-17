@@ -119,6 +119,14 @@ fun Location.toLatLng() : LatLng {
     return LatLng(this.latitude, this.longitude)
 }
 
+fun String.toLatLng(): LatLng? {
+    val splitResult = this.split(",")
+    if (splitResult.size == 2) {
+        return LatLng(splitResult[0].toDouble(), splitResult[1].toDouble())
+    }
+    return null
+}
+
 
 /**
  * sprawdza czy jakikolwiek element z pierwszej listy jest taki sam jak jakikolwiek element z drugiej listy
