@@ -31,6 +31,7 @@ import com.client.traveller.ui.chat.messeages.MesseageViewModelFactory
 import com.client.traveller.ui.home.HomeViewModelFactory
 import com.client.traveller.ui.nearby.NearbyPlacesViewModelFactory
 import com.client.traveller.ui.settings.SettingsViewModelFactory
+import com.client.traveller.ui.splash.SplashViewModelFactory
 import com.client.traveller.ui.trip.TripViewModelFactory
 import com.client.traveller.ui.tripInfo.TripInfoViewModelFactory
 import com.google.android.gms.location.LocationServices
@@ -113,6 +114,7 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from provider { TripViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { ChatViewModelFactory(instance(), instance(), instance(), instance()) }
         bind() from provider { MesseageViewModelFactory(instance(), instance(), instance()) }
+        bind() from provider { SplashViewModelFactory(instance()) }
         bind() from provider {
             NearbyPlacesViewModelFactory(
                 instance(),

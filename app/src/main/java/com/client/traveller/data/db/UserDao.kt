@@ -18,7 +18,7 @@ interface UserDao {
     fun getUser(): LiveData<User>
 
     @Query("SELECT * FROM user WHERE uid = $CURRENT_USER_ID")
-    suspend fun getUserNonLiveData(): User
+    suspend fun getUserNonLiveData(): User?
 
     @Query("DELETE FROM user WHERE uid = $CURRENT_USER_ID")
     suspend fun deleteUser()

@@ -345,6 +345,7 @@ class UserRepositoryImpl(
                 name?.let { s -> continuation.resumeWith(Result.success(s)) }
             }
         }
-
     }
+
+    override suspend fun getCurrentUserNonLive(): User? = this.userDao.getUserNonLiveData()
 }

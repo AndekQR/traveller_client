@@ -108,17 +108,4 @@ class UploadService : BaseTaskService() {
             .sendBroadcast(broadcast)
     }
 
-    private fun showUploadFinishedNotification(downloadUri: Uri?, fileUri: Uri?) {
-        dismissProgressNotification()
-
-        val intent = Intent(this, HomeActivity::class.java)
-            .putExtra(EXTRA_DOWNLOAD_URL, downloadUri)
-            .putExtra(EXTRA_FILE_URI, fileUri)
-            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-
-        val success = downloadUri != null
-        val caption =
-            if (success) getString(R.string.upload_success) else getString(R.string.upload_failure)
-        showFinishedNotification(caption, intent, success)
-    }
 }

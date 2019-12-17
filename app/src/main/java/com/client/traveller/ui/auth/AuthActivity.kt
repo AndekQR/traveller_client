@@ -45,6 +45,7 @@ class AuthActivity : AppCompatActivity(), KodeinAware {
 
         viewModel.currentUser.observe(this, Observer { user ->
             if (user != null) {
+                // gdy zalogujemy się jedną z trzech metod to tu nas przekieruje do HomeActivity
                 Intent(this, HomeActivity::class.java).also {
                     it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(it)

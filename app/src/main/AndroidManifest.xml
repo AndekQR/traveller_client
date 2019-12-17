@@ -21,6 +21,16 @@
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:allowBackup">
         <activity
+            android:name=".ui.splash.SplashActivity"
+            android:theme="@style/Launcher"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".ui.tripInfo.TripInfoActivity"
             android:theme="@style/AppTheme.StatusBar.Transparent" />
         <activity
@@ -72,11 +82,6 @@
         <activity
             android:name=".ui.auth.AuthActivity"
             android:theme="@style/AppTheme.StatusBar.Transparent">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <meta-data

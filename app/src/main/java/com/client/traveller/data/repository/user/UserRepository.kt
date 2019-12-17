@@ -40,4 +40,5 @@ interface UserRepository {
     suspend fun getUserByFirestoreId(id: String): User
     suspend fun getUsersByIds(ids: ArrayList<String>): List<User>
     suspend fun getUserName(uid: String): String
+    suspend fun getCurrentUserNonLive(): User?
 }
