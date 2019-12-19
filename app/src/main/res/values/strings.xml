@@ -103,7 +103,7 @@
     <string name="chat">Chat</string>
     <string name="nearby">W pobliżu</string>
     <string name="trip">Wycieczka</string>
-    <string name="trip_city">Miejsce:</string>
+    <string name="trip_start_city">Miejsce startu:</string>
     <string name="trip_author">Twórca:</string>
     <string name="trip_people">Osoby:</string>
     <string name="trip_distance">Trasa:</string>
@@ -247,6 +247,7 @@
     <string name="settings">Ustawienia</string>
     <string name="contact_author">Kontakt z autorem</string>
     <string name="thanks_to">Podziękowania</string>
+    <string name="time">Czas</string>
 
 
 </resources>

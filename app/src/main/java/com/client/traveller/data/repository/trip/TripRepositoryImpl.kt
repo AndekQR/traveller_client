@@ -39,6 +39,7 @@ class TripRepositoryImpl(
 
     /**
      * aktualizcje lokalnej currentTrip gdy inny użytkownik wyśle do firestore zmiany do tej wycieczki
+     * wybieramy pierwszą bo w liście powinna być tylko jedna wycieczka o takim uid
      */
     // TODO mogą być problemy -> trzeab sprawdzić
     @ExperimentalCoroutinesApi
@@ -47,20 +48,9 @@ class TripRepositoryImpl(
         currentTripUid?.let {
             Trips.getTrip(it).toFlow().map { it.toObjects(Trip::class.java).toList() }
                 .collect { list ->
-                    this.tripDao.upsert(list.first())
+                    if (list.isNotEmpty()) this.tripDao.upsert(list.first())
                 }
         }
-//        currentTripUid?.let {
-//            trips.getTrip(it)
-//                .addSnapshotListener(EventListener<QuerySnapshot> { querySnapshot, excetion ->
-//                    excetion?.let { return@EventListener }
-//
-//                    val updatedCurrentTrip = querySnapshot?.first()?.toObject(Trip::class.java)
-//                    updatedCurrentTrip?.let {
-//                        io { tripDao.upsert(it) }
-//                    }
-//                })
-//        }
     }
 
     @ExperimentalCoroutinesApi

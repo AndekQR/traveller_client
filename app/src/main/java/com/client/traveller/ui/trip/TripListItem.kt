@@ -1,6 +1,7 @@
 package com.client.traveller.ui.trip
 
 import android.content.Context
+import android.view.View
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.db.entities.User
@@ -8,6 +9,7 @@ import com.client.traveller.ui.util.Coroutines.main
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import com.xwray.groupie.kotlinandroidextensions.Item
 import kotlinx.android.synthetic.main.item_trip_list.*
+import org.threeten.bp.LocalDateTime
 
 
 class TripListItem(
@@ -27,10 +29,23 @@ class TripListItem(
             updateTripPeople()
             updateTripDistance()
             updateTripWaypoints()
+            updateTripTime()
+            checkTripDate()
         }
     }
 
     override fun getLayout() = R.layout.item_trip_list
+
+    private fun GroupieViewHolder.checkTripDate() {
+        val date = LocalDateTime.parse(trip.endDate)
+        if (date.isBefore(LocalDateTime.now())) this.trip_outdate_layout.visibility = View.VISIBLE
+    }
+
+    private fun GroupieViewHolder.updateTripTime() {
+        val startDateFormattedString = trip.startDate?.trim()?.replace("T", " ")
+        val endDateFormattedString = trip.endDate?.trim()?.replace("T", " ")
+        this.trip_time.text = "${context?.getString(R.string.time)}: $startDateFormattedString - $endDateFormattedString"
+    }
 
     private fun GroupieViewHolder.updateStatus() {
 
@@ -52,7 +67,7 @@ class TripListItem(
 
     private fun GroupieViewHolder.updateTripCity() {
         if (context != null) {
-            trip_city.text = "${context.getString(R.string.trip_city)} ${trip.startAddress}"
+            trip_city.text = "${context.getString(R.string.trip_start_city)} ${trip.startAddress}"
         } else {
             trip_city.text = "${trip.startAddress}"
         }

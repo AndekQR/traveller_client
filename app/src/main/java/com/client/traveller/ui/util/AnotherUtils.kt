@@ -16,6 +16,9 @@ import kotlinx.coroutines.flow.callbackFlow
 import org.threeten.bp.Instant
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneId
+import kotlin.math.acos
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 fun Location.format(): String {
@@ -139,6 +142,33 @@ fun <T> List<T>.contains(list: List<T>): Boolean {
         }
     }
     return false
+}
+
+fun Double.toRadians(): Double {
+    return (this * Math.PI / 180.0)
+}
+fun Double.toDegrees(): Double {
+    return (this * 180.0 / Math.PI)
+}
+
+/**
+ * dystanas w lini prostej
+ * @param unitOutput M -> maters, K -> kilometers
+ */
+fun distance(lat1: Double, lon1: Double, lat2: Double, lon2: Double, unitOutput: String = "M"): Double {
+    val theta = lon1 - lon2
+    var distance = sin(lat1.toRadians()) * sin(lat2.toRadians()) + cos(lat1.toRadians()) * cos(lat2.toRadians()) * cos(theta.toRadians())
+    distance = acos(distance)
+    distance = distance.toDegrees()
+    distance *= 60 * 1.1515
+    if (unitOutput == "K") {
+        distance *= 1.609344
+        return distance
+    } else if (unitOutput == "M") {
+        distance *= 0.8684
+        return distance
+    }
+    return 0.0
 }
 
 

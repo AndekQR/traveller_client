@@ -82,7 +82,11 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
         this.viewModel.initUsersChats(currentUser.idUserFirebase!!, currentTrip.uid!!)
         this.viewModel.currentUserChats.observe(viewLifecycleOwner, Observer { chats ->
             if (chats == null) return@Observer
-            if (this.mapChatParticipants.keys.toList() == chats) return@Observer
+            if (this.mapChatParticipants.keys.toList() == chats && chats.isNotEmpty()) return@Observer
+            if (chats.isEmpty()) {
+                progress_bar.hideProgressBar()
+                return@Observer
+            }
             progress_bar.showProgressBar()
             this.initChatsLastMessage(chats)
             this.mapChatParticipants.clear()

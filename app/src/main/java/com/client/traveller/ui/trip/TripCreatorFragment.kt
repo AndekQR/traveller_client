@@ -30,6 +30,8 @@ import org.kodein.di.generic.instance
 import org.threeten.bp.LocalDate
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.LocalTime
+import java.util.*
+import kotlin.collections.ArrayList
 
 class TripCreatorFragment : ScopedFragment(), KodeinAware {
 
@@ -346,34 +348,31 @@ class TripCreatorFragment : ScopedFragment(), KodeinAware {
      * Wyświetla dialog z kalndarzem, po wybraniu daty wyśietla dialog do wybrania godziny
      */
     private fun pickDate(form: EditText) {
-        var date = LocalDate.now()
-        var time = LocalTime.now()
+        val calendar = Calendar.getInstance()
         context?.let {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 DatePickerDialog(
-                    it,
-                    DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+                    it, DatePickerDialog.OnDateSetListener { datePicker, year, month, dayOfMonth ->
                         TimePickerDialog(
-                            it,
-                            TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
-                                date = LocalDate.of(year, month, dayOfMonth)
-                                time = LocalTime.of(hourOfDay, minute)
+                            it, TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
+                                val pickedDate = LocalDate.of(year, month + 1, dayOfMonth)
+                                val pickedTime = LocalTime.of(hourOfDay, minute)
 
                                 if (form.id == trip_start_date.id)
-                                    tripStartDate = LocalDateTime.of(date, time)
+                                    tripStartDate = LocalDateTime.of(pickedDate, pickedTime)
                                 if (form.id == trip_end_date.id)
-                                    tripEndDate = LocalDateTime.of(date, time)
+                                    tripEndDate = LocalDateTime.of(pickedDate, pickedTime)
 
-                                form.setText("$date, $time")
+                                form.setText("$pickedDate, $pickedTime")
                             },
-                            time.hour,
-                            time.minute,
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
                             true
                         ).show()
                     },
-                    date.year,
-                    date.monthValue,
-                    date.dayOfMonth
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
                 ).show()
             } else {
                 TODO("VERSION.SDK_INT < N")

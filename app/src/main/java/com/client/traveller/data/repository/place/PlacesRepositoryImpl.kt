@@ -36,7 +36,7 @@ class PlacesRepositoryImpl(
         "zoo"
     )
 
-    //TODO switch map lokalna baza i places api, trzeba dodać jakiś interceptor czy jest internet
+    //TODO zmiana działania, trzeba sprawdzić
     override suspend fun getNearbyPlaces(latlng: String, radius: Int?): Set<NearbySearchResponse> {
         val listofNearbyResponse = mutableSetOf<NearbySearchResponse>()
         this.searchedTypes.forEach { type ->
@@ -46,6 +46,12 @@ class PlacesRepositoryImpl(
             else this.placesApiClient.findNearbyPlaces(latlng = latlng, type = type)
             listofNearbyResponse.add(response)
         }
+//        val myRadius = radius ?: preferencesProvider.getNearbyPlacesSearchDistance()
+//        val response = if (myRadius != null) this.placesApiClient.findNearbyPlaces(latlng = latlng, radius = myRadius)
+//            else this.placesApiClient.findNearbyPlaces(latlng = latlng)
+//
+//        return response.
+
         return listofNearbyResponse.toSet()
     }
 

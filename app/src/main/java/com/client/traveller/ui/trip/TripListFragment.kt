@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
@@ -22,6 +23,7 @@ import com.xwray.groupie.Item
 import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.fragment_trip_list.*
+import kotlinx.android.synthetic.main.item_trip_list.view.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -95,7 +97,7 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
         progress_bar.showProgressBar()
         updateHeader(getString(R.string.title_trips_list), null)
 
-        viewModel.allTrips.observe(this@TripListFragment, Observer { trips: List<Trip>? ->
+        viewModel.allTrips.observe(viewLifecycleOwner, Observer { trips: List<Trip>? ->
             if (trips == null) return@Observer
             this@TripListFragment.allTrips = trips
             updateTrips(this@TripListFragment.allTrips)
@@ -144,7 +146,7 @@ class TripListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
     }
 
     override fun onItemClick(item: Item<*>, view: View) {
-        if (item is TripListItem) {
+        if (item is TripListItem && !view.trip_outdate_layout.isVisible) {
             viewModel.selectedItem = item
             val action = TripListFragmentDirections.actionTripListFragmentToTripCreatorFragment(
                 item.trip,
