@@ -19,9 +19,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
-import com.client.traveller.ui.BaseActivity
 import com.client.traveller.R
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
+import com.client.traveller.ui.BaseActivity
 import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.chat.ChatActivity
@@ -180,7 +180,10 @@ class NearbyPlacesActivity : BaseActivity(), KodeinAware,
 
     override fun onNewLocation(location: Location) {
         this.viewModel.currentLocation = location
-        this.viewModel.updatePlaces()
+        if(!::currentListOfPlaces.isInitialized){
+            this.currentListOfPlaces = setOf()
+            this.viewModel.updatePlaces()
+        }
     }
 
     private val onBottomNavigationItemSelected =

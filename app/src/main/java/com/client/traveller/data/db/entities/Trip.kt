@@ -28,6 +28,4 @@ data class Trip(
     override fun equals(other: Any?): Boolean {
         return super.equals(other)
     }
-
-
 }

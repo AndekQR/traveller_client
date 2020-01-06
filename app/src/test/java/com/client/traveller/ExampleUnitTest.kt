@@ -1,17 +1,11 @@
 package com.client.traveller
 
-import org.junit.Test
+import io.kotlintest.matchers.string.shouldHaveLength
+import io.kotlintest.specs.StringSpec
 
-import org.junit.Assert.*
+class ExampleUnitTest: StringSpec({
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-class ExampleUnitTest {
-    @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    "should be in firestore" {
+        "hello" shouldHaveLength 5
     }
-}
+})

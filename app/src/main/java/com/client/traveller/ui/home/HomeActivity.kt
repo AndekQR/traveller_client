@@ -20,11 +20,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.NavHostFragment
-import com.client.traveller.ui.BaseActivity
 import com.client.traveller.R
 import com.client.traveller.data.provider.PlacesClientProvider
 import com.client.traveller.data.provider.PreferenceProvider
 import com.client.traveller.data.services.UploadService
+import com.client.traveller.ui.BaseActivity
 import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.chat.ChatActivity
@@ -182,6 +182,8 @@ class HomeActivity : BaseActivity(),
                     this@HomeActivity.currentLocation?.let {
                         viewModel.clearMap()
                         viewModel.drawRouteToLocation(origin =  it.format(),destination = query, locations = arrayListOf())
+                        viewModel.centerRoad(it.format(), null, query)
+                        searchView.collapse()
                     }
                 }
             } catch (ex: NoCurrentLocationException) {
@@ -214,6 +216,8 @@ class HomeActivity : BaseActivity(),
                                 destination = destination,
                                 locations = arrayListOf()
                             )
+                            viewModel.centerRoad(it.format(), null, destination)
+                            searchView.collapse()
                         }
                 }
             } catch (ex: NoCurrentLocationException) {

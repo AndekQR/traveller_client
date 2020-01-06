@@ -18,7 +18,6 @@ interface PlacesApiService {
         @Query("location") latlng: String, // as latitude,longitude.
         @Query("radius") radius: Int = 3000, //max 50 000 in meters
         @Query("language") language: String = "pl",
-        @Query("type") type: String,
         @Query("keyword") keyword: String = "" //do szukajki
     ): NearbySearchResponse
 

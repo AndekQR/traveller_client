@@ -15,7 +15,6 @@ import com.client.traveller.data.repository.message.MessagingRepository
 import com.client.traveller.data.repository.place.PlacesRepository
 import com.client.traveller.data.repository.trip.TripRepository
 import com.client.traveller.data.repository.user.UserRepository
-import com.client.traveller.ui.util.format
 import com.client.traveller.ui.util.formatToApi
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.SupportMapFragment

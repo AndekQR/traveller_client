@@ -9,15 +9,11 @@ import com.client.traveller.data.network.api.directions.model.TravelMode
 import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.GeocodingResponse
 import com.client.traveller.data.network.api.geocoding.response.reverseGeocodingResponse.ReverseGeocodingResponse
-import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.Polyline
-import com.google.firebase.firestore.QuerySnapshot
-import kotlinx.coroutines.flow.Flow
 
 interface MapRepository {
 
@@ -49,7 +45,7 @@ interface MapRepository {
     fun centerCameraOnLocation(location: LatLng, putMarker: Boolean = false)
     suspend fun centerCameraOnRoute(startAddress: String, waypoints: ArrayList<String>?, endAddress: String)
     fun elementOnMap(): Boolean
-    suspend fun drawNearbyPlaceMarkers(places: Set<NearbySearchResponse>)
+    suspend fun drawNearbyPlaceMarkers(places: Set<Result>)
     fun getPhotoUrl(reference: String, width: Int): String
     fun getActualMarker(): Marker?
     fun disableMapDragging()

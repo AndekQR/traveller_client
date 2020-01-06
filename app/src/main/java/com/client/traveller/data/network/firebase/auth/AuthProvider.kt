@@ -2,7 +2,7 @@ package com.client.traveller.data.network.firebase.auth
 
 import com.google.firebase.auth.FirebaseUser
 
-class AuthProvider {
+object AuthProvider {
 
     fun isUserGoogleAuth(user: FirebaseUser): Boolean {
         return user.providerData.any { userInfo ->

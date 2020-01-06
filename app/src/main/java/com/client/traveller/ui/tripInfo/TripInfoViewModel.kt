@@ -2,7 +2,6 @@ package com.client.traveller.ui.tripInfo
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.client.traveller.data.db.entities.Trip
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.repository.map.MapRepository
@@ -12,8 +11,6 @@ import com.client.traveller.data.repository.user.UserRepository
 import com.client.traveller.ui.util.formatToApi
 import com.client.traveller.ui.util.toLatLng
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class TripInfoViewModel(
     private val tripRepository: TripRepository,
@@ -36,12 +33,7 @@ class TripInfoViewModel(
         val latlngLocation = if (geocodeResult.isNotEmpty()) geocodeResult.first().geometry.location.toLatLng() else return emptySet()
         val placesResponse = this@TripInfoViewModel.placesRepository.getNearbyPlaces(latlngLocation.formatToApi(), 1000)
         if (placesResponse.isEmpty()) return emptySet()
-        val places = mutableListOf<Result>()
-        placesResponse.forEach {
-            places.addAll(it.results)
-        }
-        places.shuffle()
-        return places.toSet()
+        return placesResponse.shuffled().toSet()
     }
 
     suspend fun geocodeAddress(address: String) = this.mapRepository.geocodeAddress(address)

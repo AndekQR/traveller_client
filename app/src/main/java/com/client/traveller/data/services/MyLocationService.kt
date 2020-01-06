@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.location.Location
 import android.os.*
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.client.traveller.R
@@ -16,7 +15,6 @@ import com.client.traveller.data.network.firebase.firestore.model.MyLatLng
 import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
 import com.client.traveller.data.provider.PreferenceProvider
 import com.client.traveller.ui.home.HomeActivity
-import com.client.traveller.ui.util.toLatLng
 import com.google.android.gms.location.*
 import com.google.firebase.auth.FirebaseAuth
 import java.text.DateFormat
@@ -138,7 +136,6 @@ class MyLocationService : Service() {
     }
 
     fun startLocationUpdates() {
-//        Utils.setRequestingLocationUpdates(this, true)
         this.startService(Intent(applicationContext, MyLocationService::class.java))
         this.fusedLocationClient!!.requestLocationUpdates(
             locationRequest,
@@ -150,6 +147,7 @@ class MyLocationService : Service() {
         this.fusedLocationClient?.removeLocationUpdates(locationCallback)
     }
 
+    @Suppress("DEPRECATION")
     @SuppressLint("StringFormatInvalid")
     private fun getNotification(): Notification {
         val intent = Intent(this, MyLocationService::class.java)
@@ -212,7 +210,7 @@ class MyLocationService : Service() {
 
     /**
      * wysyłanie dofirestore aktualnej lokalizacji użytkownika
-     * dziękiczemu pozostali uczestnicy tej samej wycieczki ogę go zobaczyćna mapie
+     * dziękiczemu pozostali uczestnicy tej samej wycieczki ogę go zobaczyć na mapie
      */
     private fun sendToFirestore(location: Location) {
         val currentTripUid = PreferenceProvider(this).getCurrentTravelUid()
@@ -236,7 +234,7 @@ class MyLocationService : Service() {
      * klasa może być też interfejs
      * aktywność która zbinduje ten serwis za pomocą tej klasy może zarządzać ty mserwisem
      *
-     * właśnie tą zwróconą wartość dostaje locationServiceConnection w HomeActivity
+     * właśnie tą zwróconą wartość dostaje locationServiceConnection w BaseActivity
      */
     inner class LocalBinder : Binder() {
         val service: MyLocationService
@@ -248,6 +246,7 @@ class MyLocationService : Service() {
      * czy działa pierwszoplanowa z aktywnym powiadomieniem
      * czy w tle podczas gdy aplikacja jest na pierwszym planie
      */
+    @Suppress("DEPRECATION")
     private fun isRunningInForeground(context: Context): Boolean {
         val manager = context.getSystemService(
             Context.ACTIVITY_SERVICE

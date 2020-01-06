@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
-import com.client.traveller.ui.BaseActivity
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.User
+import com.client.traveller.ui.BaseActivity
 import kotlinx.android.synthetic.main.activity_trip.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein

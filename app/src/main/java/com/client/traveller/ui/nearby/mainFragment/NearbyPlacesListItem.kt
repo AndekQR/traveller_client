@@ -12,7 +12,6 @@ import com.client.traveller.ui.home.HomeActivity
 import com.client.traveller.ui.util.ActivitiesAction
 import com.client.traveller.ui.util.formatToApi
 import com.client.traveller.ui.util.toLatLng
-import com.google.android.gms.maps.model.LatLng
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import com.xwray.groupie.kotlinandroidextensions.Item
 import kotlinx.android.synthetic.main.item_nearby_place.*

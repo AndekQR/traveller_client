@@ -7,7 +7,6 @@ import android.os.IBinder
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.client.traveller.R
 import com.client.traveller.data.network.firebase.storage.Avatars
-import com.client.traveller.ui.home.HomeActivity
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 

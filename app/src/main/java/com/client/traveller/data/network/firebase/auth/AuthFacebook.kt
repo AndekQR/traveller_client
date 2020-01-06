@@ -7,7 +7,7 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 
-class AuthFacebook {
+object AuthFacebook {
 
     fun login(accessToken: AccessToken): Task<AuthResult> {
         return this.handleFacebookAccessToken(accessToken)

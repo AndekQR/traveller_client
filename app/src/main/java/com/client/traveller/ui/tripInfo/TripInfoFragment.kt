@@ -28,7 +28,6 @@ import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.trip_info_fragment.*
-import kotlinx.android.synthetic.main.trip_info_recyclerview_dragable_item.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware

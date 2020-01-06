@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreference
 import com.client.traveller.R
 import kotlinx.android.synthetic.main.settings_activity.*
 import org.kodein.di.KodeinAware

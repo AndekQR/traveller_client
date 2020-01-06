@@ -15,9 +15,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
-import com.client.traveller.ui.BaseActivity
 import com.client.traveller.R
 import com.client.traveller.data.db.entities.Trip
+import com.client.traveller.ui.BaseActivity
 import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.chat.ChatActivity

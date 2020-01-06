@@ -8,7 +8,7 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 
-class AuthGoogle {
+object AuthGoogle {
 
     fun login(task: Task<GoogleSignInAccount>): Task<AuthResult>? {
         val account = handleSignInResult(task)

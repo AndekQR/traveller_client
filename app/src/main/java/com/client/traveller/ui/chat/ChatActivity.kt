@@ -14,8 +14,8 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
-import com.client.traveller.ui.BaseActivity
 import com.client.traveller.R
+import com.client.traveller.ui.BaseActivity
 import com.client.traveller.ui.about.AboutActivity
 import com.client.traveller.ui.auth.AuthActivity
 import com.client.traveller.ui.chat.chatList.ChatListFragment

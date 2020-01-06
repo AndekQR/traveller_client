@@ -18,7 +18,6 @@ import com.client.traveller.data.network.api.geocoding.GeocodingApiService
 import com.client.traveller.data.network.api.geocoding.response.geocodingResponse.Location
 import com.client.traveller.data.network.api.places.API_KEY
 import com.client.traveller.data.network.api.places.PlacesApiService
-import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.network.firebase.firestore.Map
 import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
@@ -137,12 +136,8 @@ class MapRepositoryImpl(
         )
     }
 
-    override suspend fun drawNearbyPlaceMarkers(places: Set<NearbySearchResponse>) {
-        val placesResult = mutableSetOf<Result>()
-        places.forEach {
-            placesResult.addAll(it.results)
-        }
-        this.mapUtils.drawPlaceMarkersInCluster(placesResult)
+    override suspend fun drawNearbyPlaceMarkers(places: Set<Result>) {
+        this.mapUtils.drawPlaceMarkersInCluster(places)
     }
 
     override fun getPhotoUrl(reference: String, width: Int): String {

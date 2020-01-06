@@ -1,4 +1,4 @@
-package com.client.traveller.data.network.firebase.messaging.notifications
+package com.client.traveller.data.network.api.notifications
 
 
 data class Data(

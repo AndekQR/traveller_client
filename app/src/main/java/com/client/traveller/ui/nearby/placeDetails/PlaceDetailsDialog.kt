@@ -24,7 +24,6 @@ import com.client.traveller.ui.nearby.NearbyPlacesViewModel
 import com.client.traveller.ui.nearby.NearbyPlacesViewModelFactory
 import com.client.traveller.ui.util.hideProgressBar
 import com.client.traveller.ui.util.showProgressBar
-import kotlinx.android.synthetic.main.fragment_place_detail.*
 import kotlinx.android.synthetic.main.place_detail_dialog.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.launch

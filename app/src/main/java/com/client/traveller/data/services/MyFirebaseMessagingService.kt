@@ -54,11 +54,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        // TODO trzeba sprawdzać czy jest w MesseageActivity
-        //  i czy jest w tej samej wycieczce
         val sentTo = message.data["sentTo"]
         val currentUser = FirebaseAuth.getInstance().currentUser
-        val am = applicationContext.getSystemService(Activity.ACTIVITY_SERVICE) as ActivityManager
         if (currentUser != null && sentTo == currentUser.uid)
             sendNotification(message)
     }

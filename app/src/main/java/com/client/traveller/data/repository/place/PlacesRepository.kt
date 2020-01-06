@@ -1,6 +1,5 @@
 package com.client.traveller.data.repository.place
 
-import com.client.traveller.data.network.api.places.response.nearbySearchResponse.NearbySearchResponse
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.network.api.places.response.placeDetailResponse.PlaceDetailResponse
 import com.client.traveller.data.network.api.wikipedia.model.Section
@@ -9,7 +8,7 @@ import com.client.traveller.data.network.api.wikipedia.response.wikipediaPrefixS
 
 interface PlacesRepository {
 
-    suspend fun getNearbyPlaces(latlng: String, radius: Int? = null): Set<NearbySearchResponse>
+    suspend fun getNearbyPlaces(latlng: String, radius: Int? = null): Set<Result>
     fun getPhotoUrl(reference: String, width: Int): String
     fun getSearchedTypes(): List<String>
     suspend fun getPlaceDetail(placeId: String): PlaceDetailResponse

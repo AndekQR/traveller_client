@@ -8,10 +8,6 @@ import com.client.traveller.data.network.api.directions.DirectionsApiService
 import com.client.traveller.data.network.api.geocoding.GeocodingApiService
 import com.client.traveller.data.network.api.places.PlacesApiService
 import com.client.traveller.data.network.api.wikipedia.WikipediaApiService
-import com.client.traveller.data.network.firebase.auth.*
-import com.client.traveller.data.network.firebase.firestore.*
-import com.client.traveller.data.network.firebase.messaging.CloudMessaging
-import com.client.traveller.data.network.firebase.storage.Avatars
 import com.client.traveller.data.network.map.MapUtils
 import com.client.traveller.data.network.map.MapUtilsImpl
 import com.client.traveller.data.provider.PreferenceProvider
@@ -57,20 +53,9 @@ class TravellerAplication : Application(), KodeinAware {
         bind() from singleton { WikipediaApiService() }
         bind<MapUtils>() with singleton { MapUtilsImpl(instance()) }
         bind() from singleton { AppDatabase(instance()) }
-        bind() from provider { CloudMessaging() }
-        bind() from provider { AuthNormal() }
-        bind() from provider { AuthGoogle() }
-        bind() from provider { AuthFacebook() }
-        bind() from provider { AuthUtils() }
-        bind() from provider { AuthProvider() }
         bind() from singleton { instance<AppDatabase>().userDao() }
         bind<UserRepository>() with singleton {
             UserRepositoryImpl(
-                instance(),
-                instance(),
-                instance(),
-                instance(),
-                instance(),
                 instance(),
                 instance()
             )

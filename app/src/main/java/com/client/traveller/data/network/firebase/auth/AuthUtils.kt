@@ -7,7 +7,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 
-class AuthUtils {
+object AuthUtils {
 
     fun sendEmailVerification(user: FirebaseUser): Task<Void> {
         val baseUrl = "https://travellersystems.page.link/"

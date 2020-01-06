@@ -9,11 +9,9 @@ import com.client.traveller.data.network.api.directions.response.Distance
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.data.network.firebase.firestore.model.UserLocalization
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.Polyline
 
 interface MapUtils :  GoogleMap.OnMarkerClickListener,
     GoogleMap.OnMapLongClickListener {

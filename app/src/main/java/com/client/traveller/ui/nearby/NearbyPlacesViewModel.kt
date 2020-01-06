@@ -69,11 +69,7 @@ class NearbyPlacesViewModel(
             currentLatLng?.let { location ->
                 val nearbySearchResponses =
                     this@NearbyPlacesViewModel.findNearbyPlaces(location.toLatLng().formatToApi())
-                val listofPlaces = mutableSetOf<Result>()
-                nearbySearchResponses.forEach {
-                    listofPlaces.addAll(it.results)
-                }
-                this@NearbyPlacesViewModel.updateSearchedPlaces(listofPlaces)
+                this@NearbyPlacesViewModel.updateSearchedPlaces(nearbySearchResponses)
             }
         }
     }

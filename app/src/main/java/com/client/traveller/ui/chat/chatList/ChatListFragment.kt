@@ -166,11 +166,16 @@ class ChatListFragment : ScopedFragment(), KodeinAware, OnItemClickListener {
         }
     }
 
+    /**
+     * może być czat z zerową ilością wiadomości, wtedy myLastMessage nie będzie zainicjalizowana
+     */
     private fun Map<ChatFirestoreModel, List<User>>.toChatItem(): List<ItemChatList> {
-        return this.map {
-            val myLastMessage = this@ChatListFragment.chatsLastMesseage[it.key.uid]
-            ItemChatList(it.key, it.value, myLastMessage)
-        }
+        return this.map {entry ->
+            var myLastMessage: Messeage? = null
+            if(::chatsLastMesseage.isInitialized)
+                myLastMessage = this@ChatListFragment.chatsLastMesseage[entry.key.uid]
+            myLastMessage?.let { ItemChatList(entry.key, entry.value, it) }
+        }.filterNotNull()
     }
 
     override fun onItemClick(item: Item<*>, view: View) {

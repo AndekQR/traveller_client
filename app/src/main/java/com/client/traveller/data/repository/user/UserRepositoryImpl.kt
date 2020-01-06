@@ -23,12 +23,7 @@ import kotlin.coroutines.suspendCoroutine
 
 class UserRepositoryImpl(
     private val userDao: UserDao,
-    private val tripDao: TripDao,
-    private val authNormal: AuthNormal,
-    private val authGoogle: AuthGoogle,
-    private val authFacebook: AuthFacebook,
-    private val authUtils: AuthUtils,
-    private val authProvider: AuthProvider
+    private val tripDao: TripDao
 ) : UserRepository {
 
     /**
@@ -73,7 +68,7 @@ class UserRepositoryImpl(
         function: (Boolean, Exception?) -> Unit
     ) {
 
-        authNormal.login(username, password)
+        AuthNormal.login(username, password)
             .addOnCompleteListener {
                 if (it.isSuccessful) {
                     this.updateLocalUserDataAsync(it.result?.user?.toLocalUser()!!)
@@ -89,7 +84,7 @@ class UserRepositoryImpl(
         function: (Boolean, Exception?) -> Unit
     ) {
         if (task != null)
-            authGoogle.login(task)?.addOnCompleteListener {
+            AuthGoogle.login(task)?.addOnCompleteListener {
                 if (it.isSuccessful) {
                     val user = it.result?.user
                     user?.let {
@@ -113,7 +108,7 @@ class UserRepositoryImpl(
         accessToken: AccessToken,
         function: (Boolean, Exception?) -> Unit
     ) {
-        authFacebook.login(accessToken).addOnCompleteListener {
+        AuthFacebook.login(accessToken).addOnCompleteListener {
             if (it.isSuccessful) {
                 val user = it.result?.user
                 user?.let {
@@ -150,7 +145,7 @@ class UserRepositoryImpl(
         displayName: String,
         function: (Boolean, Exception?, FirebaseUser?) -> Unit
     ) {
-        authNormal.createUser(email, password).addOnCompleteListener {
+        AuthNormal.createUser(email, password).addOnCompleteListener {
             if (it.isSuccessful) {
                 val user = it.result?.user
                 user?.let { userNotNull ->
@@ -172,7 +167,7 @@ class UserRepositoryImpl(
         email: String,
         function: (Boolean, Exception?) -> Unit
     ) {
-        authNormal.resetEmail(email).addOnCompleteListener {
+        AuthNormal.resetEmail(email).addOnCompleteListener {
             function.invoke(it.isSuccessful, it.exception)
         }
     }
@@ -182,7 +177,7 @@ class UserRepositoryImpl(
         profileChangeRequest: UserProfileChangeRequest,
         function: (Boolean, Exception?) -> Unit
     ) {
-        authUtils.updateFirebaseUserProfile(user, profileChangeRequest).addOnCompleteListener {
+        AuthUtils.updateFirebaseUserProfile(user, profileChangeRequest).addOnCompleteListener {
             if (!it.isSuccessful) {
                 function.invoke(it.isSuccessful, it.exception)
             }
@@ -193,7 +188,7 @@ class UserRepositoryImpl(
         user: FirebaseUser,
         function: (Boolean, Exception?) -> Unit
     ) {
-        authUtils.sendEmailVerification(user).addOnCompleteListener {
+        AuthUtils.sendEmailVerification(user).addOnCompleteListener {
             function.invoke(it.isSuccessful, it.exception)
         }
     }
@@ -229,9 +224,9 @@ class UserRepositoryImpl(
         val currentUser = FirebaseAuth.getInstance().currentUser
         currentUser?.let { user ->
             when (true) {
-                authProvider.isUserFacebookAuth(user) -> authFacebook.logout()
-                authProvider.isUserGoogleAuth(user) -> authGoogle.logout(googleSignInClient)
-                authProvider.isUserNormalAuth(user) -> authNormal.logout()
+                AuthProvider.isUserFacebookAuth(user) -> AuthFacebook.logout()
+                AuthProvider.isUserGoogleAuth(user) -> AuthGoogle.logout(googleSignInClient)
+                AuthProvider.isUserNormalAuth(user) -> AuthNormal.logout()
             }
         }
     }

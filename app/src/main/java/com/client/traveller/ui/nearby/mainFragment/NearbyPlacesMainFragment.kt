@@ -12,7 +12,9 @@ import com.client.traveller.R
 import com.client.traveller.data.network.api.places.response.nearbySearchResponse.Result
 import com.client.traveller.ui.nearby.NearbyPlacesViewModel
 import com.client.traveller.ui.nearby.NearbyPlacesViewModelFactory
-import com.client.traveller.ui.util.*
+import com.client.traveller.ui.util.ScopedFragment
+import com.client.traveller.ui.util.hideProgressBar
+import com.client.traveller.ui.util.showProgressBar
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
@@ -33,7 +35,6 @@ class NearbyPlacesMainFragment : ScopedFragment(), KodeinAware {
     private lateinit var groupAdapter: GroupAdapter<GroupieViewHolder>
 
     private var searchedPlaces = setOf<Result>()
-    private var searchQuery: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
