@@ -20,7 +20,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseUser
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class HomeViewModel(
     private val userRepository: UserRepository,
@@ -36,6 +36,8 @@ class HomeViewModel(
 
     init {
         viewModelScope.launch { messagingRepository.refreshToken() }
+        // musi działać przez cały czas gdy aplikacja działa
+        GlobalScope.launch(Dispatchers.IO) { tripRepository.initCurrentTripUpdates() }
     }
 
     fun logoutUser(mGoogleSignInClient: GoogleSignInClient) =

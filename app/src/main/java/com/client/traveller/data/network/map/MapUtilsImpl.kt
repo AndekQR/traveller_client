@@ -235,6 +235,7 @@ class MapUtilsImpl(
         }
         this.markers.clear()
         this.nearbyPlacesClusterItems.clear()
+        this.nearbyPlacesClusterManager.cluster()
         this.polylinesOnMap.clear()
     }
 

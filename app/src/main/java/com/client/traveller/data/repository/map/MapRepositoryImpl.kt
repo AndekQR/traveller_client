@@ -204,7 +204,10 @@ class MapRepositoryImpl(
      */
     @ExperimentalCoroutinesApi
     override fun drawTripUsersLocation(tripUid: String, currentUser: User?) {
-        if (this.tripUsersLocationListener != null) this.tripUsersLocationListener?.remove()
+        if (this.tripUsersLocationListener != null) {
+            this.tripUsersLocationListener?.remove()
+        }
+        Log.e(javaClass.simpleName, tripUid)
         this.tripUsersLocationListener =
             Map.getUserLocalizationCollection(tripUid)
                 .addSnapshotListener { querySnapshot, exception ->
@@ -218,12 +221,14 @@ class MapRepositoryImpl(
                                     // wywoływane na początku, inicjalizacja bo na początku cache zapytania jest pusty
                                     val data = dc.document.toObject(UserLocalization::class.java)
                                     Log.e(javaClass.simpleName, "ADDED")
+                                    Log.e(javaClass.simpleName, data.userUidFirebase)
                                     this@MapRepositoryImpl.mapUtils.updateUserPositionMarker(data, currentUser)
 
                                 }
                                 DocumentChange.Type.MODIFIED -> {
                                     val data = dc.document.toObject(UserLocalization::class.java)
                                     Log.e(javaClass.simpleName, "MODIFIED")
+                                    Log.e(javaClass.simpleName, data.userUidFirebase)
                                     this@MapRepositoryImpl.mapUtils.updateUserPositionMarker(data, currentUser)
                                 }
                                 DocumentChange.Type.REMOVED -> {

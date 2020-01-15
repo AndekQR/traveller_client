@@ -1,6 +1,7 @@
 package com.client.traveller.data.repository.place
 
 import android.os.Build
+import android.util.Log
 import androidx.core.text.HtmlCompat
 import com.client.traveller.data.network.api.places.API_KEY
 import com.client.traveller.data.network.api.places.PlacesApiService
@@ -34,9 +35,7 @@ class PlacesRepositoryImpl(
         "museum",
         "park",
         "tourist_attraction",
-        "zoo",
-        "atm",
-        "point_of_interest"
+        "zoo"
     )
 
     override suspend fun getNearbyPlaces(latlng: String, radius: Int?): Set<Result> {
@@ -82,7 +81,7 @@ class PlacesRepositoryImpl(
         val reponse = this.wikipediaApiService.getSectionsHtml(pageTitle)
         val sectionsHTML = reponse.remaining.sections
         val sections = mutableListOf<Section>()
-        sectionsHTML.forEachIndexed { index, sectionX ->
+        sectionsHTML.forEachIndexed { _, sectionX ->
             val title = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 android.text.Html.fromHtml(sectionX.anchor, HtmlCompat.FROM_HTML_MODE_LEGACY)
                     .toString().replace("_", " ")

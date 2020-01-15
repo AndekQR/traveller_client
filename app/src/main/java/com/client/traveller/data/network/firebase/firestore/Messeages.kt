@@ -9,9 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore
  */
 object Messeages {
 
-
     private const val COLLECTION_NAME = "messeages"
-
 
     private fun getCollectionReference(chatUid: String): CollectionReference {
         return FirebaseFirestore.getInstance().collection(Chats.COLLECTION_NAME).document(chatUid)

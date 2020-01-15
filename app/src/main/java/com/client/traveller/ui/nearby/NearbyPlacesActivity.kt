@@ -106,9 +106,6 @@ class NearbyPlacesActivity : BaseActivity(), KodeinAware,
         )
         this.drawerLayout.addDrawerListener(mDrawerToggle)
         this.mDrawerToggle.syncState()
-//        this.mDrawerToggle.isDrawerIndicatorEnabled = true
-//        this.supportActionBar?.setHomeButtonEnabled(true)
-//        this.supportActionBar?.setDisplayShowHomeEnabled(true)
 
         // inicjalizacja dolengo paska nwigacji
         this.bottomNavigation = bottom_navigation
@@ -119,7 +116,6 @@ class NearbyPlacesActivity : BaseActivity(), KodeinAware,
         this.navController = navHostFragment.navController
         this.navController.addOnDestinationChangedListener(this)
 
-//        NavigationUI.setupWithNavController(this.navigationView, this.navController)
         NavigationUI.setupWithNavController(this.toolBar, this.navController, this.drawerLayout)
         NavigationUI.setupActionBarWithNavController(this, this.navController)
         NavigationUI.setupActionBarWithNavController(this, this.navController, this.drawerLayout)
@@ -310,6 +306,7 @@ class NearbyPlacesActivity : BaseActivity(), KodeinAware,
                 checkedTypesValues.add(value)
             }
         }
+        if (checkedTypesValues.size < 1) return this
         val filteredPlaces = this.filter { result ->
             result.types.contains(checkedTypesValues)
         }

@@ -8,9 +8,7 @@ import com.google.firebase.firestore.Query
 
 object Chats {
 
-
     const val COLLECTION_NAME = "chats"
-
 
     private fun getCollectionReference(): CollectionReference {
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME)

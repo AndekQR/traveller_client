@@ -40,24 +40,27 @@ class UserRepositoryImpl(
         this.updateLocalUserDataAsync(user)
 
         io {
+            this.setAvatar(user, function)
+        }
+    }
 
-            //funkcje firebase gwarantują przynajmniej jedno prawidłowe wykonanie
-            ////wykonuje się to gdy użytkownik jest już alogowany
-            Avatars.getDefaultAvatarImageReference().downloadUrl.addOnCompleteListener {
-                if (it.isSuccessful) {
-                    if (user.image == null) user.image = it.result.toString()
-                    Users.createUser(user).addOnCompleteListener { result ->
-                        if (result.isSuccessful) {
-                            // aktualizacja avatara
-                            updateLocalUserDataAsync(user)
-                            function.invoke(it.isSuccessful, it.exception)
-                        } else {
-                            function.invoke(it.isSuccessful, it.exception)
-                        }
+    private fun setAvatar(user: User, function: (Boolean, Exception?) -> Unit) {
+        //funkcje firebase gwarantują przynajmniej jedno prawidłowe wykonanie
+        ////wykonuje się to gdy użytkownik jest już alogowany
+        Avatars.getDefaultAvatarImageReference().downloadUrl.addOnCompleteListener {
+            if (it.isSuccessful) {
+                if (user.image == null) user.image = it.result.toString()
+                Users.createUser(user).addOnCompleteListener { result ->
+                    if (result.isSuccessful) {
+                        // aktualizacja avatara
+                        updateLocalUserDataAsync(user)
+                        function.invoke(it.isSuccessful, it.exception)
+                    } else {
+                        function.invoke(it.isSuccessful, it.exception)
                     }
-                } else {
-                    function.invoke(it.isSuccessful, it.exception)
                 }
+            } else {
+                function.invoke(it.isSuccessful, it.exception)
             }
         }
     }
@@ -131,7 +134,6 @@ class UserRepositoryImpl(
     /**
      * Pobranie danych o użytkowniku z firestore
      */
-    // TODO mogło popsuć avatary
     override fun updateLocalUserDataAsync(user: User) {
         Users.getUserByUid(user.idUserFirebase!!).addOnSuccessListener { snapshot ->
             val userFirestore = snapshot.toObject(User::class.java)
