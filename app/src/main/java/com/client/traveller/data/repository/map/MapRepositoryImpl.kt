@@ -220,15 +220,11 @@ class MapRepositoryImpl(
                                 DocumentChange.Type.ADDED -> {
                                     // wywoływane na początku, inicjalizacja bo na początku cache zapytania jest pusty
                                     val data = dc.document.toObject(UserLocalization::class.java)
-                                    Log.e(javaClass.simpleName, "ADDED")
-                                    Log.e(javaClass.simpleName, data.userUidFirebase)
                                     this@MapRepositoryImpl.mapUtils.updateUserPositionMarker(data, currentUser)
 
                                 }
                                 DocumentChange.Type.MODIFIED -> {
                                     val data = dc.document.toObject(UserLocalization::class.java)
-                                    Log.e(javaClass.simpleName, "MODIFIED")
-                                    Log.e(javaClass.simpleName, data.userUidFirebase)
                                     this@MapRepositoryImpl.mapUtils.updateUserPositionMarker(data, currentUser)
                                 }
                                 DocumentChange.Type.REMOVED -> {

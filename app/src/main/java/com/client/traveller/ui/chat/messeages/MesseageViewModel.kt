@@ -20,7 +20,6 @@ class MesseageViewModel(
     private val tripRepository: TripRepository
 ) : ViewModel() {
 
-    // TODO trzeba zapisywać wartości do lokalnej bazy
     // gdy użytkownik wybierze usera z listy userów tu będzie id tego usera
     // w przypadku wiadomości tak samo
     internal var userId: String? = null

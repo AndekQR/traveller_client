@@ -12,6 +12,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
@@ -32,6 +33,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.nav_header.view.*
 import kotlinx.android.synthetic.main.trip_info_activity.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
@@ -98,16 +101,14 @@ class TripInfoActivity : BaseActivity(), KodeinAware {
 
         val navHostFragment = nav_host_fragment_trip_info as NavHostFragment
         this.navController = navHostFragment.navController
-//        this.navController.addOnDestinationChangedListener(this)
 
-//        NavigationUI.setupWithNavController(this.navigationView, this.navController)
         NavigationUI.setupWithNavController(this.toolBar, this.navController, this.drawerLayout)
         NavigationUI.setupActionBarWithNavController(this, this.navController)
         NavigationUI.setupActionBarWithNavController(this, this.navController, this.drawerLayout)
     }
 
-    private fun setSubtitleNavView(subtitle: String) = Coroutines.main {
-        this.navigationView.getHeaderView(0).subtitle.text = subtitle
+    private fun setSubtitleNavView(subtitle: String) =  lifecycleScope.launch(Dispatchers.Main) {
+        this@TripInfoActivity.navigationView.getHeaderView(0).subtitle.text = subtitle
     }
 
     private val onNavigationItemSelected = NavigationView.OnNavigationItemSelectedListener { item ->

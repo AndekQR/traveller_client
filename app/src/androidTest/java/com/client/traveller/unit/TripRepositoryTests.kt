@@ -1,7 +1,6 @@
 package com.client.traveller.unit
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.client.traveller.data.db.AppDatabase
@@ -42,7 +41,6 @@ class TripRepositoryTests {
             "2019-12-25T12:52", "Staszów", "Połaniec", arrayListOf(),
             user, "TEST"
         )
-        var savedTrip: Trip? = null
         runBlocking {
            tripDao.upsert(trip)
             val savedTrip = this@TripRepositoryTests.tripDao.getCurrentTripNonLive()

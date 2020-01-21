@@ -170,7 +170,6 @@ class MessagingRepositoryImpl(
      */
     @ExperimentalCoroutinesApi
     override fun initChatMessages(chatUid: String): Flow<List<Messeage>> {
-//        if (this.isTheSameChat(chatUid)) return this.messeageDao.getAll().asFlow()
         return Messeages.getMesseages(chatUid).orderBy(
             "sendDate",
             Query.Direction.ASCENDING

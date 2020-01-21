@@ -54,7 +54,5 @@ class PlacesRepositoryTests {
             val returned = placesRepositoryImpl.getPageSections(pageTitle)
             Assertions.assertEquals(returned.first().text.trim(), sections.first().text.trim())
         }
-
-
     }
 }

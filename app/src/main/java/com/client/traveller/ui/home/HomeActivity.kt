@@ -181,7 +181,11 @@ class HomeActivity : BaseActivity(),
                 lifecycleScope.launch {
                     this@HomeActivity.currentLocation?.let {
                         viewModel.clearMap()
-                        viewModel.drawRouteToLocation(origin =  it.format(),destination = query, locations = arrayListOf())
+                        viewModel.drawRouteToLocation(
+                            origin = it.format(),
+                            destination = query,
+                            locations = arrayListOf()
+                        )
                         viewModel.centerRoad(it.format(), null, query)
                         searchView.collapse()
                     }
@@ -209,7 +213,7 @@ class HomeActivity : BaseActivity(),
                 lifecycleScope.launch {
                     viewModel.clearMap()
                     val destination = suggestion?.itemModel?.text
-                    if (destination != null )
+                    if (destination != null)
                         this@HomeActivity.currentLocation?.let {
                             viewModel.drawRouteToLocation(
                                 origin = it.format(),
@@ -235,7 +239,7 @@ class HomeActivity : BaseActivity(),
         }
     }
 
-    private fun setSubtitleNavView(subtitle: String) = Coroutines.main {
+    private fun setSubtitleNavView(subtitle: String) = lifecycleScope.launch(Dispatchers.Main) {
         navigation_view.getHeaderView(0).subtitle.text = subtitle
     }
 
@@ -243,7 +247,7 @@ class HomeActivity : BaseActivity(),
      * Pobranie i wpisanie wyników do sugestii searchview
      * @param query zapytanie z searchview
      */
-    private fun performSearch(query: String) = Coroutines.main {
+    private fun performSearch(query: String) = lifecycleScope.launch(Dispatchers.Main) {
         val suggestions =
             SuggestionCreationUtil.asRegularSearchSuggestions(this@HomeActivity.search(query))
         this@HomeActivity.searchView.hideLoding()
@@ -388,32 +392,14 @@ class HomeActivity : BaseActivity(),
     }
 
 
-    //TODO trzeba pprawić metodę
     private fun getDynamicLinks() {
         FirebaseDynamicLinks.getInstance()
             .getDynamicLink(intent)
             .addOnSuccessListener(this) {
-                var deepLink: Uri? = null
-
-                if (it != null) {
-                    Log.e(
-                        javaClass.simpleName,
-                        "dynamic Link working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-                    )
-//                    FirebaseAuth.getInstance().applyActionCode()
-                    deepLink = it.link
-                    viewModel.setEmailVerified()
-                    Dialog.Builder()
-                        .addMessage(getString(R.string.post_email_verification_success))
-                        .addPositiveButton("Ok") { dialog ->
-                            dialog.dismiss()
-                        }
-                        .build(supportFragmentManager, javaClass.simpleName)
-                } else {
-                    if (intent.data != null) {
-                        this.handleLink(intent.data)
-                    }
+                if (intent.data != null) {
+                    this.handleLink(intent.data)
                 }
+
             }
             .addOnFailureListener {
                 Log.e(javaClass.simpleName, it.localizedMessage)
